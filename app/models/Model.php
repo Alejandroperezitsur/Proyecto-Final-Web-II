@@ -91,4 +91,8 @@ abstract class Model {
         }
         return $clean;
     }
+
+    public function getDb() {
+        return $this->db;
+    }
 }

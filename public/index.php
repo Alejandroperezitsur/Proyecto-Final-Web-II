@@ -14,11 +14,11 @@ if (isset($_SESSION['user_id'])) {
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
+    $identifier = trim((string)filter_input(INPUT_POST, 'identifier', FILTER_UNSAFE_RAW));
     $password = filter_input(INPUT_POST, 'password', FILTER_UNSAFE_RAW);
     
     try {
-        if ($auth->login($email, $password)) {
+        if ($auth->login($identifier, $password)) {
             header('Location: dashboard.php');
             exit;
         } else {
@@ -61,11 +61,13 @@ $csrf_token = $auth->generateCSRFToken();
                                    value="<?= htmlspecialchars($csrf_token) ?>">
                             
                             <div class="mb-3">
-                                <label for="email" class="form-label">Email:</label>
-                                <input type="email" class="form-control" id="email" 
-                                       name="email" required>
+                                <label for="identifier" class="form-label">Matrícula</label>
+                                <input type="text" class="form-control" id="identifier" 
+                                       name="identifier" required 
+                                       pattern="^[SICMQEA][0-9]{8}$|^.+@.+\..+$" 
+                                       placeholder="Ej: S12345678">
                                 <div class="invalid-feedback">
-                                    Por favor ingrese un email válido.
+                                    Ingresa una matrícula válida (prefijo de ingeniería + 8 dígitos).
                                 </div>
                             </div>
 

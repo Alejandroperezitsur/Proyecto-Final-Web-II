@@ -6,7 +6,7 @@ class Alumno extends Model {
     
     private $allowedFields = [
         'matricula', 'nombre', 'apellido', 
-        'email', 'fecha_nac', 'foto'
+        'email', 'fecha_nac', 'foto', 'password', 'activo'
     ];
 
     public function __construct() {
@@ -16,6 +16,9 @@ class Alumno extends Model {
     public function create($data) {
         $data = $this->sanitize($data);
         $data = $this->filterAllowedFields($data);
+        if (isset($data['password']) && !empty($data['password'])) {
+            $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
+        }
         
         if (isset($data['foto']) && $data['foto']['error'] === 0) {
             $data['foto'] = $this->processFoto($data['foto']);
@@ -31,6 +34,13 @@ class Alumno extends Model {
     public function update($id, $data) {
         $data = $this->sanitize($data);
         $data = $this->filterAllowedFields($data);
+        if (isset($data['password'])) {
+            if (!empty($data['password'])) {
+                $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
+            } else {
+                unset($data['password']);
+            }
+        }
         
         if (isset($data['foto']) && $data['foto']['error'] === 0) {
             $this->deleteFoto($id);
@@ -44,6 +54,14 @@ class Alumno extends Model {
         return parent::update($id, $data);
     }
 
+    public function findByMatricula($matricula) {
+        $sql = "SELECT * FROM {$this->table} WHERE matricula = :matricula LIMIT 1";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':matricula', $matricula);
+        $stmt->execute();
+        return $stmt->fetch();
+    }
+
     public function delete($id) {
         $this->deleteFoto($id);
         return parent::delete($id);
@@ -55,7 +73,7 @@ class Alumno extends Model {
         // Validar matrícula
         if (empty($data['matricula'])) {
             $errors[] = "La matrícula es requerida";
-        } elseif (!preg_match('/^[A-Z0-9]{8,10}$/', $data['matricula'])) {
+        } elseif (!preg_match('/^[SICMQEA][0-9]{8}$/', $data['matricula'])) {
             $errors[] = "Formato de matrícula inválido";
         }
 
@@ -163,5 +181,70 @@ class Alumno extends Model {
         $stmt->execute();
 
         return $stmt->fetchAll();
+    }
+
+    public function countSearch($term) {
+        $like = "%$term%";
+        $sql = "SELECT COUNT(*) FROM alumnos 
+                WHERE nombre LIKE :term 
+                OR apellido LIKE :term 
+                OR matricula LIKE :term 
+                OR email LIKE :term";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':term', $like);
+        $stmt->execute();
+        return (int)$stmt->fetchColumn();
+    }
+
+    public function getAllByEstado($estado, $page = 1, $limit = 10) {
+        $page = max(1, (int)$page);
+        $limit = max(1, (int)$limit);
+        $offset = ($page - 1) * $limit;
+        $sql = "SELECT * FROM alumnos WHERE activo = :estado LIMIT {$limit} OFFSET {$offset}";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':estado', (int)$estado);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    public function countByEstado($estado) {
+        $sql = "SELECT COUNT(*) FROM alumnos WHERE activo = :estado";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':estado', (int)$estado);
+        $stmt->execute();
+        return (int)$stmt->fetchColumn();
+    }
+
+    public function searchByEstado($term, $estado, $page = 1, $limit = 10) {
+        $page = max(1, (int)$page);
+        $limit = max(1, (int)$limit);
+        $offset = ($page - 1) * $limit;
+        $like = "%$term%";
+
+        $sql = "SELECT * FROM alumnos 
+                WHERE activo = :estado AND (
+                    nombre LIKE :term OR apellido LIKE :term OR matricula LIKE :term OR email LIKE :term
+                )
+                LIMIT {$limit} OFFSET {$offset}";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':estado', (int)$estado);
+        $stmt->bindValue(':term', $like);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
+
+    public function countSearchByEstado($term, $estado) {
+        $like = "%$term%";
+        $sql = "SELECT COUNT(*) FROM alumnos 
+                WHERE activo = :estado AND (
+                    nombre LIKE :term OR apellido LIKE :term OR matricula LIKE :term OR email LIKE :term
+                )";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':estado', (int)$estado);
+        $stmt->bindValue(':term', $like);
+        $stmt->execute();
+        return (int)$stmt->fetchColumn();
     }
 }

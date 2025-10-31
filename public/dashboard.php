@@ -64,7 +64,7 @@ $isAdmin = $_SESSION['user_role'] === 'admin';
                         <a class="nav-link dropdown-toggle" href="#" 
                            data-bs-toggle="dropdown">
                             <i class="bi bi-person-circle"></i>
-                            <?= htmlspecialchars($_SESSION['user_email']) ?>
+                            <?= htmlspecialchars($_SESSION['user_email'] ?? ($_SESSION['user_identifier'] ?? ''), ENT_QUOTES, 'UTF-8') ?>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li>

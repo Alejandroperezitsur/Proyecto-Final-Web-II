@@ -5,7 +5,7 @@ return [
         'host' => '127.0.0.1:3306',
         'name' => 'control_escolar',
         'user' => 'root',
-        'pass' => ''
+        'pass' => 'root'
     ],
     'app' => [
         'name' => 'Control Escolar',
