@@ -3,10 +3,14 @@ require_once __DIR__ . '/Controller.php';
 require_once __DIR__ . '/../models/Usuario.php';
 
 class AuthController extends Controller {
-    private $model;
+    protected $model;
     
     public function __construct() {
         $this->model = new Usuario();
+    }
+    
+    public function generateCSRFToken() {
+        return parent::generateCSRFToken();
     }
     
     public function login($email, $password) {
