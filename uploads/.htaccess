@@ -1,0 +1,17 @@
+# Prevenir ejecución de PHP en el directorio de uploads
+<FilesMatch "\.ph(p[3-5]?|tml)$">
+    Require all denied
+</FilesMatch>
+
+# Permitir solo imágenes
+<FilesMatch "\.(jpg|jpeg|png|gif)$">
+    Require all granted
+</FilesMatch>
+
+# Deshabilitar listado de directorio
+Options -Indexes
+
+# Denegar acceso a archivos ocultos
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
