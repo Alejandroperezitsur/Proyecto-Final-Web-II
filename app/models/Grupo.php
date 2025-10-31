@@ -64,6 +64,29 @@ class Grupo extends Model {
         return (int)$stmt->fetchColumn();
     }
 
+    // Catálogo de ciclos distintos, opcionalmente filtrado por profesor
+    public function getDistinctCiclos($profesorId = null) {
+        $where = '';
+        $params = [];
+        if ($profesorId) {
+            $where = 'WHERE profesor_id = :profesor_id';
+            $params[':profesor_id'] = $profesorId;
+        }
+        $sql = "SELECT DISTINCT ciclo FROM grupos $where ORDER BY ciclo";
+        $stmt = $this->db->prepare($sql);
+        foreach ($params as $k => $v) {
+            $stmt->bindValue($k, $v);
+        }
+        $stmt->execute();
+        $rows = $stmt->fetchAll();
+        $ciclos = [];
+        foreach ($rows as $r) {
+            $val = trim((string)($r['ciclo'] ?? ''));
+            if ($val !== '') { $ciclos[] = $val; }
+        }
+        return $ciclos;
+    }
+
     private function filterAllowedFields($data) {
         return array_intersect_key($data, array_flip($this->allowedFields));
     }

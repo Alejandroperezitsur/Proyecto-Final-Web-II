@@ -150,8 +150,10 @@ $csrf = $auth->generateCSRFToken();
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Profesores</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/css/styles.css" rel="stylesheet">
 </head>
-<body class="bg-light">
+<body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container-fluid">
     <a class="navbar-brand" href="/dashboard.php">Control Escolar</a>
@@ -161,7 +163,9 @@ $csrf = $auth->generateCSRFToken();
   </div>
  </nav>
 
-<main class="container py-4">
+<div class="app-shell">
+  <?php include __DIR__ . '/partials/sidebar.php'; ?>
+  <main class="app-content">
   <div class="d-flex justify-content-between align-items-center mb-3">
     <div>
       <h1 class="h3 mb-0">Profesores</h1>
@@ -228,8 +232,12 @@ $csrf = $auth->generateCSRFToken();
   <div class="card">
     <div class="card-header">Listado</div>
     <div class="card-body">
+      <div class="d-flex justify-content-end mb-3 gap-2">
+        <button class="btn btn-outline-primary" data-export="csv" data-target="#tabla-profesores" data-filename="profesores.csv"><i class="bi bi-filetype-csv"></i> Exportar CSV</button>
+        <button class="btn btn-outline-secondary" data-export="pdf"><i class="bi bi-filetype-pdf"></i> Exportar PDF</button>
+      </div>
       <div class="table-responsive">
-        <table class="table table-striped table-hover">
+        <table id="tabla-profesores" class="table table-striped table-hover">
           <thead>
             <tr>
               <th>ID</th>
@@ -282,7 +290,9 @@ $csrf = $auth->generateCSRFToken();
     </div>
   </div>
 </main>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/main.js"></script>
 </body>
 </html>

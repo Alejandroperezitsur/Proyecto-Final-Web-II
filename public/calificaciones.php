@@ -2,6 +2,8 @@
 require_once __DIR__ . '/../app/controllers/AuthController.php';
 require_once __DIR__ . '/../app/models/Alumno.php';
 require_once __DIR__ . '/../app/models/Grupo.php';
+require_once __DIR__ . '/../app/models/Materia.php';
+require_once __DIR__ . '/../app/models/SavedView.php';
 require_once __DIR__ . '/../app/models/Calificacion.php';
 
 $auth = new AuthController();
@@ -9,6 +11,8 @@ $auth->requireAuth();
 $user = $auth->getCurrentUser();
 
 $grupoModel = new Grupo();
+$materiaModel = new Materia();
+$savedViewModel = new SavedView();
 $alumnoModel = new Alumno();
 $calificacionModel = new Calificacion();
 
@@ -121,6 +125,10 @@ if ($role === 'profesor') {
 }
 
 $totalPages = max(1, (int)ceil($total / $limit));
+
+// Catálogos para filtros
+$materiasCatalog = $materiaModel->getCatalog();
+$ciclosCatalog = $grupoModel->getDistinctCiclos($role === 'profesor' ? (int)$user['id'] : null);
 ?>
 <!doctype html>
 <html lang="es">
@@ -129,8 +137,18 @@ $totalPages = max(1, (int)ceil($total / $limit));
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Calificaciones</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/css/styles.css" rel="stylesheet">
+  <style>
+  @media print {
+    body * { visibility: hidden; }
+    .print-list, .print-list * { visibility: visible; }
+    .print-list { position: absolute; left:0; top:0; width:100%; }
+    .btn, .form-control, .form-select, nav, header, .app-sidebar { display:none !important; }
+  }
+  </style>
 </head>
-<body class="bg-light">
+<body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container-fluid">
     <a class="navbar-brand" href="/dashboard.php">Control Escolar</a>
@@ -140,7 +158,9 @@ $totalPages = max(1, (int)ceil($total / $limit));
   </div>
 </nav>
 
-<main class="container py-4">
+<div class="app-shell">
+  <?php include __DIR__ . '/partials/sidebar.php'; ?>
+  <main class="app-content">
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h1 class="h3">Calificaciones</h1>
     <a href="/dashboard.php" class="btn btn-outline-secondary">Volver</a>
@@ -194,8 +214,105 @@ $totalPages = max(1, (int)ceil($total / $limit));
   <div class="card">
     <div class="card-header">Listado</div>
     <div class="card-body">
-      <div class="table-responsive">
-        <table class="table table-striped table-hover">
+      <div class="row g-3 mb-3">
+        <div class="col-md-3">
+          <label class="form-label">Materia</label>
+          <input list="dlc-materias" class="form-control" id="fc-materia" placeholder="Nombre o clave">
+          <datalist id="dlc-materias">
+            <?php foreach ($materiasCatalog as $m):
+              $label = trim((string)($m['nombre'] ?? ''));
+              $clave = trim((string)($m['clave'] ?? ''));
+              $opt = $label . ($clave !== '' ? " ($clave)" : '');
+              if ($opt === '') continue;
+            ?>
+              <option value="<?= htmlspecialchars($opt) ?>"></option>
+            <?php endforeach; ?>
+          </datalist>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Ciclo</label>
+          <select class="form-select" id="fc-ciclo">
+            <option value="">Todos</option>
+            <?php foreach ($ciclosCatalog as $c): ?>
+              <option value="<?= htmlspecialchars($c) ?>"><?= htmlspecialchars($c) ?></option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Alumno</label>
+          <input type="text" class="form-control" id="fc-alumno" placeholder="Nombre o matrícula">
+        </div>
+        <?php if ($role !== 'profesor'): ?>
+        <div class="col-md-2">
+          <label class="form-label">Profesor</label>
+          <input type="text" class="form-control" id="fc-profesor" placeholder="Email o matrícula">
+        </div>
+        <?php endif; ?>
+        <div class="col-md-1">
+          <label class="form-label">Final min</label>
+          <input type="number" class="form-control" id="fc-min" min="0" max="100" step="0.01">
+        </div>
+        <div class="col-md-1">
+          <label class="form-label">Final max</label>
+          <input type="number" class="form-control" id="fc-max" min="0" max="100" step="0.01">
+        </div>
+        <div class="col-md-1 d-flex align-items-end">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="fc-aprobado">
+            <label class="form-check-label" for="fc-aprobado">Aprobados (≥ 70)</label>
+          </div>
+        </div>
+      </div>
+      <div class="row g-3 mb-3">
+        <div class="col-md-4">
+          <input type="text" class="form-control" id="fc-nombre-vista" placeholder="Nombre de vista (opcional)">
+        </div>
+        <div class="col-md-2">
+          <button class="btn btn-outline-primary w-100" id="fc-guardar-vista"><i class="bi bi-save"></i> Guardar filtros</button>
+        </div>
+        <div class="col-md-3">
+          <select class="form-select" id="fc-vistas"><option value="">Cargar vista...</option></select>
+        </div>
+        <div class="col-md-3 d-flex gap-2">
+          <button class="btn btn-outline-secondary flex-fill" id="fc-limpiar"><i class="bi bi-x-circle"></i> Limpiar</button>
+          <button class="btn btn-outline-success flex-fill" data-bs-toggle="collapse" data-bs-target="#server-views">Vistas servidor</button>
+        </div>
+      </div>
+      <div class="collapse" id="server-views">
+        <div class="card card-body">
+          <form id="server-views-form" method="post" class="row g-3" novalidate>
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf) ?>">
+            <input type="hidden" name="save_server_view" value="1">
+            <div class="col-md-4">
+              <label class="form-label">Nombre</label>
+              <input type="text" class="form-control" name="label" placeholder="Ej. Aprobados por ciclo actual">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Vistas guardadas</label>
+              <select class="form-select" id="fc-vistas-srv">
+                <option value="">Selecciona...</option>
+                <?php foreach ($serverViews as $sv): ?>
+                  <option value='<?= htmlspecialchars($sv['data_json'] ?? '{}') ?>'><?= htmlspecialchars($sv['label'] ?? '') ?></option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+            <div class="col-md-4 d-flex align-items-end gap-2">
+              <button type="submit" class="btn btn-success"><i class="bi bi-cloud-check"></i> Guardar vista en servidor</button>
+              <button type="button" class="btn btn-outline-primary" id="btn-cargar-srv"><i class="bi bi-cloud-download"></i> Cargar vista</button>
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="alert alert-secondary" id="fc-totales" role="alert">
+        <strong>Totales:</strong>
+        Registros: <span id="fc-count">0</span> · Promedio final: <span id="fc-prom">0</span> · Aprobadas: <span id="fc-aprob">0</span> · Reprobadas: <span id="fc-reprob">0</span>
+      </div>
+      <div class="d-flex justify-content-end mb-3 gap-2">
+        <button class="btn btn-outline-primary" data-export="csv" data-target="#tabla-calificaciones" data-filename="calificaciones.csv"><i class="bi bi-filetype-csv"></i> Exportar CSV</button>
+        <button class="btn btn-outline-secondary" data-export="pdf"><i class="bi bi-filetype-pdf"></i> Exportar PDF</button>
+      </div>
+      <div class="table-responsive print-list">
+        <table id="tabla-calificaciones" class="table table-striped table-hover">
           <thead>
             <tr>
               <th>Alumno</th>
@@ -243,7 +360,208 @@ $totalPages = max(1, (int)ceil($total / $limit));
     </div>
   </div>
 </main>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/main.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+  (function(){
+    const tabla = document.getElementById('tabla-calificaciones');
+    const inputs = {
+      materia: document.getElementById('fc-materia'),
+      ciclo: document.getElementById('fc-ciclo'),
+      alumno: document.getElementById('fc-alumno'),
+      profesor: document.getElementById('fc-profesor'),
+      min: document.getElementById('fc-min'),
+      max: document.getElementById('fc-max'),
+      aprobado: document.getElementById('fc-aprobado')
+    };
+    const vistasSel = document.getElementById('fc-vistas');
+    const nombreVista = document.getElementById('fc-nombre-vista');
+    const storageKey = 'calificaciones_filters_global';
+
+    // Inserta contenedor de totales y espacio para gráficas si no existen
+    const totalesHtml = `
+      <div class="alert alert-secondary" id="fc-totales" role="alert">
+        Registros: <span id="fc-count">0</span> · Promedio final: <span id="fc-prom">0</span> · Aprobadas: <span id="fc-aprob">0</span> · Reprobadas: <span id="fc-reprob">0</span>
+      </div>
+      <div class="row g-3 mb-3">
+        <div class="col-md-6"><canvas id="fc-donut-chart" height="140"></canvas></div>
+        <div class="col-md-6"><canvas id="fc-ciclo-chart" height="140"></canvas></div>
+      </div>`;
+    const listingCardBody = document.querySelector('.card .card-body');
+    if (listingCardBody && !document.getElementById('fc-totales')) {
+      listingCardBody.insertAdjacentHTML('beforeend', totalesHtml);
+    }
+
+    function filtrar() {
+      let count = 0, sumFinal = 0, aprob = 0, reprob = 0;
+      const materiaQ = (inputs.materia?.value || '').toLowerCase();
+      const cicloQ = (inputs.ciclo?.value || '').toLowerCase();
+      const alumnoQ = (inputs.alumno?.value || '').toLowerCase();
+      const profesorQ = (inputs.profesor?.value || '').toLowerCase();
+      const min = inputs.min?.value !== '' ? parseFloat(inputs.min.value) : -Infinity;
+      const max = inputs.max?.value !== '' ? parseFloat(inputs.max.value) : Infinity;
+      const onlyAprob = !!(inputs.aprobado && inputs.aprobado.checked);
+
+      const rows = Array.from(tabla.querySelectorAll('tbody tr'));
+      const sumPorCiclo = {};
+      rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        const alumno = ((cells[0]?.textContent || '') + ' ' + (cells[1]?.textContent || '')).toLowerCase();
+        const materia = (cells[2]?.textContent || '').toLowerCase();
+        const grupo = (cells[3]?.textContent || '').toLowerCase();
+        const ciclo = (cells[4]?.textContent || '').toLowerCase();
+        const finalStr = (cells[7]?.textContent || '').trim();
+        const final = finalStr === '' ? NaN : parseFloat(finalStr);
+        const profesor = cells[8] ? (cells[8].textContent || '').toLowerCase() : '';
+
+        let visible = true;
+        if (materiaQ && !materia.includes(materiaQ)) visible = false;
+        if (cicloQ && !ciclo.includes(cicloQ)) visible = false;
+        if (alumnoQ && !alumno.includes(alumnoQ)) visible = false;
+        if (profesorQ && !profesor.includes(profesorQ)) visible = false;
+        if (!isNaN(final)) {
+          if (final < min || final > max) visible = false;
+          if (onlyAprob && final < 70) visible = false;
+        } else {
+          if (!isFinite(min) || !isFinite(max) || onlyAprob) visible = false;
+        }
+
+        row.style.display = visible ? '' : 'none';
+        if (visible && !isNaN(final)) {
+          count++; sumFinal += final; aprob += (final >= 70) ? 1 : 0; reprob += (final < 70) ? 1 : 0;
+          const cicloKey = (cells[4]?.textContent || '').trim();
+          if (!sumPorCiclo[cicloKey]) sumPorCiclo[cicloKey] = {count:0,sum:0};
+          sumPorCiclo[cicloKey].count++; sumPorCiclo[cicloKey].sum += final;
+        }
+      });
+
+      document.getElementById('fc-count').textContent = String(count);
+      document.getElementById('fc-prom').textContent = count ? (sumFinal / count).toFixed(2) : '0';
+      document.getElementById('fc-aprob').textContent = String(aprob);
+      document.getElementById('fc-reprob').textContent = String(reprob);
+
+      updateChart(aprob, reprob);
+      updateBarChart(sumPorCiclo);
+    }
+
+    Object.values(inputs).forEach(el => el && el.addEventListener('input', filtrar));
+    // poblar selects/datalist
+    const materias = TableUtils.collectUniqueColumnValues(tabla, 2);
+    const dl = document.getElementById('dlc-materias');
+    materias.forEach(m => { const opt = document.createElement('option'); opt.value = m; dl.appendChild(opt); });
+    const ciclos = TableUtils.collectUniqueColumnValues(tabla, 4);
+    const cicloSel = document.getElementById('fc-ciclo');
+    ciclos.forEach(c => { const opt = document.createElement('option'); opt.value = c; opt.textContent = c; cicloSel.appendChild(opt); });
+
+    // ordenar por encabezado
+    TableUtils.enableTableSort(tabla);
+
+    // guardado de filtros
+    document.getElementById('fc-guardar-vista').addEventListener('click', (e)=>{
+      e.preventDefault();
+      TableUtils.saveFilters(Object.values(inputs), storageKey, nombreVista.value.trim());
+      refreshVistas();
+    });
+    document.getElementById('fc-limpiar').addEventListener('click', (e)=>{
+      e.preventDefault(); Object.values(inputs).forEach(el=>{ if(el.type==='checkbox') el.checked=false; else el.value=''; }); filtrar();
+    });
+    vistasSel.addEventListener('change', ()=>{
+      const list = TableUtils.loadFilterList(storageKey);
+      const idx = parseInt(vistasSel.value);
+      if (!isNaN(idx) && list[idx]) { TableUtils.applyFilters(Object.values(inputs), list[idx]); }
+    });
+    document.getElementById('btn-cargar-srv')?.addEventListener('click', ()=>{
+      const sel = document.getElementById('fc-vistas-srv');
+      try {
+        const json = sel?.value || '{}';
+        const data = JSON.parse(json);
+        TableUtils.applyFilters(Object.values(inputs), { data });
+      } catch {}
+    });
+    // Antes de enviar el formulario al servidor, inyecta los filtros actuales
+    document.getElementById('server-views-form')?.addEventListener('submit', (e)=>{
+      const form = e.target;
+      const ensure = (name, value)=>{
+        let input = form.querySelector(`[name="${name}"]`);
+        if (!input) { input = document.createElement('input'); input.type = 'hidden'; input.name = name; form.appendChild(input); }
+        input.value = value;
+      };
+      ensure('fc-materia', inputs.materia?.value || '');
+      ensure('fc-ciclo', inputs.ciclo?.value || '');
+      ensure('fc-alumno', inputs.alumno?.value || '');
+      ensure('fc-profesor', inputs.profesor?.value || '');
+      ensure('fc-min', inputs.min?.value || '');
+      ensure('fc-max', inputs.max?.value || '');
+      ensure('fc-aprobado', inputs.aprobado?.checked ? '1' : '0');
+    });
+    function refreshVistas(){
+      const list = TableUtils.loadFilterList(storageKey);
+      vistasSel.innerHTML = '<option value="">Cargar vista...</option>';
+      list.forEach((rec, i) => {
+        const opt = document.createElement('option'); opt.value = String(i); opt.textContent = rec.label || ('Vista ' + (i+1)); vistasSel.appendChild(opt);
+      });
+    }
+    let chartInstance = null;
+    let barInstance = null;
+    function updateChart(aprob, reprob){
+      const ctx = document.getElementById('fc-donut-chart');
+      if (!ctx) return;
+      const data = { labels:['Aprobadas','Reprobadas'], datasets:[{ data:[aprob,reprob], backgroundColor:['#28a745','#dc3545'] }] };
+      if (chartInstance) { chartInstance.data = data; chartInstance.update(); }
+      else { chartInstance = new Chart(ctx, { type:'doughnut', data }); }
+    }
+
+    function updateBarChart(sumPorCiclo){
+      const ctx = document.getElementById('fc-ciclo-chart');
+      if (!ctx) return;
+      const labels = Object.keys(sumPorCiclo);
+      const dataVals = labels.map(k => {
+        const rec = sumPorCiclo[k];
+        return rec.count ? (rec.sum / rec.count) : 0;
+      });
+      const data = { labels, datasets:[{ label:'Promedio por ciclo', data:dataVals, backgroundColor:'#0d6efd' }] };
+      if (barInstance) { barInstance.data = data; barInstance.update(); }
+      else { barInstance = new Chart(ctx, { type:'bar', data, options:{ scales:{ y:{ beginAtZero:true, max:100 } } } }); }
+    }
+
+    refreshVistas();
+    filtrar();
+  })();
+</script>
 </body>
 </html>
+// Guardado de vistas de filtros en servidor
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_server_view'])) {
+    $token = $_POST['csrf_token'] ?? '';
+    if (!$auth->validateCSRFToken($token)) {
+        http_response_code(400);
+        echo 'CSRF inválido';
+        exit;
+    }
+    $label = trim((string)($_POST['label'] ?? 'Vista'));
+    // Recolectar filtros actuales desde POST
+    $data = [
+        'fc-materia' => (string)($_POST['fc-materia'] ?? ''),
+        'fc-ciclo' => (string)($_POST['fc-ciclo'] ?? ''),
+        'fc-alumno' => (string)($_POST['fc-alumno'] ?? ''),
+        'fc-profesor' => (string)($_POST['fc-profesor'] ?? ''),
+        'fc-min' => (string)($_POST['fc-min'] ?? ''),
+        'fc-max' => (string)($_POST['fc-max'] ?? ''),
+        'fc-aprobado' => isset($_POST['fc-aprobado']) ? '1' : '0',
+    ];
+    try {
+        $savedViewModel->create([
+            'user_id' => (int)$user['id'],
+            'page_key' => 'calificaciones',
+            'label' => $label !== '' ? $label : ('Vista ' . date('Y-m-d H:i')),
+            'data_json' => json_encode($data, JSON_UNESCAPED_UNICODE),
+        ]);
+        $message = 'Vista guardada en servidor';
+    } catch (Throwable $e) {
+        $message = 'No se pudo guardar la vista';
+    }
+}
+$serverViews = $savedViewModel->getByUserAndPage((int)$user['id'], 'calificaciones');

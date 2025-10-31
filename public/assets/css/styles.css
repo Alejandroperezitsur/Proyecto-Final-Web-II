@@ -1,0 +1,93 @@
+/* Tema moderno y sidebar */
+:root {
+  --bg: #0f172a;
+  --surface: #111827;
+  --surface-2: #0b1220;
+  --text: #e5e7eb;
+  --muted: #9ca3af;
+  --primary: #22c55e;
+  --primary-600: #16a34a;
+  --primary-700: #15803d;
+  --accent: #60a5fa;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --radius: 14px;
+  --shadow: 0 12px 30px rgba(0,0,0,.25);
+}
+
+html, body { height: 100%; }
+body {
+  background: radial-gradient(1200px 600px at 10% -10%, rgba(34,197,94,.12), transparent),
+              radial-gradient(900px 500px at 90% 110%, rgba(96,165,250,.12), transparent),
+              var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+}
+
+/* Navbar */
+.navbar { background: linear-gradient(90deg, var(--surface) 0%, #0f1a2b 100%) !important; box-shadow: var(--shadow); }
+.navbar-brand { font-weight: 700; letter-spacing: .3px; color: var(--text) !important; }
+.nav-link { color: var(--muted) !important; transition: color .2s ease; }
+.nav-link:hover { color: var(--text) !important; }
+
+/* Shell con sidebar */
+.app-shell { display: grid; grid-template-columns: 280px 1fr; gap: 0; min-height: calc(100vh - 64px); }
+.app-sidebar { position: sticky; top: 64px; align-self: start; height: calc(100vh - 64px); background: var(--surface); border-right: 1px solid rgba(255,255,255,.06); padding: 20px 16px; overflow-y: auto; }
+.brand { margin-bottom: 12px; }
+.brand-link { display: block; color: var(--text); text-decoration: none; font-weight: 700; font-size: 18px; }
+.menu-section { margin-top: 14px; }
+.menu-section-title { color: var(--primary); font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: .8px; margin-bottom: 12px; }
+.menu-section ul { list-style: none; margin: 0; padding: 0; }
+.menu-section li { margin: 4px 0; }
+.menu-section a { display: flex; align-items: center; justify-content: space-between; text-decoration: none; color: var(--text); padding: 10px 12px; border-radius: 10px; background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)); border: 1px solid rgba(255,255,255,.06); position: relative; overflow: hidden; }
+.menu-section a::after { content: ""; position: absolute; inset: 0; border-radius: 10px; box-shadow: inset 0 0 0 1px rgba(34,197,94,.2); opacity: 0; transition: opacity .25s ease; }
+.menu-section a:hover { transform: translateY(-1px); border-color: rgba(34,197,94,.35); }
+.menu-section a:hover::after { opacity: 1; }
+.menu-section a .menu-icon { margin-right: 10px; color: var(--primary); }
+.menu-section a.active { background: linear-gradient(180deg, rgba(34,197,94,.15), rgba(34,197,94,.08)); border-color: rgba(34,197,94,.45); }
+
+.app-content { padding: 28px; }
+
+/* Cards y paneles */
+.card { background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03)); border: 1px solid rgba(255,255,255,.08); border-radius: var(--radius); box-shadow: var(--shadow); color: var(--text); }
+.card-title { font-weight: 700; }
+.card .btn { border-radius: 12px; }
+.card:hover { transform: translateY(-2px); transition: transform .2s ease; }
+
+/* Botones */
+.btn-primary { background: linear-gradient(180deg, var(--primary), var(--primary-600)); border: 0; box-shadow: 0 8px 20px rgba(34,197,94,.25); }
+.btn-primary:hover { background: linear-gradient(180deg, var(--primary-600), var(--primary-700)); }
+.btn-outline-secondary { border-color: rgba(255,255,255,.25); color: var(--text); }
+.btn-outline-primary { border-color: var(--primary); color: var(--text); }
+
+/* Formularios */
+.form-control, .form-select { background: var(--surface-2); border: 1px solid rgba(255,255,255,.1); color: var(--text); border-radius: 12px; }
+.form-control::placeholder { color: var(--muted); }
+.form-label { color: var(--muted); }
+
+/* Login refinado */
+.login-hero { min-height: 100vh; display: grid; place-items: center; padding: 24px; }
+.login-card { max-width: 420px; width: 100%; }
+.login-title { font-weight: 800; letter-spacing: .4px; }
+
+/* Animaciones suaves */
+.fade-in-up { animation: fadeInUp .35s ease both; }
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .app-shell { grid-template-columns: 1fr; }
+  .app-sidebar { position: relative; top: 0; height: auto; margin-bottom: 16px; border-right: none; border-bottom: 1px solid rgba(255,255,255,.08); }
+}
+
+/* Impresión limpia para exportar a PDF (via print) */
+@media print {
+  nav.navbar, .app-sidebar, .btn, .pagination { display: none !important; }
+  .app-content { margin: 0 !important; padding: 0 !important; box-shadow: none !important; }
+  .card { box-shadow: none !important; border: none !important; }
+  body { background: #fff !important; color: #000 !important; }
+  table { color: #000 !important; }
+}

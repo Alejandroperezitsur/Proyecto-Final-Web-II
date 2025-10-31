@@ -20,6 +20,14 @@ class Materia extends Model {
         return parent::update($id, $data);
     }
 
+    // Catálogo completo de materias (id, nombre, clave)
+    public function getCatalog() {
+        $sql = "SELECT id, nombre, clave FROM {$this->table} ORDER BY nombre";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
     private function filterAllowedFields($data) {
         return array_intersect_key($data, array_flip($this->allowedFields));
     }

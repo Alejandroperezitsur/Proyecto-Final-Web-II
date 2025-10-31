@@ -93,10 +93,16 @@ class AuthController extends Controller {
     }
     
     public function isLoggedIn() {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
         return isset($_SESSION['user_id']);
     }
     
     public function requireAuth() {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
         if (!$this->isLoggedIn()) {
             header('Location: /index.php');
             exit;
@@ -112,6 +118,9 @@ class AuthController extends Controller {
     }
     
     public function getCurrentUser() {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
         if (!$this->isLoggedIn()) {
             return null;
         }

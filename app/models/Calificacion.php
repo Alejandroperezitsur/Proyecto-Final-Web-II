@@ -58,6 +58,113 @@ class Calificacion extends Model {
         return (int)$stmt->fetchColumn();
     }
 
+    // Agregados globales: total, promedio final, aprobados/reprobados
+    public function getGlobalAggregates() {
+        $sql = "SELECT 
+                    COUNT(CASE WHEN final IS NOT NULL THEN 1 END) AS total,
+                    AVG(final) AS promedio,
+                    SUM(CASE WHEN final >= 70 THEN 1 ELSE 0 END) AS aprobados,
+                    SUM(CASE WHEN final < 70 THEN 1 ELSE 0 END) AS reprobados
+                FROM {$this->table}";
+        $stmt = $this->db->query($sql);
+        $row = $stmt->fetch();
+        return [
+            'total' => (int)($row['total'] ?? 0),
+            'promedio' => $row['promedio'] !== null ? round((float)$row['promedio'], 2) : 0.0,
+            'aprobados' => (int)($row['aprobados'] ?? 0),
+            'reprobados' => (int)($row['reprobados'] ?? 0),
+        ];
+    }
+
+    // Promedios por ciclo
+    public function getAveragesByCiclo() {
+        $sql = "SELECT g.ciclo AS ciclo, COUNT(*) AS count, AVG(c.final) AS promedio
+                FROM {$this->table} c
+                JOIN grupos g ON c.grupo_id = g.id
+                WHERE c.final IS NOT NULL
+                GROUP BY g.ciclo
+                ORDER BY g.ciclo";
+        $stmt = $this->db->query($sql);
+        $rows = $stmt->fetchAll();
+        return array_map(function($r){
+            return [
+                'ciclo' => (string)($r['ciclo'] ?? ''),
+                'count' => (int)($r['count'] ?? 0),
+                'promedio' => $r['promedio'] !== null ? round((float)$r['promedio'], 2) : 0.0,
+            ];
+        }, $rows);
+    }
+
+    // Promedios por materia
+    public function getAveragesByMateria() {
+        $sql = "SELECT m.id, m.nombre, m.clave, COUNT(*) AS count, AVG(c.final) AS promedio
+                FROM {$this->table} c
+                JOIN grupos g ON c.grupo_id = g.id
+                JOIN materias m ON g.materia_id = m.id
+                WHERE c.final IS NOT NULL
+                GROUP BY m.id, m.nombre, m.clave
+                ORDER BY m.nombre";
+        $stmt = $this->db->query($sql);
+        $rows = $stmt->fetchAll();
+        return array_map(function($r){
+            return [
+                'id' => (int)($r['id'] ?? 0),
+                'nombre' => (string)($r['nombre'] ?? ''),
+                'clave' => (string)($r['clave'] ?? ''),
+                'count' => (int)($r['count'] ?? 0),
+                'promedio' => $r['promedio'] !== null ? round((float)$r['promedio'], 2) : 0.0,
+            ];
+        }, $rows);
+    }
+
+    // Agregados detallados por ciclo: count, promedio, aprobados, reprobados
+    public function getAggregatesByCicloDetailed() {
+        $sql = "SELECT g.ciclo AS ciclo,
+                       COUNT(CASE WHEN c.final IS NOT NULL THEN 1 END) AS total,
+                       AVG(c.final) AS promedio,
+                       SUM(CASE WHEN c.final >= 70 THEN 1 ELSE 0 END) AS aprobados,
+                       SUM(CASE WHEN c.final < 70 THEN 1 ELSE 0 END) AS reprobados
+                FROM {$this->table} c
+                JOIN grupos g ON c.grupo_id = g.id
+                GROUP BY g.ciclo
+                ORDER BY g.ciclo";
+        $stmt = $this->db->query($sql);
+        $rows = $stmt->fetchAll();
+        return array_map(function($r){
+            return [
+                'ciclo' => (string)($r['ciclo'] ?? ''),
+                'total' => (int)($r['total'] ?? 0),
+                'promedio' => $r['promedio'] !== null ? round((float)$r['promedio'], 2) : 0.0,
+                'aprobados' => (int)($r['aprobados'] ?? 0),
+                'reprobados' => (int)($r['reprobados'] ?? 0),
+            ];
+        }, $rows);
+    }
+
+    // Promedios por materia para un ciclo específico
+    public function getAveragesByMateriaForCiclo($ciclo) {
+        $sql = "SELECT m.id, m.nombre, m.clave, COUNT(*) AS count, AVG(c.final) AS promedio
+                FROM {$this->table} c
+                JOIN grupos g ON c.grupo_id = g.id
+                JOIN materias m ON g.materia_id = m.id
+                WHERE c.final IS NOT NULL AND g.ciclo = :ciclo
+                GROUP BY m.id, m.nombre, m.clave
+                ORDER BY promedio DESC";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':ciclo', $ciclo);
+        $stmt->execute();
+        $rows = $stmt->fetchAll();
+        return array_map(function($r){
+            return [
+                'id' => (int)($r['id'] ?? 0),
+                'nombre' => (string)($r['nombre'] ?? ''),
+                'clave' => (string)($r['clave'] ?? ''),
+                'count' => (int)($r['count'] ?? 0),
+                'promedio' => $r['promedio'] !== null ? round((float)$r['promedio'], 2) : 0.0,
+            ];
+        }, $rows);
+    }
+
     private function filterAllowedFields($data) {
         return array_intersect_key($data, array_flip($this->allowedFields));
     }

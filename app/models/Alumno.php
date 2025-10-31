@@ -149,12 +149,13 @@ class Alumno extends Model {
     }
 
     public function getWithCalificaciones($id) {
-        $sql = "SELECT a.*, c.parcial1, c.parcial2, c.final, c.promedio, 
-                       g.id as grupo_id, m.nombre as materia 
-                FROM alumnos a 
-                LEFT JOIN calificaciones c ON a.id = c.alumno_id 
-                LEFT JOIN grupos g ON c.grupo_id = g.id 
-                LEFT JOIN materias m ON g.materia_id = m.id 
+        $sql = "SELECT a.*, c.parcial1, c.parcial2, c.final, c.promedio,
+                       g.id AS grupo_id, g.nombre AS grupo_nombre, g.ciclo AS grupo_ciclo,
+                       m.nombre AS materia, m.clave AS materia_clave
+                FROM alumnos a
+                LEFT JOIN calificaciones c ON a.id = c.alumno_id
+                LEFT JOIN grupos g ON c.grupo_id = g.id
+                LEFT JOIN materias m ON g.materia_id = m.id
                 WHERE a.id = :id";
         
         $stmt = $this->db->prepare($sql);
