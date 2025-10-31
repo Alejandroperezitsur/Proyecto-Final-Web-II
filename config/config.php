@@ -1,10 +1,10 @@
 <?php
 return [
     'db' => [
-        'host' => 'localhost',
+        'host' => 'localhost:3306',
         'name' => 'control_escolar',
         'user' => 'root',
-        'pass' => ''
+        'pass' => 'root'
     ],
     'app' => [
         'name' => 'Control Escolar',
