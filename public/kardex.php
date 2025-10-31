@@ -36,7 +36,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_server_view'])) 
     $message = 'No se pudo guardar la vista';
   }
 }
-if ($user['rol'] !== 'admin') {
+// Acceso: Admin puede consultar cualquier matrícula; Alumno solo su propio Kardex
+$role = $_SESSION['user_role'] ?? '';
+$isAdmin = ($role === 'admin');
+$isAlumno = ($role === 'alumno');
+if (!$isAdmin && !$isAlumno) {
   http_response_code(403);
   echo 'Acceso denegado';
   exit;
@@ -45,12 +49,17 @@ if ($user['rol'] !== 'admin') {
 $alumnoModel = new Alumno();
 $savedViewModel = new SavedView();
 $matricula = trim((string)($_GET['matricula'] ?? ''));
+if ($isAlumno) {
+  // Forzar a la matrícula del alumno si no se especifica
+  $matricula = $matricula !== '' ? $matricula : trim((string)($user['matricula'] ?? ''));
+}
 $alumno = null;
 $historial = [];
 if ($matricula !== '') {
   $alumno = $alumnoModel->findByMatricula($matricula);
   if ($alumno) {
-    $historial = $alumnoModel->getWithCalificaciones((int)$alumno['id']);
+    $profFilter = ($role === 'profesor') ? (int)($user['id'] ?? 0) : null;
+    $historial = $alumnoModel->getWithCalificaciones((int)$alumno['id'], $profFilter);
   }
 }
 ?>
@@ -78,7 +87,7 @@ if ($matricula !== '') {
     <a class="navbar-brand" href="/dashboard.php">Control Escolar</a>
   </div>
   <div class="container-fluid">
-    <span class="navbar-text text-white">Admin</span>
+    <span class="navbar-text text-white"><?= htmlspecialchars($role) ?></span>
   </div>
 </nav>
 
@@ -90,6 +99,7 @@ if ($matricula !== '') {
 
     <div class="card">
       <div class="card-body">
+        <?php if (!$isAlumno): ?>
         <form class="row g-3" method="get">
           <div class="col-md-4">
             <label class="form-label">Matrícula del alumno</label>
@@ -99,6 +109,7 @@ if ($matricula !== '') {
             <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i> Buscar</button>
           </div>
         </form>
+        <?php endif; ?>
       </div>
     </div>
 
@@ -111,6 +122,7 @@ if ($matricula !== '') {
         <div class="d-flex gap-2">
           <button class="btn btn-outline-primary" data-export="csv" data-target="#tabla-kardex" data-filename="kardex_<?= htmlspecialchars($alumno['matricula'] ?? 'alumno') ?>.csv"><i class="bi bi-filetype-csv"></i> Exportar CSV</button>
           <button class="btn btn-outline-secondary" data-export="pdf"><i class="bi bi-filetype-pdf"></i> Exportar PDF</button>
+          <a class="btn btn-outline-dark" target="_blank" href="kardex_formato.php?matricula=<?= urlencode($alumno['matricula'] ?? '') ?>"><i class="bi bi-file-earmark-text"></i> Formato oficial</a>
         </div>
       </div>
       <div class="card-body">

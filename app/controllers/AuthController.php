@@ -124,6 +124,20 @@ class AuthController extends Controller {
         if (!$this->isLoggedIn()) {
             return null;
         }
-        return $this->model->find($_SESSION['user_id']);
+        $role = $_SESSION['user_role'] ?? null;
+        $id = $_SESSION['user_id'] ?? null;
+        if (!$id) { return null; }
+        // Soporte para alumnos: obtener desde tabla alumnos y normalizar rol
+        if ($role === 'alumno') {
+            $alumnoModel = new Alumno();
+            $alumno = $alumnoModel->find($id);
+            if ($alumno && is_array($alumno)) {
+                $alumno['rol'] = 'alumno';
+                return $alumno;
+            }
+            return null;
+        }
+        // Para admin y profesor: tabla usuarios
+        return $this->model->find($id);
     }
 }
