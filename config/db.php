@@ -4,20 +4,47 @@ class Database {
     private $conn;
     
     private function __construct() {
-        $config = require_once __DIR__ . '/config.php';
+        // Cargar la configuración. Usamos include en vez de require_once
+        // porque require_once puede devolver true si ya se incluyó antes,
+        // lo que rompe la asignación esperada (devuelve bool en lugar del array).
+        $config = include __DIR__ . '/config.php';
+
+        if ($config === false || !isset($config['db']) || !is_array($config['db'])) {
+            die("Error: no se pudo cargar la configuración de base de datos (config/config.php). Revisa que el archivo exista y retorne un array.");
+        }
+
+        // Valores por defecto seguros para entorno local
+        $hostPort = $config['db']['host'] ?? '127.0.0.1:3306';
+        $dbname = $config['db']['name'] ?? 'control_escolar';
+        $user = $config['db']['user'] ?? 'root';
+        $pass = $config['db']['pass'] ?? '';
+
+        // Separar host y puerto si se proporcionaron juntos (ej. 127.0.0.1:3306)
+        $hostOnly = $hostPort;
+        $port = null;
+        if (strpos($hostPort, ':') !== false) {
+            list($hostOnly, $port) = explode(':', $hostPort, 2);
+        }
+
         try {
-            $host = $config['db']['host'];
-            $dbname = $config['db']['name'];
-            $user = $config['db']['user'];
-            $pass = $config['db']['pass'];
-            
-            // First create the database if it doesn't exist
-            $tempConn = new PDO("mysql:host=$host", $user, $pass);
-            $tempConn->exec("CREATE DATABASE IF NOT EXISTS `$dbname` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;");
-            
-            // Now connect to the database
+            // Crear conexión temporal (sin DB) para crear la base si no existe
+            $tempDsn = 'mysql:host=' . $hostOnly;
+            if ($port) {
+                $tempDsn .= ';port=' . $port;
+            }
+
+            $tempConn = new PDO($tempDsn, $user, $pass, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+            $tempConn->exec("CREATE DATABASE IF NOT EXISTS `" . str_replace("`", "", $dbname) . "` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;");
+
+            // Ahora conectar a la base de datos específica
+            $dsn = 'mysql:host=' . $hostOnly;
+            if ($port) {
+                $dsn .= ';port=' . $port;
+            }
+            $dsn .= ';dbname=' . $dbname . ';charset=utf8mb4';
+
             $this->conn = new PDO(
-                "mysql:host=$host;dbname=$dbname;charset=utf8mb4",
+                $dsn,
                 $user,
                 $pass,
                 [

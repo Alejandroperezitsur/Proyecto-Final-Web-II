@@ -4,9 +4,23 @@
 $config = require_once __DIR__ . '/config.php';
 
 try {
+    // Separar host y puerto si vienen juntos (e.g. 127.0.0.1:3306)
+    $hostPort = $config['db']['host'] ?? '127.0.0.1:3306';
+    $hostOnly = $hostPort;
+    $port = null;
+    if (strpos($hostPort, ':') !== false) {
+        list($hostOnly, $port) = explode(':', $hostPort, 2);
+    }
+
     // Primero conectar sin seleccionar base de datos
+    $dsn = "mysql:host={$hostOnly}";
+    if ($port) {
+        $dsn .= ";port={$port}";
+    }
+    $dsn .= ";charset=utf8mb4";
+
     $pdo = new PDO(
-        "mysql:host={$config['db']['host']};charset=utf8mb4",
+        $dsn,
         $config['db']['user'],
         $config['db']['pass'],
         [
@@ -28,11 +42,15 @@ try {
     $pdo->exec("USE `$dbName`;");
     
     // Leer y ejecutar el archivo de migración
-    $sql = file_get_contents(__DIR__ . '/../migrations/001_create_schema.sql');
+    $migrationPath = __DIR__ . '/../migrations/control_escolar.sql';
+    $sql = file_get_contents($migrationPath);
+    if ($sql === false) {
+        throw new RuntimeException("No se pudo leer el archivo de migración: {$migrationPath}");
+    }
     $pdo->exec($sql);
     
     echo "Migraciones ejecutadas correctamente.\n";
     
-} catch (PDOException $e) {
+} catch (Throwable $e) {
     die("Error: " . $e->getMessage() . "\n");
 }

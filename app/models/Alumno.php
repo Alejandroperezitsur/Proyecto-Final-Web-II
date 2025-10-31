@@ -146,20 +146,20 @@ class Alumno extends Model {
     }
 
     public function search($term, $page = 1, $limit = 10) {
+        $page = max(1, (int)$page);
+        $limit = max(1, (int)$limit);
         $offset = ($page - 1) * $limit;
-        $term = "%$term%";
-        
+        $like = "%$term%";
+
         $sql = "SELECT * FROM alumnos 
                 WHERE nombre LIKE :term 
                 OR apellido LIKE :term 
                 OR matricula LIKE :term 
                 OR email LIKE :term 
-                LIMIT :limit OFFSET :offset";
+                LIMIT {$limit} OFFSET {$offset}";
 
         $stmt = $this->db->prepare($sql);
-        $stmt->bindValue(':term', $term);
-        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->bindValue(':term', $like);
         $stmt->execute();
 
         return $stmt->fetchAll();

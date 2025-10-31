@@ -11,11 +11,13 @@ abstract class Model {
     }
 
     public function getAll($page = 1, $limit = 10, $where = '') {
+        $page = max(1, (int)$page);
+        $limit = max(1, (int)$limit);
         $offset = ($page - 1) * $limit;
-        $sql = "SELECT * FROM {$this->table} " . $where . " LIMIT :limit OFFSET :offset";
+        $whereSql = $where ? (' ' . trim($where)) : '';
+        // Evitar parámetros en LIMIT/OFFSET con prepared statements nativos
+        $sql = "SELECT * FROM {$this->table}{$whereSql} LIMIT {$limit} OFFSET {$offset}";
         $stmt = $this->db->prepare($sql);
-        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetchAll();
     }

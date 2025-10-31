@@ -59,7 +59,7 @@ class AuthController extends Controller {
     
     public function requireAuth() {
         if (!$this->isLoggedIn()) {
-            header('Location: /login.php');
+            header('Location: /index.php');
             exit;
         }
     }
@@ -67,7 +67,7 @@ class AuthController extends Controller {
     public function requireRole($roles) {
         $this->requireAuth();
         if (!in_array($_SESSION['user_role'], (array)$roles)) {
-            header('Location: /error.php?code=403');
+            header('Location: /index.php?code=403');
             exit;
         }
     }

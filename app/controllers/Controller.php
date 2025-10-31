@@ -4,12 +4,14 @@ abstract class Controller {
     protected $isApi = false;
 
     protected function checkAuth() {
-        session_start();
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
         if (!isset($_SESSION['user_id'])) {
             if ($this->isApi) {
                 $this->jsonResponse(['success' => false, 'error' => 'No autorizado'], 401);
             } else {
-                header('Location: /login.php');
+                header('Location: /index.php');
                 exit;
             }
         }
@@ -20,7 +22,7 @@ abstract class Controller {
             if ($this->isApi) {
                 $this->jsonResponse(['success' => false, 'error' => 'Acceso denegado'], 403);
             } else {
-                header('Location: /error.php?code=403');
+                header('Location: /index.php?code=403');
                 exit;
             }
         }
@@ -33,7 +35,7 @@ abstract class Controller {
                 if ($this->isApi) {
                     $this->jsonResponse(['success' => false, 'error' => 'Token CSRF inválido'], 400);
                 } else {
-                    header('Location: /error.php?code=400');
+                    header('Location: /index.php?code=400');
                     exit;
                 }
             }

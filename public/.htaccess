@@ -51,7 +51,7 @@ RewriteRule ^(.*)$ index.php [QSA,L]
 # Deshabilitar listado de directorios
 Options -Indexes
 
-# Mostrar errores personalizados
-ErrorDocument 404 /error.php?code=404
-ErrorDocument 403 /error.php?code=403
-ErrorDocument 500 /error.php?code=500
+# Mostrar errores personalizados en index.php
+ErrorDocument 404 /index.php?code=404
+ErrorDocument 403 /index.php?code=403
+ErrorDocument 500 /index.php?code=500
