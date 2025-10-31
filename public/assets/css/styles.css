@@ -91,3 +91,28 @@ body {
   body { background: #fff !important; color: #000 !important; }
   table { color: #000 !important; }
 }
+
+/* Estilos para tablas de usuarios */
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.users-table th,
+.users-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+.users-table th {
+  background: #f5f5f5;
+  text-align: left;
+}
+
+.users-container {
+  padding: 1rem;
+}
+
+.users-section {
+  margin-top: 2rem;
+}

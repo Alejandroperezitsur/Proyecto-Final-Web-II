@@ -15,9 +15,7 @@ class AuthController extends Controller {
     }
 
     public function validateCSRFToken($token) {
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-            session_start();
-        }
+        require_once __DIR__ . '/../init.php';
         return isset($_SESSION['csrf_token']) && is_string($token) && hash_equals($_SESSION['csrf_token'], $token);
     }
     
@@ -93,16 +91,12 @@ class AuthController extends Controller {
     }
     
     public function isLoggedIn() {
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-            session_start();
-        }
+        require_once __DIR__ . '/../init.php';
         return isset($_SESSION['user_id']);
     }
     
     public function requireAuth() {
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-            session_start();
-        }
+        require_once __DIR__ . '/../init.php';
         if (!$this->isLoggedIn()) {
             header('Location: /index.php');
             exit;

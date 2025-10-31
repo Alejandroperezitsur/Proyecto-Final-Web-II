@@ -1,6 +1,6 @@
 <?php
+require_once __DIR__ . '/../../app/init.php';
 // Sidebar de Operaciones Académicas y navegación principal
-session_start();
 $role = $_SESSION['user_role'] ?? null;
 ?>
 <aside class="app-sidebar">

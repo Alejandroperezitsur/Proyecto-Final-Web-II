@@ -5,21 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Credenciales de prueba</title>
     <link rel="stylesheet" href="assets/css/styles.css">
-    <style>
-        table { width: 100%; border-collapse: collapse }
-        th, td { border: 1px solid #ddd; padding: 8px }
-        th { background: #f5f5f5; text-align: left }
-        .container { padding: 1rem }
-    </style>
-    
 </head>
 <body>
-    <div class="container">
+    <div class="users-container">
         <h1>Usuarios de prueba</h1>
         <p>Contraseñas de 8 dígitos generadas para pruebas. No usar en producción.</p>
 
         <h2>Alumnos (40)</h2>
-        <table>
+        <table class="users-table">
             <thead>
                 <tr>
                     <th>Matrícula</th>
@@ -313,8 +306,8 @@
             </tbody>
         </table>
 
-        <h2 style="margin-top: 2rem">Profesores (20)</h2>
-        <table>
+        <h2 class="users-section">Profesores (20)</h2>
+        <table class="users-table">
             <thead>
                 <tr>
                     <th>Matrícula</th>

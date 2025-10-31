@@ -4,9 +4,7 @@ abstract class Controller {
     protected $isApi = false;
 
     protected function checkAuth() {
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-            session_start();
-        }
+        require_once __DIR__ . '/../init.php';
         if (!isset($_SESSION['user_id'])) {
             if ($this->isApi) {
                 $this->jsonResponse(['success' => false, 'error' => 'No autorizado'], 401);
