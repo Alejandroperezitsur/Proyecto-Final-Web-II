@@ -23,7 +23,7 @@ $isAlumno = ($_SESSION['user_role'] ?? '') === 'alumno';
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
   <div class="container-fluid">
-    <a class="navbar-brand" href="/dashboard.php">Control Escolar</a>
+        <a class="navbar-brand" href="dashboard.php">Control Escolar</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
       <span class="navbar-toggler-icon"></span>
     </button>
@@ -68,6 +68,9 @@ $isAlumno = ($_SESSION['user_role'] ?? '') === 'alumno';
             <?php if ($isAlumno): ?>
             <a class="btn btn-primary" href="kardex.php?matricula=<?= urlencode($user['matricula'] ?? '') ?>">
               <i class="bi bi-journal-text"></i> Ver mi Kardex
+            </a>
+            <a class="btn btn-outline-primary ms-2" href="mi_carga.php">
+              <i class="bi bi-list-check"></i> Mi Carga Académica
             </a>
             <?php endif; ?>
           </div>

@@ -151,7 +151,7 @@ $ciclosCatalog = $grupoModel->getDistinctCiclos($role === 'profesor' ? (int)$use
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container-fluid">
-    <a class="navbar-brand" href="/dashboard.php">Control Escolar</a>
+        <a class="navbar-brand" href="dashboard.php">Control Escolar</a>
   </div>
   <div class="container-fluid">
     <span class="navbar-text text-white"><?= htmlspecialchars(ucfirst($role)) ?></span>
@@ -163,7 +163,7 @@ $ciclosCatalog = $grupoModel->getDistinctCiclos($role === 'profesor' ? (int)$use
   <main class="app-content">
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h1 class="h3">Calificaciones</h1>
-    <a href="/dashboard.php" class="btn btn-outline-secondary">Volver</a>
+        <a href="dashboard.php" class="btn btn-outline-secondary">Volver</a>
   </div>
 
   <?php if ($message): ?>

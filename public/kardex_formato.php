@@ -66,7 +66,9 @@ $promedioGeneral = $count ? ($sumProm / $count) : 0;
       <small>Formato oficial de Kardex</small>
     </div>
     <div class="text-end">
+      <?php $folio = ($alumno ? (strtoupper(substr((string)$alumno['matricula'], 0, 3)) . '-' . date('Ymd') . '-' . (int)$alumno['id']) : ('KDX-' . date('Ymd-His'))); ?>
       <div><strong>Fecha:</strong> <?= htmlspecialchars(date('Y-m-d')) ?></div>
+      <div><strong>Folio:</strong> <?= htmlspecialchars($folio) ?></div>
       <div><strong>Emitido por:</strong> <?= htmlspecialchars($role) ?></div>
     </div>
   </div>
@@ -122,6 +124,19 @@ $promedioGeneral = $count ? ($sumProm / $count) : 0;
   <div class="alert alert-secondary" role="alert">
     <strong>Totales:</strong>
     Materias: <?= (int)$count ?> · Promedio general: <?= number_format((float)$promedioGeneral, 2) ?> · Aprobadas: <?= (int)$aprob ?> · Reprobadas: <?= (int)$reprob ?>
+  </div>
+
+  <div class="mt-4">
+    <p class="small text-muted mb-1">Este documento ha sido generado electrónicamente.</p>
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <div><strong>Departamento de Control Escolar</strong></div>
+        <div>Firma digital: CE-UNIV-<?= htmlspecialchars(date('Ymd')) ?></div>
+      </div>
+      <div class="text-end">
+        <span class="badge bg-primary">Válido para uso institucional</span>
+      </div>
+    </div>
   </div>
 
   <div class="no-print mt-3">

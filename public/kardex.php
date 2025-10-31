@@ -84,7 +84,7 @@ if ($matricula !== '') {
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container-fluid">
-    <a class="navbar-brand" href="/dashboard.php">Control Escolar</a>
+        <a class="navbar-brand" href="dashboard.php">Control Escolar</a>
   </div>
   <div class="container-fluid">
     <span class="navbar-text text-white"><?= htmlspecialchars($role) ?></span>

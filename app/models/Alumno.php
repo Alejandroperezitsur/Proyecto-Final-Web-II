@@ -149,18 +149,26 @@ class Alumno extends Model {
     }
 
     public function getWithCalificaciones($id, $profesorId = null) {
-        $sql = "SELECT a.*, c.parcial1, c.parcial2, c.final, c.promedio,
-                       g.id AS grupo_id, g.nombre AS grupo_nombre, g.ciclo AS grupo_ciclo,
-                       m.nombre AS materia, m.clave AS materia_clave
-                FROM alumnos a
-                LEFT JOIN calificaciones c ON a.id = c.alumno_id
-                LEFT JOIN grupos g ON c.grupo_id = g.id AND (:profesorId IS NULL OR g.profesor_id = :profesorId)
-                LEFT JOIN materias m ON g.materia_id = m.id
-                WHERE a.id = :id";
+        $baseSql = "SELECT a.*, c.parcial1, c.parcial2, c.final, c.promedio,
+                           g.id AS grupo_id, g.nombre AS grupo_nombre, g.ciclo AS grupo_ciclo,
+                           m.nombre AS materia, m.clave AS materia_clave
+                    FROM alumnos a
+                    LEFT JOIN calificaciones c ON a.id = c.alumno_id
+                    LEFT JOIN grupos g ON c.grupo_id = g.id";
 
-        $stmt = $this->db->prepare($sql);
-        $stmt->bindValue(':id', $id);
-        $stmt->bindValue(':profesorId', $profesorId, is_null($profesorId) ? PDO::PARAM_NULL : PDO::PARAM_INT);
+        // Aplicar filtro por profesor solo si se proporciona
+        if (!is_null($profesorId)) {
+            $baseSql .= " AND g.profesor_id = :profesorId";
+        }
+
+        $baseSql .= " LEFT JOIN materias m ON g.materia_id = m.id
+                      WHERE a.id = :id";
+
+        $stmt = $this->db->prepare($baseSql);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        if (!is_null($profesorId)) {
+            $stmt->bindValue(':profesorId', (int)$profesorId, PDO::PARAM_INT);
+        }
         $stmt->execute();
         return $stmt->fetchAll();
     }

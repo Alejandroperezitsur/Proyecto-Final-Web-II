@@ -160,7 +160,7 @@ $csrf = $auth->generateCSRFToken();
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container-fluid">
-    <a class="navbar-brand" href="/dashboard.php">Control Escolar</a>
+        <a class="navbar-brand" href="dashboard.php">Control Escolar</a>
   </div>
   <div class="container-fluid">
     <span class="navbar-text text-white">Admin</span>
@@ -189,7 +189,7 @@ $csrf = $auth->generateCSRFToken();
           <a href="alumnos.php" class="btn btn-outline-secondary ms-2">Limpiar</a>
         <?php endif; ?>
       </form>
-      <a href="/dashboard.php" class="btn btn-outline-secondary">Volver</a>
+        <a href="dashboard.php" class="btn btn-outline-secondary">Volver</a>
     </div>
   </div>
 
