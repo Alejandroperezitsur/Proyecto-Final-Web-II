@@ -34,6 +34,47 @@ document.addEventListener('DOMContentLoaded', () => {
       window.print();
     });
   });
+
+  // Toggle de tema oscuro/claro
+  const applyTheme = (theme) => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('sicenet-theme', theme);
+  };
+  let saved = localStorage.getItem('sicenet-theme') || 'dark';
+  applyTheme(saved);
+  const nav = document.querySelector('nav.navbar .container-fluid');
+  const existingToggle = document.getElementById('themeToggle') || document.getElementById('theme-toggle');
+  const updateIconEl = (el) => {
+    if (!el) return;
+    const icon = el.querySelector('i');
+    if (icon) {
+      icon.className = saved === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
+    } else {
+      el.innerHTML = saved === 'dark' ? '<i class="bi bi-sun-fill"></i>' : '<i class="bi bi-moon-fill"></i>';
+    }
+  };
+  if (existingToggle) {
+    updateIconEl(existingToggle);
+    existingToggle.addEventListener('click', () => {
+      const next = (localStorage.getItem('sicenet-theme') || 'dark') === 'dark' ? 'light' : 'dark';
+      applyTheme(next);
+      saved = next;
+      updateIconEl(existingToggle);
+    });
+  } else if (nav) {
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-sm btn-outline-secondary ms-2';
+    btn.type = 'button';
+    btn.title = 'Cambiar tema';
+    updateIconEl(btn);
+    btn.addEventListener('click', () => {
+      const next = (localStorage.getItem('sicenet-theme') || 'dark') === 'dark' ? 'light' : 'dark';
+      applyTheme(next);
+      saved = next;
+      updateIconEl(btn);
+    });
+    nav.appendChild(btn);
+  }
 });
 
 // -------- Tabla: ordenamiento sencillo por encabezado --------

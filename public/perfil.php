@@ -15,20 +15,41 @@ $isAlumno = ($_SESSION['user_role'] ?? '') === 'alumno';
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Mi Perfil</title>
+  <title>SICEnet · ITSUR — Mi Perfil</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
   <link href="assets/css/styles.css" rel="stylesheet">
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+<!-- Header institucional compacto -->
+<header class="institutional-header">
+    <div class="container-fluid">
+        <a href="dashboard.php" class="institutional-brand">
+            <img src="assets/ITSUR-LOGO.webp" alt="ITSUR Logo" class="institutional-logo">
+            <div class="institutional-text">
+                <h1 class="institutional-title">SICEnet · ITSUR</h1>
+                <p class="institutional-subtitle">Sistema Integral de Control Escolar</p>
+            </div>
+        </a>
+    </div>
+</header>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container-fluid">
-        <a class="navbar-brand" href="dashboard.php">Control Escolar</a>
+        <a class="navbar-brand d-flex align-items-center" href="dashboard.php">
+            <img src="assets/ITSUR-LOGO.webp" alt="ITSUR Logo" class="navbar-logo me-2">
+            <span class="brand-text">SICEnet · ITSUR</span>
+        </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <button class="btn btn-outline-light btn-sm me-2" id="themeToggle" title="Cambiar tema">
+            <i class="bi bi-sun-fill"></i>
+          </button>
+        </li>
         <li class="nav-item">
           <a class="nav-link" href="logout.php"><i class="bi bi-box-arrow-right"></i> Cerrar Sesión</a>
         </li>

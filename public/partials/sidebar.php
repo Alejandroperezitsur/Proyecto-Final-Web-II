@@ -5,7 +5,8 @@ $role = $_SESSION['user_role'] ?? null;
 ?>
 <aside class="app-sidebar">
   <div class="brand">
-    <a href="dashboard.php" class="brand-link">Control Escolar</a>
+    <a href="dashboard.php" class="brand-link">SICEnet · ITSUR</a>
+    <div class="small text-muted">Sistema Integral de Control Escolar</div>
   </div>
   <nav class="menu">
     <?php if ($role === 'alumno'): ?>

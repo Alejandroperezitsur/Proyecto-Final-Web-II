@@ -76,15 +76,30 @@ if ($edit_id > 0) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
-    <title>Materias - Control Escolar</title>
+  <title>SICEnet · ITSUR — Materias</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <link href="assets/css/styles.css" rel="stylesheet">
 }</head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+<!-- Header institucional compacto -->
+<header class="institutional-header">
     <div class="container-fluid">
-        <a class="navbar-brand" href="dashboard.php">Control Escolar</a>
+        <a href="dashboard.php" class="institutional-brand">
+            <img src="assets/ITSUR-LOGO.webp" alt="ITSUR Logo" class="institutional-logo">
+            <div class="institutional-text">
+                <h1 class="institutional-title">SICEnet · ITSUR</h1>
+                <p class="institutional-subtitle">Sistema Integral de Control Escolar</p>
+            </div>
+        </a>
+    </div>
+</header>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand d-flex align-items-center" href="dashboard.php">
+            <img src="assets/ITSUR-LOGO.webp" alt="ITSUR Logo" class="navbar-logo me-2">
+            <span class="brand-text">SICEnet · ITSUR</span>
+        </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -94,7 +109,14 @@ if ($edit_id > 0) {
                 <li class="nav-item"><a class="nav-link active" href="materias.php">Materias</a></li>
                 <li class="nav-item"><a class="nav-link" href="grupos.php">Grupos</a></li>
             </ul>
-            <ul class="navbar-nav"><li class="nav-item"><a class="nav-link" href="logout.php">Salir</a></li></ul>
+            <ul class="navbar-nav ms-auto align-items-center">
+              <li class="nav-item me-2">
+                <button class="btn btn-outline-light btn-sm" id="themeToggle" title="Cambiar tema">
+                  <i class="bi bi-sun-fill"></i>
+                </button>
+              </li>
+              <li class="nav-item"><a class="nav-link" href="logout.php">Salir</a></li>
+            </ul>
         </div>
     </div>
     </nav>

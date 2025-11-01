@@ -15,6 +15,116 @@
   --shadow: 0 12px 30px rgba(0,0,0,.25);
 }
 
+[data-theme="light"] {
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --surface-2: #f1f5f9;
+  --text: #0f172a;
+  --muted: #334155;
+  --primary: #2563eb;
+  --primary-600: #1d4ed8;
+  --primary-700: #1e40af;
+  --accent: #10b981;
+  --danger: #b91c1c;
+  --warning: #b45309;
+  --shadow: 0 12px 30px rgba(0,0,0,.12);
+}
+
+/* Header compacto con branding institucional */
+.institutional-header {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-700) 100%);
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  box-shadow: var(--shadow);
+}
+
+.institutional-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: white;
+  text-decoration: none;
+}
+
+.institutional-brand:hover {
+  color: rgba(255,255,255,0.9);
+  text-decoration: none;
+}
+
+.institutional-logo {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}
+
+.institutional-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.institutional-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.institutional-subtitle {
+  font-size: 0.85rem;
+  opacity: 0.9;
+  margin: 0;
+  font-weight: 400;
+}
+
+/* Logo y branding navbar */
+.navbar-logo {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
+  filter: brightness(0) invert(1); /* Logo blanco en navbar oscura */
+}
+
+.brand-text {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+/* Responsive navbar */
+@media (max-width: 768px) {
+  .navbar-logo { height: 28px; }
+  .institutional-logo { height: 32px; }
+  .institutional-title { font-size: 1.1rem; }
+  .institutional-subtitle { font-size: 0.75rem; }
+  .brand-text { font-size: 1rem; }
+  .navbar-brand { margin-right: 0.5rem; }
+}
+
+/* Theme toggle button */
+#theme-toggle {
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+#theme-toggle:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: scale(1.05);
+}
+
+/* Logo en tema claro */
+[data-theme="light"] .navbar-logo {
+  filter: none; /* Logo original en navbar clara */
+}
+
+[data-theme="light"] .navbar {
+  background-color: var(--accent) !important;
+}
+
 html, body { height: 100%; }
 body {
   background: radial-gradient(1200px 600px at 10% -10%, rgba(34,197,94,.12), transparent),
@@ -29,6 +139,10 @@ body {
 .navbar-brand { font-weight: 700; letter-spacing: .3px; color: var(--text) !important; }
 .nav-link { color: var(--muted) !important; transition: color .2s ease; }
 .nav-link:hover { color: var(--text) !important; }
+/* Navbar en tema claro */
+[data-theme="light"] .navbar { background: linear-gradient(90deg, #ffffff 0%, #eef2ff 100%) !important; }
+[data-theme="light"] .nav-link { color: #334155 !important; }
+[data-theme="light"] .nav-link:hover { color: #0f172a !important; }
 
 /* Shell con sidebar */
 .app-shell { display: grid; grid-template-columns: 280px 1fr; gap: 0; min-height: calc(100vh - 64px); }
@@ -50,6 +164,7 @@ body {
 
 /* Cards y paneles */
 .card { background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03)); border: 1px solid rgba(255,255,255,.08); border-radius: var(--radius); box-shadow: var(--shadow); color: var(--text); }
+[data-theme="light"] .card { background: #ffffff; border-color: rgba(2,6,23,.08); }
 .card-title { font-weight: 700; }
 .card .btn { border-radius: 12px; }
 .card:hover { transform: translateY(-2px); transition: transform .2s ease; }
@@ -58,12 +173,35 @@ body {
 .btn-primary { background: linear-gradient(180deg, var(--primary), var(--primary-600)); border: 0; box-shadow: 0 8px 20px rgba(34,197,94,.25); }
 .btn-primary:hover { background: linear-gradient(180deg, var(--primary-600), var(--primary-700)); }
 .btn-outline-secondary { border-color: rgba(255,255,255,.25); color: var(--text); }
+[data-theme="light"] .btn-outline-secondary { border-color: rgba(2,6,23,.2); color: #0f172a; }
 .btn-outline-primary { border-color: var(--primary); color: var(--text); }
+[data-theme="light"] .btn-outline-primary { color: #0f172a; }
+ .badge { border-radius: 10px; }
 
 /* Formularios */
 .form-control, .form-select { background: var(--surface-2); border: 1px solid rgba(255,255,255,.1); color: var(--text); border-radius: 12px; }
+[data-theme="light"] .form-control, [data-theme="light"] .form-select { background: #ffffff; border-color: rgba(2,6,23,.12); color: #0f172a; }
 .form-control::placeholder { color: var(--muted); }
 .form-label { color: var(--muted); }
+
+/* Tablas modernas */
+.table { color: var(--text); }
+.table thead th { background: rgba(255,255,255,.06); color: var(--muted); border-bottom-color: rgba(255,255,255,.1); }
+.table tbody tr:hover { background: rgba(255,255,255,.04); }
+[data-theme="light"] .table thead th { background: #f8fafc; color: #334155; border-bottom-color: rgba(2,6,23,.08); }
+[data-theme="light"] .table tbody tr:hover { background: #f1f5f9; }
+
+/* Login minimalista con header institucional */
+.login-container { max-width: 420px; margin: 40px auto; }
+.login-card { background: var(--surface); border: 1px solid rgba(255,255,255,.08); border-radius: var(--radius); box-shadow: var(--shadow); padding: 24px; color: var(--text); }
+[data-theme="light"] .login-card { background: #ffffff; border-color: rgba(2,6,23,.08); }
+.login-title { font-weight: 700; margin-bottom: 12px; }
+.login-subtitle { color: var(--muted); margin-bottom: 16px; }
+.table-striped>tbody>tr:nth-of-type(odd) { --bs-table-accent-bg: rgba(255,255,255,.03); }
+
+/* Alerts en tema oscuro */
+.alert-info { background: rgba(96,165,250,.15); color: var(--text); border-color: rgba(96,165,250,.3); }
+.alert-warning { background: rgba(245,158,11,.15); color: var(--text); border-color: rgba(245,158,11,.35); }
 
 /* Login refinado */
 .login-hero { min-height: 100vh; display: grid; place-items: center; padding: 24px; }

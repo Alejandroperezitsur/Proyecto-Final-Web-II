@@ -154,17 +154,35 @@ $grupos = $cicloActual ? $grupoModel->getByCicloAndPrefixes($cicloActual, $prefi
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Selección de materias</title>
+  <title>SICEnet · ITSUR — Selección de materias</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
   <link href="assets/css/styles.css" rel="stylesheet">
 </head>
 <body>
+<!-- Header institucional compacto -->
+<header class="institutional-header">
+  <div class="container-fluid">
+    <a href="dashboard.php" class="institutional-brand">
+      <img src="assets/ITSUR-LOGO.webp" alt="ITSUR Logo" class="institutional-logo">
+      <div class="institutional-text">
+        <h1 class="institutional-title">SICEnet · ITSUR</h1>
+        <p class="institutional-subtitle">Sistema Integral de Control Escolar</p>
+      </div>
+    </a>
+  </div>
+</header>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container-fluid">
-        <a class="navbar-brand" href="dashboard.php">Control Escolar</a>
+        <a class="navbar-brand d-flex align-items-center" href="dashboard.php">
+          <img src="assets/ITSUR-LOGO.webp" alt="ITSUR" class="navbar-logo me-2">
+          <span class="brand-text">SICEnet · ITSUR</span>
+        </a>
   </div>
-  <div class="container-fluid">
+  <div class="container-fluid d-flex justify-content-end align-items-center">
+    <button class="btn btn-outline-light btn-sm me-3" id="theme-toggle" title="Cambiar tema">
+      <i class="bi bi-moon-fill" id="theme-icon"></i>
+    </button>
     <span class="navbar-text text-white">Alumno</span>
   </div>
 </nav>
@@ -220,11 +238,13 @@ $grupos = $cicloActual ? $grupoModel->getByCicloAndPrefixes($cicloActual, $prefi
                 <?php endif; ?>
                 <?php if ($ya): ?>
                   <span class="badge bg-info me-2">Inscrito</span>
-                  <form method="post" class="d-inline" onsubmit="return confirm('¿Confirmas dar de baja este grupo?');">
+                  <form method="post" class="d-inline form-with-confirmation" data-confirm-message="¿Confirmas dar de baja la materia <?= htmlspecialchars($g['materia_nombre']) ?>?">
                     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($auth->generateCSRFToken()) ?>">
                     <input type="hidden" name="grupo_id" value="<?= (int)$g['id'] ?>">
                     <input type="hidden" name="accion" value="baja">
-                    <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-dash-circle"></i> Baja</button>
+                    <button type="submit" class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip" title="Dar de baja esta materia">
+                      <i class="bi bi-dash-circle"></i> Baja
+                    </button>
                   </form>
                 <?php elseif (!$activo): ?>
                   <button class="btn btn-sm btn-secondary" disabled>Inscribir</button>
@@ -233,11 +253,13 @@ $grupos = $cicloActual ? $grupoModel->getByCicloAndPrefixes($cicloActual, $prefi
                 <?php elseif (!empty($faltantes)): ?>
                   <button class="btn btn-sm btn-outline-secondary" disabled>Prerrequisitos</button>
                 <?php else: ?>
-                  <form method="post" class="d-inline">
+                  <form method="post" class="d-inline form-with-confirmation" data-confirm-message="¿Confirmas inscribirte a <?= htmlspecialchars($g['materia_nombre']) ?> - Grupo <?= htmlspecialchars($g['nombre']) ?>?">
                     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($auth->generateCSRFToken()) ?>">
                     <input type="hidden" name="grupo_id" value="<?= (int)$g['id'] ?>">
                     <input type="hidden" name="accion" value="inscribir">
-                    <button type="submit" class="btn btn-sm btn-primary"><i class="bi bi-plus-circle"></i> Inscribir</button>
+                    <button type="submit" class="btn btn-sm btn-primary" data-bs-toggle="tooltip" title="Inscribirse a esta materia">
+                      <i class="bi bi-plus-circle"></i> Inscribir
+                    </button>
                   </form>
                 <?php endif; ?>
               </td>
@@ -255,5 +277,38 @@ $grupos = $cicloActual ? $grupoModel->getByCicloAndPrefixes($cicloActual, $prefi
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="assets/js/main.js"></script>
+<script>
+// Inicializar tooltips
+document.addEventListener('DOMContentLoaded', function() {
+  // Tooltips
+  var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+  var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl);
+  });
+  
+  // Confirmaciones elegantes para formularios
+  document.querySelectorAll('.form-with-confirmation').forEach(form => {
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const message = this.dataset.confirmMessage || '¿Estás seguro de realizar esta acción?';
+      
+      if (confirm(message)) {
+        // Deshabilitar botón para evitar doble envío
+        const submitBtn = this.querySelector('button[type="submit"]');
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Procesando...';
+        }
+        this.submit();
+      }
+    });
+  });
+  
+  // Feedback visual para botones deshabilitados
+  document.querySelectorAll('button[disabled]').forEach(btn => {
+    btn.style.cursor = 'not-allowed';
+  });
+});
+</script>
 </body>
 </html>

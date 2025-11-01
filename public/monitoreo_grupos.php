@@ -15,15 +15,33 @@ if ($user['rol'] !== 'admin') {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Monitoreo de Grupos</title>
+  <title>SICEnet · ITSUR — Monitoreo de Grupos</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
   <link href="assets/css/styles.css" rel="stylesheet">
 </head>
 <body>
+<!-- Header institucional compacto -->
+<header class="institutional-header">
+  <div class="container-fluid">
+    <a href="dashboard.php" class="institutional-brand">
+      <img src="assets/ITSUR-LOGO.webp" alt="ITSUR Logo" class="institutional-logo">
+      <div class="institutional-text">
+        <h1 class="institutional-title">SICEnet · ITSUR</h1>
+        <p class="institutional-subtitle">Sistema Integral de Control Escolar</p>
+      </div>
+    </a>
+  </div>
+</header>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container-fluid">
-        <a class="navbar-brand" href="dashboard.php">Control Escolar</a>
+        <a class="navbar-brand d-flex align-items-center" href="dashboard.php">
+          <img src="assets/ITSUR-LOGO.webp" alt="ITSUR Logo" class="navbar-logo me-2">
+          <span class="brand-text">SICEnet · ITSUR</span>
+        </a>
+        <button class="btn btn-outline-light btn-sm ms-auto me-2" id="themeToggle" title="Cambiar tema">
+          <i class="bi bi-sun-fill"></i>
+        </button>
   </div>
   <div class="container-fluid">
     <span class="navbar-text text-white">Admin</span>

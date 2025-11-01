@@ -44,7 +44,7 @@ if ($cicloSel !== '') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
-    <title>Dashboard - Control Escolar</title>
+    <title>SICEnet · ITSUR — Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" 
           rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" 
@@ -61,9 +61,25 @@ if ($cicloSel !== '') {
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <!-- Header institucional compacto -->
+    <header class="institutional-header">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">Control Escolar</a>
+            <a href="dashboard.php" class="institutional-brand">
+                <img src="assets/ITSUR-LOGO.webp" alt="ITSUR Logo" class="institutional-logo">
+                <div class="institutional-text">
+                    <h1 class="institutional-title">SICEnet · ITSUR</h1>
+                    <p class="institutional-subtitle">Sistema Integral de Control Escolar</p>
+                </div>
+            </a>
+        </div>
+    </header>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center" href="dashboard.php">
+                <img src="assets/ITSUR-LOGO.webp" alt="ITSUR Logo" class="navbar-logo me-2">
+                <span class="brand-text">SICEnet · ITSUR</span>
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" 
                     data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -99,6 +115,16 @@ if ($cicloSel !== '') {
                     </li>
                 </ul>
                 <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <button class="btn btn-outline-light btn-sm me-2" id="help-toggle" title="Centro de Ayuda" data-bs-toggle="modal" data-bs-target="#helpModal">
+                            <i class="bi bi-question-circle"></i>
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn btn-outline-light btn-sm me-2" id="theme-toggle" title="Cambiar tema">
+                            <i class="bi bi-moon-fill" id="theme-icon"></i>
+                        </button>
+                    </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" 
                            data-bs-toggle="dropdown">
@@ -129,23 +155,52 @@ if ($cicloSel !== '') {
     <div class="app-shell">
         <?php include __DIR__ . '/partials/sidebar.php'; ?>
         <main class="app-content">
-        <h2 class="mb-4">Dashboard</h2>
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <h2 class="mb-0">Dashboard</h2>
+          <div class="d-flex gap-2">
+            <a href="seleccion_materias.php" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Inscribir Materias</a>
+            <a href="kardex.php" class="btn btn-outline-primary"><i class="bi bi-journal-text"></i> Ver Kardex</a>
+            <a href="perfil.php" class="btn btn-outline-secondary"><i class="bi bi-person"></i> Mi Perfil</a>
+          </div>
+        </div>
         <?php if ($isAdmin): ?>
-        <form class="row g-3 mb-3" method="get" action="dashboard.php">
-            <div class="col-md-4">
-                <label class="form-label">Filtrar por ciclo</label>
-                <select name="ciclo" class="form-select">
-                    <option value="">Todos</option>
+        <div class="card mb-4 border-0 shadow-sm">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-md-8">
+                <h6 class="card-title mb-2">
+                  <i class="bi bi-calendar3 me-2"></i>Filtro de Ciclo Académico
+                </h6>
+                <p class="text-muted small mb-0">
+                  Selecciona un ciclo específico para analizar el rendimiento académico de ese período
+                </p>
+              </div>
+              <div class="col-md-4">
+                <form method="get" action="dashboard.php" class="d-flex gap-2">
+                  <select name="ciclo" class="form-select form-select-sm" onchange="this.form.submit()">
+                    <option value="">📊 Todos los ciclos</option>
                     <?php foreach ($ciclosCatalog as $c): $val = trim((string)($c['ciclo'] ?? $c)); ?>
-                      <option value="<?= htmlspecialchars($val) ?>" <?= $val === $cicloSel ? 'selected' : '' ?>><?= htmlspecialchars($val) ?></option>
+                      <option value="<?= htmlspecialchars($val) ?>" <?= $val === $cicloSel ? 'selected' : '' ?>>
+                        📅 <?= htmlspecialchars($val) ?>
+                      </option>
                     <?php endforeach; ?>
-                </select>
+                  </select>
+                  <?php if ($cicloSel): ?>
+                    <a href="dashboard.php" class="btn btn-outline-secondary btn-sm" title="Limpiar filtro">
+                      <i class="bi bi-x-circle"></i>
+                    </a>
+                  <?php endif; ?>
+                </form>
+              </div>
             </div>
-            <div class="col-md-3 align-self-end">
-                <button class="btn btn-primary" type="submit"><i class="bi bi-funnel"></i> Aplicar</button>
-                <a href="dashboard.php" class="btn btn-outline-secondary">Limpiar</a>
-            </div>
-        </form>
+            <?php if ($cicloSel): ?>
+              <div class="alert alert-info mt-3 mb-0">
+                <i class="bi bi-info-circle me-2"></i>
+                Mostrando datos del ciclo: <strong><?= htmlspecialchars($cicloSel) ?></strong>
+              </div>
+            <?php endif; ?>
+          </div>
+        </div>
         <?php endif; ?>
         <div class="row g-4">
             <?php if ($isAdmin): ?>
@@ -307,6 +362,61 @@ if ($cicloSel !== '') {
             <?php endif; ?>
         </div>
         </main>
+    </div>
+
+    <!-- Modal Centro de Ayuda -->
+    <div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="helpModalLabel">
+              <i class="bi bi-question-circle me-2"></i>Centro de Ayuda - Dashboard
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="row">
+              <div class="col-md-6">
+                <h6><i class="bi bi-speedometer2 me-2"></i>Indicadores Clave</h6>
+                <ul class="list-unstyled">
+                  <li><strong>Total de Calificaciones:</strong> Número total de evaluaciones registradas</li>
+                  <li><strong>Promedio General:</strong> Promedio de todas las calificaciones</li>
+                  <li><strong>Aprobados/Reprobados:</strong> Distribución de resultados académicos</li>
+                </ul>
+                
+                <h6 class="mt-3"><i class="bi bi-graph-up me-2"></i>Gráficas</h6>
+                <ul class="list-unstyled">
+                  <li><strong>Gráfica Circular:</strong> Proporción de aprobados vs reprobados</li>
+                  <li><strong>Promedio por Ciclo:</strong> Evolución del rendimiento académico</li>
+                </ul>
+              </div>
+              <div class="col-md-6">
+                <h6><i class="bi bi-funnel me-2"></i>Filtros</h6>
+                <ul class="list-unstyled">
+                  <li><strong>Ciclo Académico:</strong> Filtra datos por período específico</li>
+                  <li><strong>Exportar:</strong> Descarga reportes en Excel</li>
+                </ul>
+                
+                <h6 class="mt-3"><i class="bi bi-lightning me-2"></i>Acciones Rápidas</h6>
+                <ul class="list-unstyled">
+                  <li><strong>Inscribir Materias:</strong> Proceso de inscripción de asignaturas</li>
+                  <li><strong>Ver Kardex:</strong> Historial académico completo</li>
+                  <li><strong>Mi Perfil:</strong> Información personal y académica</li>
+                </ul>
+              </div>
+            </div>
+            
+            <div class="alert alert-info mt-3">
+              <i class="bi bi-info-circle me-2"></i>
+              <strong>Tip:</strong> Usa el selector de ciclo para analizar el rendimiento de períodos específicos. 
+              Los datos se actualizan automáticamente al cambiar el filtro.
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js">
