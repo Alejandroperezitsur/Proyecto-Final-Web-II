@@ -136,7 +136,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['grupo_id'])) {
         $ok = $calModel->deleteByAlumnoGrupo((int)$user['id'], $grupoId);
         if ($ok) {
           $mensaje = 'Baja realizada correctamente.';
-          $inscritosIds = array_values(array_filter($inscritosIds, function($id){ return $id !== $grupoId; }));
+          $inscritosIds = array_values(array_filter($inscritosIds, function($id) use ($grupoId) { return $id !== $grupoId; }));
         } else {
           $mensaje = 'No se pudo realizar la baja.';
         }
