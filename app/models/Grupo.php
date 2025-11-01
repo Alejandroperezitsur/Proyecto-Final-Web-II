@@ -4,7 +4,7 @@ require_once __DIR__ . '/Model.php';
 class Grupo extends Model {
     protected $table = 'grupos';
 
-    private $allowedFields = ['materia_id', 'profesor_id', 'nombre', 'ciclo'];
+    private $allowedFields = ['materia_id', 'profesor_id', 'nombre', 'ciclo', 'cupo'];
 
     public function __construct() {
         parent::__construct();
@@ -89,5 +89,29 @@ class Grupo extends Model {
 
     private function filterAllowedFields($data) {
         return array_intersect_key($data, array_flip($this->allowedFields));
+    }
+
+    // Obtener grupos por ciclo filtrados por prefijos de clave de materia
+    public function getByCicloAndPrefixes($ciclo, array $prefixes) {
+        $conditions = [];
+        $params = [':ciclo' => $ciclo];
+        $i = 0;
+        foreach ($prefixes as $p) {
+            $key = ':p' . $i++;
+            $conditions[] = "m.clave LIKE $key";
+            $params[$key] = $p . '%';
+        }
+        $wherePrefix = count($conditions) ? ('(' . implode(' OR ', $conditions) . ')') : '1=1';
+        $sql = "SELECT g.*, m.nombre AS materia_nombre, m.clave AS materia_clave,
+                       u.email AS profesor_email, u.matricula AS profesor_matricula
+                FROM grupos g
+                JOIN materias m ON g.materia_id = m.id
+                JOIN usuarios u ON g.profesor_id = u.id
+                WHERE g.ciclo = :ciclo AND $wherePrefix
+                ORDER BY m.nombre, g.nombre";
+        $stmt = $this->db->prepare($sql);
+        foreach ($params as $k => $v) { $stmt->bindValue($k, $v); }
+        $stmt->execute();
+        return $stmt->fetchAll();
     }
 }

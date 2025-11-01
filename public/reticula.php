@@ -74,6 +74,92 @@ for ($s=1; $s<=8; $s++) {
   }
 }
 
+// Plantillas por carrera para mostrar nombres completos cuando falten en la BD
+$plantillasPorCarrera = [
+  'S' => [
+    1 => ['Fundamentos de Programación','Matemáticas I','Física I','Computación Básica','Comunicación Oral y Escrita'],
+    2 => ['Programación Orientada a Objetos','Álgebra Lineal','Estructuras Discretas','Electricidad y Magnetismo','Ética Profesional'],
+    3 => ['Estructuras de Datos','Probabilidad y Estadística','Arquitectura de Computadoras','Bases de Datos I','Desarrollo Web I'],
+    4 => ['Análisis y Diseño de Sistemas','Sistemas Operativos','Bases de Datos II','Desarrollo Web II','Métodos Numéricos'],
+    5 => ['Ingeniería de Software','Redes de Computadoras I','Programación Avanzada','Administración de BD','Desarrollo Móvil I'],
+    6 => ['Redes de Computadoras II','Seguridad Informática','Inteligencia Artificial','Computación Paralela','Desarrollo Móvil II'],
+    7 => ['Minería de Datos','Desarrollo de APIs','Cloud Computing','UX/UI','Gestión de Proyectos TI'],
+    8 => ['Big Data','DevOps','Arquitecturas Empresariales','Integración de Sistemas','Seminario de Titulación'],
+  ],
+  'I' => [
+    1 => ['Dibujo Industrial','Matemáticas I','Física I','Química','Comunicación Oral y Escrita'],
+    2 => ['Estadística I','Álgebra Lineal','Ciencia de Materiales','Termodinámica','Ética Profesional'],
+    3 => ['Estadística II','Métodos de Ingeniería','Procesos de Manufactura I','Inv. de Operaciones I','Ergonomía'],
+    4 => ['Control de Calidad I','Procesos de Manufactura II','Inv. de Operaciones II','Ingeniería Económica','Higiene y Seguridad'],
+    5 => ['Planeación y Control de la Producción I','Simulación','Control de Calidad II','Sistemas de Información','Logística I'],
+    6 => ['Planeación y Control de la Producción II','Automatización Industrial','Mantenimiento','Logística II','Gestión de Proyectos'],
+    7 => ['Mejora Continua','LEAN Manufacturing','Cadena de Suministro','Gestión de Calidad','Auditoría de Procesos'],
+    8 => ['Gestión Ambiental','Innovación en Manufactura','Sistemas Integrados','Dirección de Operaciones','Seminario de Titulación'],
+  ],
+  'C' => [
+    1 => ['Dibujo Técnico','Matemáticas I','Física I','Química','Comunicación Oral y Escrita'],
+    2 => ['Topografía','Álgebra Lineal','Mecánica','Estática','Ética Profesional'],
+    3 => ['Resistencia de Materiales','Hidráulica','Geología','Construcción I','Probabilidad y Estadística'],
+    4 => ['Análisis Estructural I','Mecánica de Suelos','Construcción II','Instalaciones','Costos y Presupuestos'],
+    5 => ['Análisis Estructural II','Concreto Reforzado','Vías Terrestres I','Hidrología','Urbanismo'],
+    6 => ['Estructuras de Acero','Vías Terrestres II','Saneamiento','Planeación Urbana','Administración de Obras'],
+    7 => ['Estructuras Avanzadas','Pavimentos','Gestión de Proyectos','Evaluación de Impacto','Seguridad en Obras'],
+    8 => ['Ingeniería Ambiental','Construcción Sustentable','Supervisión de Obras','Dirección de Proyectos','Seminario de Titulación'],
+  ],
+  'M' => [
+    1 => ['Dibujo Mecánico','Matemáticas I','Física I','Química','Comunicación Oral y Escrita'],
+    2 => ['Álgebra Lineal','Termodinámica I','Estática','Materiales','Ética Profesional'],
+    3 => ['Dinámica','Probabilidad y Estadística','Procesos de Manufactura I','Mecánica de Fluidos','Metrología'],
+    4 => ['Mecanismos','Transferencia de Calor','Procesos de Manufactura II','Máquinas Herramienta','Ingeniería de Materiales'],
+    5 => ['Diseño Mecánico I','Control','Mantenimiento','CAD/CAM','Gestión de Proyectos'],
+    6 => ['Diseño Mecánico II','Automatización','Robótica','Máquinas Térmicas','Vibraciones'],
+    7 => ['Sistemas de Manufactura','Ingeniería de Confiabilidad','Energías Alternas','Lean Manufacturing','Seguridad Industrial'],
+    8 => ['Gestión de Mantenimiento','Innovación Tecnológica','Selección de Materiales','Dirección de Proyectos','Seminario de Titulación'],
+  ],
+  'Q' => [
+    1 => ['Química General','Matemáticas I','Física I','Biología','Comunicación Oral y Escrita'],
+    2 => ['Química Inorgánica','Álgebra Lineal','Termodinámica','Química Analítica','Ética Profesional'],
+    3 => ['Química Orgánica I','Probabilidad y Estadística','Balance de Materia y Energía','Fisicoquímica','Microbiología'],
+    4 => ['Química Orgánica II','Operaciones Unitarias I','Instrumentación','Bioquímica','Métodos Numéricos'],
+    5 => ['Operaciones Unitarias II','Ingeniería de Reactores I','Control de Procesos','Análisis de Alimentos','Gestión de Laboratorio'],
+    6 => ['Ingeniería de Reactores II','Procesos Químicos','Bioprocesos','Corrosión','Gestión de Proyectos'],
+    7 => ['Diseño de Plantas','Seguridad de Procesos','Ambiental en Procesos','Simulación de Procesos','Calidad en Procesos'],
+    8 => ['Optimización de Procesos','Innovación Química','Escalamiento','Dirección de Proyectos','Seminario de Titulación'],
+  ],
+  'E' => [
+    1 => ['Introducción a la Electrónica','Matemáticas I','Física I','Computación Básica','Comunicación Oral y Escrita'],
+    2 => ['Álgebra Lineal','Electricidad y Magnetismo','Circuitos I','Programación','Ética Profesional'],
+    3 => ['Circuitos II','Probabilidad y Estadística','Electrónica Analógica','Arquitectura de Computadoras','Señales y Sistemas'],
+    4 => ['Electrónica Digital','Microcontroladores','Sistemas de Comunicación I','Instrumentación','Métodos Numéricos'],
+    5 => ['Sistemas de Comunicación II','Control Automático','Procesamiento Digital de Señales','Redes','Gestión de Proyectos'],
+    6 => ['Electrónica de Potencia','Sistemas Embebidos','Antenas','Robótica','Seguridad de Sistemas'],
+    7 => ['Optoelectrónica','Comunicaciones Inalámbricas','Sensores Inteligentes','Internet de las Cosas','Sistemas Avanzados'],
+    8 => ['Telecomunicaciones Avanzadas','Automatización Avanzada','Innovación Tecnológica','Dirección de Proyectos','Seminario de Titulación'],
+  ],
+  'A' => [
+    1 => ['Introducción a la Ambiental','Matemáticas I','Física I','Química','Comunicación Oral y Escrita'],
+    2 => ['Álgebra Lineal','Biología','Estadística I','Química Ambiental','Ética Profesional'],
+    3 => ['Estadística II','Hidrología','Suelos','Microbiología Ambiental','Contaminación del Aire'],
+    4 => ['Saneamiento','Tratamiento de Aguas','Gestión de Residuos','Impacto Ambiental','Métodos Numéricos'],
+    5 => ['Remediación de Suelos','Energías Renovables','Gestión Ambiental','Legislación Ambiental','Modelación Ambiental'],
+    6 => ['Auditoría Ambiental','Sistemas de Gestión','Cambio Climático','Tecnologías Limpias','Gestión de Proyectos'],
+    7 => ['Evaluación Ambiental Avanzada','Economía Ambiental','Planificación Ambiental','Sustentabilidad','Calidad Ambiental'],
+    8 => ['Innovación Ambiental','Consultoría Ambiental','Dirección de Proyectos','Sistemas Integrados','Seminario de Titulación'],
+  ],
+];
+
+if ($careerKey && isset($plantillasPorCarrera[$careerKey])) {
+  $tpl = $plantillasPorCarrera[$careerKey];
+  for ($s=1; $s<=8; $s++) {
+    for ($i=0; $i<5; $i++) {
+      if (($semestres[$s][$i]['clave'] ?? '—') === '—') {
+        $semestres[$s][$i]['nombre'] = $tpl[$s][$i] ?? $semestres[$s][$i]['nombre'];
+        $semestres[$s][$i]['clave'] = '—'; // mantener sin clave para conteo correcto
+      }
+    }
+  }
+}
+
 ?>
 <!doctype html>
 <html lang="es">
@@ -92,10 +178,14 @@ for ($s=1; $s<=8; $s++) {
     .sem-header { background: #f8f9fa; border-bottom: 1px solid #dee2e6; padding: 8px 12px; font-weight: 600; }
     .sem-body { padding: 8px 12px; }
     .pending { color: #6c757d; font-style: italic; }
+    .print-header { display:none; text-align:center; margin-bottom:12px; }
+    .print-header h2 { margin: 0; font-size: 20px; }
+    .print-header .meta { font-size: 12px; color: #555; }
     @media print {
       body * { visibility: hidden; }
       .print-area, .print-area * { visibility: visible; }
       .print-area { position: absolute; left:0; top:0; width:100%; }
+      .print-header { display:block; }
       nav, .app-sidebar, .btn, .badge { display:none !important; }
     }
   </style>
@@ -154,8 +244,12 @@ for ($s=1; $s<=8; $s++) {
         <span class="badge bg-success">Registradas: <?= (int)$totalReg ?>/<?= (int)$totalPlan ?></span>
         <span class="badge bg-warning text-dark ms-2">Pendientes: <?= (int)$totalPend ?></span>
       </div>
-
-      <div class="grid print-area">
+      <div class="print-area">
+        <div class="print-header">
+          <h2>Retícula Académica</h2>
+          <div class="meta">Carrera: <?= htmlspecialchars($career['label'] ?? '') ?> • Plan: 8 semestres + Residencias</div>
+        </div>
+        <div class="grid">
         <?php foreach ($semestres as $num => $materias): ?>
           <div class="sem-card">
             <?php $reg = 0; foreach ($materias as $m) { if (($m['clave'] ?? '—') !== '—') { $reg++; } } ?>
@@ -185,6 +279,7 @@ for ($s=1; $s<=8; $s++) {
               <li class="text-muted">Requisitos: 10 niveles de Inglés y Servicio Social liberados.</li>
             </ul>
           </div>
+        </div>
         </div>
       </div>
     <?php else: ?>

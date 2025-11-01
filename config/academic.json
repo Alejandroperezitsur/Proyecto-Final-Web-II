@@ -1,0 +1,25 @@
+{
+  "enero": {
+    "S": { "inicio_dia": 10, "fin_dia": 14, "habilitado": true },
+    "I": { "inicio_dia": 10, "fin_dia": 14, "habilitado": true },
+    "C": { "inicio_dia": 10, "fin_dia": 14, "habilitado": true },
+    "M": { "inicio_dia": 10, "fin_dia": 14, "habilitado": true },
+    "Q": { "inicio_dia": 10, "fin_dia": 14, "habilitado": true },
+    "E": { "inicio_dia": 10, "fin_dia": 14, "habilitado": true },
+    "A": { "inicio_dia": 10, "fin_dia": 14, "habilitado": true }
+  },
+  "agosto": {
+    "S": { "inicio_dia": 10, "fin_dia": 14, "habilitado": true },
+    "I": { "inicio_dia": 10, "fin_dia": 14, "habilitado": true },
+    "C": { "inicio_dia": 10, "fin_dia": 14, "habilitado": true },
+    "M": { "inicio_dia": 10, "fin_dia": 14, "habilitado": true },
+    "Q": { "inicio_dia": 10, "fin_dia": 14, "habilitado": true },
+    "E": { "inicio_dia": 10, "fin_dia": 14, "habilitado": true },
+    "A": { "inicio_dia": 10, "fin_dia": 14, "habilitado": true }
+  },
+  "prerrequisitos": {
+    "INF201": ["INF101"],
+    "MAT202": ["MAT102"],
+    "ELC201": ["ELC101"]
+  }
+}

@@ -41,9 +41,10 @@ if ($isAdmin && $_SERVER['REQUEST_METHOD'] === 'POST') {
             $profesor_id = filter_input(INPUT_POST, 'profesor_id', FILTER_VALIDATE_INT);
             $nombre = trim((string)filter_input(INPUT_POST, 'nombre', FILTER_UNSAFE_RAW));
             $ciclo = trim((string)filter_input(INPUT_POST, 'ciclo', FILTER_UNSAFE_RAW));
+            $cupo = filter_input(INPUT_POST, 'cupo', FILTER_VALIDATE_INT);
 
-            if (!$materia_id || !$profesor_id || $nombre === '') {
-                $error = 'Todos los campos son obligatorios';
+            if (!$materia_id || !$profesor_id || $nombre === '' || !$cupo || $cupo < 1) {
+                $error = 'Todos los campos son obligatorios y el cupo debe ser mayor a 0';
             } else {
                 try {
                     if ($action === 'update') {
@@ -55,7 +56,8 @@ if ($isAdmin && $_SERVER['REQUEST_METHOD'] === 'POST') {
                                 'materia_id' => $materia_id,
                                 'profesor_id' => $profesor_id,
                                 'nombre' => $nombre,
-                                'ciclo' => $ciclo ?: null
+                                'ciclo' => $ciclo ?: null,
+                                'cupo' => $cupo
                             ]);
                             $msg = 'Grupo actualizado correctamente';
                         }
@@ -64,7 +66,8 @@ if ($isAdmin && $_SERVER['REQUEST_METHOD'] === 'POST') {
                             'materia_id' => $materia_id,
                             'profesor_id' => $profesor_id,
                             'nombre' => $nombre,
-                            'ciclo' => $ciclo ?: null
+                            'ciclo' => $ciclo ?: null,
+                            'cupo' => $cupo
                         ]);
                         $msg = 'Grupo creado correctamente';
                     }
@@ -171,6 +174,12 @@ $profesores = $usuarioModel->getAll(1, 100, "WHERE rol = 'profesor' AND activo =
                             <label for="ciclo" class="form-label">Ciclo</label>
                             <input type="text" class="form-control" id="ciclo" name="ciclo" placeholder="Ej: 2024A" value="<?= htmlspecialchars($editGrupo['ciclo'] ?? '') ?>">
                         </div>
+                        <div class="mb-3">
+                            <label for="cupo" class="form-label">Cupo Máximo</label>
+                            <input type="number" class="form-control" id="cupo" name="cupo" placeholder="30" min="1" max="100" value="<?= (int)($editGrupo['cupo'] ?? 30) ?>" required>
+                            <div class="form-text">Número máximo de estudiantes que pueden inscribirse en este grupo.</div>
+                            <div class="invalid-feedback">El cupo debe ser un número entre 1 y 100.</div>
+                        </div>
                         <button type="submit" class="btn btn-primary"><?= $editGrupo ? 'Actualizar' : 'Crear' ?></button>
                         <?php if ($editGrupo): ?>
                         <a href="grupos.php" class="btn btn-outline-secondary">Cancelar</a>
@@ -186,7 +195,7 @@ $profesores = $usuarioModel->getAll(1, 100, "WHERE rol = 'profesor' AND activo =
                 <div class="card-body">
                     <h5 class="card-title"><i class="bi bi-list"></i> Grupos</h5>
                     <table class="table table-striped">
-                        <thead><tr><th>ID</th><th>Grupo</th><th>Ciclo</th><th>Materia</th><th>Profesor</th><?php if ($isAdmin): ?><th>Acciones</th><?php endif; ?></tr></thead>
+                        <thead><tr><th>ID</th><th>Grupo</th><th>Ciclo</th><th>Materia</th><th>Profesor</th><th>Cupo</th><?php if ($isAdmin): ?><th>Acciones</th><?php endif; ?></tr></thead>
                         <tbody>
                         <?php foreach ($grupos as $g): ?>
                             <tr>
@@ -195,6 +204,7 @@ $profesores = $usuarioModel->getAll(1, 100, "WHERE rol = 'profesor' AND activo =
                                 <td><?= htmlspecialchars($g['ciclo'] ?? '') ?></td>
                                 <td><?= htmlspecialchars($g['materia_nombre']) ?> (<?= htmlspecialchars($g['materia_clave'] ?? '') ?>)</td>
                                 <td><?= htmlspecialchars($g['profesor_email']) ?> (<?= htmlspecialchars($g['profesor_matricula'] ?? '') ?>)</td>
+                                <td><?= (int)($g['cupo'] ?? 30) ?></td>
                                 <?php if ($isAdmin): ?>
                                 <td>
                                     <a href="?edit_id=<?= (int)$g['id'] ?>" class="btn btn-sm btn-outline-primary">Editar</a>

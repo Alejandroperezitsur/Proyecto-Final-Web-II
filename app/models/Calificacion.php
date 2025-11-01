@@ -168,4 +168,39 @@ class Calificacion extends Model {
     private function filterAllowedFields($data) {
         return array_intersect_key($data, array_flip($this->allowedFields));
     }
+
+    // Listar calificaciones por alumno, retorna filas con grupo_id
+    public function getGrupoIdsByAlumno($alumnoId) {
+        $sql = "SELECT grupo_id FROM calificaciones WHERE alumno_id = :alumno_id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':alumno_id' => $alumnoId]);
+        return array_map(function($r){ return (int)$r['grupo_id']; }, $stmt->fetchAll());
+    }
+
+    // Contar inscritos por grupo
+    public function countByGrupo($grupoId) {
+        $sql = "SELECT COUNT(*) AS cnt FROM calificaciones WHERE grupo_id = :grupo_id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':grupo_id' => $grupoId]);
+        return (int)($stmt->fetchColumn() ?? 0);
+    }
+
+    // Eliminar inscripción del alumno en un grupo
+    public function deleteByAlumnoGrupo($alumnoId, $grupoId) {
+        $sql = "DELETE FROM calificaciones WHERE alumno_id = :alumno_id AND grupo_id = :grupo_id";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([':alumno_id' => $alumnoId, ':grupo_id' => $grupoId]);
+    }
+
+    // Materias aprobadas por alumno (retorna claves de materia con final >= 70)
+    public function getMateriasAprobadasClavesByAlumno($alumnoId) {
+        $sql = "SELECT DISTINCT m.clave
+                FROM calificaciones c
+                JOIN grupos g ON c.grupo_id = g.id
+                JOIN materias m ON g.materia_id = m.id
+                WHERE c.alumno_id = :alumno_id AND c.final IS NOT NULL AND c.final >= 70";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':alumno_id' => $alumnoId]);
+        return array_map(function($r){ return (string)$r['clave']; }, $stmt->fetchAll());
+    }
 }

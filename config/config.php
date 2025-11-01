@@ -15,6 +15,17 @@ return [
         'charset' => 'UTF-8',
         'debug' => true // Cambiar a false en producción
     ],
+    'academic' => [
+        // Ventanas administrables de reinscripción (editar aquí según necesidad)
+        'reinscripcion_windows' => [
+            'enero' => [ 'inicio_dia' => 10, 'fin_dia' => 14, 'mes' => 'Enero' ],
+            'agosto' => [ 'inicio_dia' => 10, 'fin_dia' => 14, 'mes' => 'Agosto' ],
+        ],
+        // Estatus mostrado por defecto para alumnos
+        'estatus_alumno_default' => 'Inscrito',
+        // Cupo por grupo por defecto (sin migración de esquema)
+        'cupo_grupo_default' => 30
+    ],
     'security' => [
         'session_timeout' => 3600, // 1 hora
         'csrf_token_name' => 'csrf_token',
