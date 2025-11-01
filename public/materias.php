@@ -80,7 +80,7 @@ if ($edit_id > 0) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <link href="assets/css/styles.css" rel="stylesheet">
-}</head>
+</head>
 <body>
 <!-- Header institucional compacto -->
 <header class="institutional-header">
@@ -157,9 +157,21 @@ if ($edit_id > 0) {
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title"><i class="bi bi-list"></i> Materias</h5>
-                    <table class="table table-striped">
+                    <div class="d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap">
+                      <div class="flex-grow-1" style="max-width: 320px;">
+                        <input type="text" class="form-control" placeholder="Filtrar rápido en la tabla" data-quick-filter-for="#tabla-materias">
+                      </div>
+                      <div class="d-flex align-items-center gap-2">
+                         <button class="btn btn-outline-primary btn-sm" data-export="csv" data-target="#tabla-materias" data-filename="materias.csv" data-timestamp="true"><i class="bi bi-filetype-csv"></i> Exportar CSV</button>
+        <button class="btn btn-outline-secondary btn-sm" data-export="pdf" data-target="#tabla-materias"><i class="bi bi-filetype-pdf"></i> Exportar PDF</button>
+                      </div>
+                    </div>
+                    <table class="table table-striped table-hover table-sort" id="tabla-materias">
                         <thead><tr><th>ID</th><th>Nombre</th><th>Clave</th><th>Acciones</th></tr></thead>
                         <tbody>
+                        <?php if (count($materias) === 0): ?>
+                          <tr class="empty-state-row"><td colspan="4" class="text-center text-muted">No hay materias registradas</td></tr>
+                        <?php endif; ?>
                         <?php foreach ($materias as $m): ?>
                             <tr>
                                 <td><?= (int)$m['id'] ?></td>
@@ -194,6 +206,7 @@ if ($edit_id > 0) {
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/main.js"></script>
 <script>
 // Validación de Bootstrap
 (function(){

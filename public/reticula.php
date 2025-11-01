@@ -222,7 +222,15 @@ if ($careerKey && isset($plantillasPorCarrera[$careerKey])) {
   <?php include __DIR__ . '/partials/sidebar.php'; ?>
   <main class="app-content">
     <div class="d-flex justify-content-between align-items-center mb-3">
-      <h1 class="h3">Retícula Académica</h1>
+      <div>
+        <h1 class="h3 mb-0">Retícula Académica</h1>
+        <nav aria-label="breadcrumb" class="small">
+          <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="dashboard.php">Inicio</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Retícula Académica</li>
+          </ol>
+        </nav>
+      </div>
       <div>
         <?php if ($role === 'alumno' && $career): ?>
           <span class="badge bg-primary">Carrera: <?= htmlspecialchars($career['label']) ?></span>
@@ -235,7 +243,7 @@ if ($careerKey && isset($plantillasPorCarrera[$careerKey])) {
               <?php endforeach; ?>
             </select>
           </form>
-          <button class="btn btn-outline-secondary ms-2" onclick="window.print()"><i class="bi bi-printer"></i> Exportar PDF</button>
+          <button class="btn btn-outline-secondary btn-sm ms-2" onclick="window.print()"><i class="bi bi-printer"></i> Exportar PDF</button>
         <?php else: ?>
           <span class="badge bg-secondary">Carrera no determinada</span>
         <?php endif; ?>
@@ -307,5 +315,6 @@ if ($careerKey && isset($plantillasPorCarrera[$careerKey])) {
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/main.js"></script>
 </body>
 </html>

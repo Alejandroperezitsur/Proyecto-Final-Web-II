@@ -109,7 +109,7 @@ $profesores = $usuarioModel->getAll(1, 100, "WHERE rol = 'profesor' AND activo =
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <link href="assets/css/styles.css" rel="stylesheet">
-}</head>
+</head>
 <body>
 <!-- Header institucional compacto -->
 <header class="institutional-header">
@@ -154,6 +154,20 @@ $profesores = $usuarioModel->getAll(1, 100, "WHERE rol = 'profesor' AND activo =
 
 <div class="container mt-4">
     <div class="row">
+        <div class="col-12 mb-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h1 class="h3 mb-0">Grupos</h1>
+              <nav aria-label="breadcrumb" class="small">
+                <ol class="breadcrumb mb-0">
+                  <li class="breadcrumb-item"><a href="dashboard.php">Inicio</a></li>
+                  <li class="breadcrumb-item active" aria-current="page">Grupos</li>
+                </ol>
+              </nav>
+            </div>
+            <div class="text-muted small">Mostrando <?= count($grupos) ?> de <?= (int)$total ?></div>
+          </div>
+        </div>
         <?php if ($isAdmin): ?>
         <div class="col-md-6">
             <div class="card">
@@ -216,9 +230,23 @@ $profesores = $usuarioModel->getAll(1, 100, "WHERE rol = 'profesor' AND activo =
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title"><i class="bi bi-list"></i> Grupos</h5>
-                    <table class="table table-striped">
+                    <div class="d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap">
+                      <div class="flex-grow-1" style="max-width: 320px;">
+                        <input type="text" class="form-control" placeholder="Filtrar rápido en la tabla" data-quick-filter-for="#tabla-grupos">
+                      </div>
+                      <div>
+                        <?php if ($isAdmin): ?>
+                         <button class="btn btn-outline-primary btn-sm" data-export="csv" data-target="#tabla-grupos" data-filename="grupos.csv" data-timestamp="true"><i class="bi bi-filetype-csv"></i> Exportar CSV</button>
+                         <button class="btn btn-outline-secondary btn-sm" data-export="pdf" data-target="#tabla-grupos"><i class="bi bi-filetype-pdf"></i> Exportar PDF</button>
+                        <?php endif; ?>
+                      </div>
+                    </div>
+                    <table id="tabla-grupos" class="table table-striped table-hover table-sort">
                         <thead><tr><th>ID</th><th>Grupo</th><th>Ciclo</th><th>Materia</th><th>Profesor</th><th>Cupo</th><?php if ($isAdmin): ?><th>Acciones</th><?php endif; ?></tr></thead>
                         <tbody>
+                        <?php if (count($grupos) === 0): ?>
+                          <tr class="empty-state-row"><td colspan="<?= $isAdmin ? 7 : 6 ?>" class="text-center text-muted">No hay grupos registrados</td></tr>
+                        <?php endif; ?>
                         <?php foreach ($grupos as $g): ?>
                             <tr>
                                 <td><?= (int)$g['id'] ?></td>
@@ -258,6 +286,7 @@ $profesores = $usuarioModel->getAll(1, 100, "WHERE rol = 'profesor' AND activo =
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/main.js"></script>
 <script>
 // Validación de Bootstrap
 (function(){

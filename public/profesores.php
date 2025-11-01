@@ -187,6 +187,12 @@ $csrf = $auth->generateCSRFToken();
   <div class="d-flex justify-content-between align-items-center mb-3">
     <div>
       <h1 class="h3 mb-0">Profesores</h1>
+      <nav aria-label="breadcrumb" class="small">
+        <ol class="breadcrumb mb-0">
+          <li class="breadcrumb-item"><a href="dashboard.php">Inicio</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Profesores</li>
+        </ol>
+      </nav>
       <div class="text-muted small">Mostrando <?= count($profesores) ?> de <?= (int)$total ?></div>
     </div>
     <div class="d-flex align-items-center gap-2">
@@ -250,12 +256,15 @@ $csrf = $auth->generateCSRFToken();
   <div class="card">
     <div class="card-header">Listado</div>
     <div class="card-body">
-      <div class="d-flex justify-content-end mb-3 gap-2">
-        <button class="btn btn-outline-primary" data-export="csv" data-target="#tabla-profesores" data-filename="profesores.csv"><i class="bi bi-filetype-csv"></i> Exportar CSV</button>
-        <button class="btn btn-outline-secondary" data-export="pdf"><i class="bi bi-filetype-pdf"></i> Exportar PDF</button>
+      <div class="d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap">
+        <div class="flex-grow-1" style="max-width: 320px;">
+          <input type="text" class="form-control" placeholder="Filtrar rápido en la tabla" data-quick-filter-for="#tabla-profesores">
+        </div>
+         <button class="btn btn-outline-primary btn-sm" data-export="csv" data-target="#tabla-profesores" data-filename="profesores.csv" data-timestamp="true"><i class="bi bi-filetype-csv"></i> Exportar CSV</button>
+         <button class="btn btn-outline-secondary btn-sm" data-export="pdf" data-target="#tabla-profesores"><i class="bi bi-filetype-pdf"></i> Exportar PDF</button>
       </div>
       <div class="table-responsive">
-        <table id="tabla-profesores" class="table table-striped table-hover">
+        <table id="tabla-profesores" class="table table-striped table-hover table-sort">
           <thead>
             <tr>
               <th>ID</th>
@@ -266,6 +275,9 @@ $csrf = $auth->generateCSRFToken();
             </tr>
           </thead>
           <tbody>
+          <?php if (count($profesores) === 0): ?>
+            <tr class="empty-state-row"><td colspan="6" class="text-center text-muted">No hay resultados</td></tr>
+          <?php endif; ?>
           <?php foreach ($profesores as $p): ?>
             <tr>
               <td><?= (int)$p['id'] ?></td>

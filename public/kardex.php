@@ -137,8 +137,8 @@ if ($matricula !== '') {
           Historial de <?= htmlspecialchars($alumno['nombre'] ?? '') . ' ' . htmlspecialchars($alumno['apellido'] ?? '') ?> (<?= htmlspecialchars($alumno['matricula'] ?? '') ?>)
         </div>
         <div class="d-flex gap-2">
-          <button class="btn btn-outline-primary" data-export="csv" data-target="#tabla-kardex" data-filename="kardex_<?= htmlspecialchars($alumno['matricula'] ?? 'alumno') ?>.csv"><i class="bi bi-filetype-csv"></i> Exportar CSV</button>
-          <button class="btn btn-outline-secondary" data-export="pdf"><i class="bi bi-filetype-pdf"></i> Exportar PDF</button>
+           <button class="btn btn-outline-primary btn-sm" data-export="csv" data-target="#tabla-kardex" data-filename="kardex_<?= htmlspecialchars($alumno['matricula'] ?? 'alumno') ?>.csv" data-timestamp="true"><i class="bi bi-filetype-csv"></i> Exportar CSV</button>
+           <button class="btn btn-outline-secondary btn-sm" data-export="pdf" data-target="#tabla-kardex"><i class="bi bi-filetype-pdf"></i> Exportar PDF</button>
           <a class="btn btn-outline-dark" target="_blank" href="kardex_formato.php?matricula=<?= urlencode($alumno['matricula'] ?? '') ?>"><i class="bi bi-file-earmark-text"></i> Formato oficial</a>
         </div>
       </div>

@@ -121,7 +121,7 @@ if ($cicloSel !== '') {
                         </button>
                     </li>
                     <li class="nav-item">
-                        <button class="btn btn-outline-light btn-sm me-2" id="theme-toggle" title="Cambiar tema">
+                        <button class="btn btn-outline-light btn-sm me-2" id="themeToggle" title="Cambiar tema">
                             <i class="bi bi-moon-fill" id="theme-icon"></i>
                         </button>
                     </li>
@@ -325,8 +325,8 @@ if ($cicloSel !== '') {
                         <div class="d-flex justify-content-between align-items-center mb-2">
                           <h6 class="mb-0">Top 5 materias por promedio <?= $cicloSel !== '' ? '(' . htmlspecialchars($cicloSel) . ')' : '' ?></h6>
                           <div class="d-flex gap-2">
-                            <button class="btn btn-outline-primary" data-export="csv" data-target="#tabla-top-materias" data-filename="top_materias.csv"><i class="bi bi-filetype-csv"></i> Exportar CSV</button>
-                            <button class="btn btn-outline-secondary" data-export="pdf"><i class="bi bi-filetype-pdf"></i> Exportar PDF</button>
+                             <button class="btn btn-outline-primary btn-sm" data-export="csv" data-target="#tabla-top-materias" data-filename="top_materias.csv" data-timestamp="true"><i class="bi bi-filetype-csv"></i> Exportar CSV</button>
+                             <button class="btn btn-outline-secondary btn-sm" data-export="pdf" data-target="#tabla-top-materias"><i class="bi bi-filetype-pdf"></i> Exportar PDF</button>
                           </div>
                         </div>
                         <div class="table-responsive print-list">

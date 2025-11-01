@@ -82,7 +82,16 @@ foreach ($rows as $r) {
   <?php include __DIR__ . '/partials/sidebar.php'; ?>
   <main class="app-content">
     <div class="d-flex justify-content-between align-items-center mb-3">
-      <h1 class="h3">Mi Carga Académica</h1>
+      <div>
+        <h1 class="h3 mb-0">Mi Carga Académica</h1>
+        <nav aria-label="breadcrumb" class="small">
+          <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="dashboard.php">Inicio</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Mi Carga Académica</li>
+          </ol>
+        </nav>
+        <div class="text-muted small">Total materias: <?= count($rows) ?></div>
+      </div>
       <div>
         <a href="perfil.php" class="btn btn-outline-secondary">Perfil</a>
         <a href="kardex.php" class="btn btn-primary">Ver mi Kardex</a>
@@ -95,9 +104,19 @@ foreach ($rows as $r) {
           <div class="alert alert-info">No tienes grupos inscritos aún. Contacta a control escolar.</div>
         <?php else: ?>
           <?php foreach ($porCiclo as $ciclo => $lista): ?>
+            <?php $cicloId = preg_replace('/[^a-zA-Z0-9_-]+/', '-', (string)$ciclo); ?>
             <h2 class="h5 mt-3">Ciclo: <?= htmlspecialchars($ciclo) ?></h2>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <div class="flex-grow-1" style="max-width: 320px;">
+                <input type="text" class="form-control" placeholder="Filtrar rápido en la tabla" data-quick-filter-for="#tabla-ciclo-<?= htmlspecialchars($cicloId) ?>">
+              </div>
+              <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-outline-primary btn-sm" data-export="csv" data-target="#tabla-ciclo-<?= htmlspecialchars($cicloId) ?>" data-filename="mi_carga_<?= htmlspecialchars($cicloId) ?>.csv" data-timestamp="true"><i class="bi bi-filetype-csv"></i> Exportar CSV</button>
+                <button class="btn btn-outline-secondary btn-sm" data-export="pdf" data-target="#tabla-ciclo-<?= htmlspecialchars($cicloId) ?>"><i class="bi bi-filetype-pdf"></i> Exportar PDF</button>
+              </div>
+            </div>
             <div class="table-responsive">
-              <table class="table table-striped">
+              <table id="tabla-ciclo-<?= htmlspecialchars($cicloId) ?>" class="table table-striped table-sort align-middle table-hover">
                 <thead>
                   <tr>
                     <th>Materia</th>
@@ -123,6 +142,7 @@ foreach ($rows as $r) {
                 <?php endforeach; ?>
                 </tbody>
               </table>
+              <div class="empty-state small text-muted d-none">No hay resultados que coincidan.</div>
             </div>
           <?php endforeach; ?>
         <?php endif; ?>
@@ -132,5 +152,6 @@ foreach ($rows as $r) {
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/main.js"></script>
 </body>
 </html>

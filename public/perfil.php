@@ -72,13 +72,13 @@ $isAlumno = ($_SESSION['user_role'] ?? '') === 'alumno';
             <div class="table-responsive">
               <table class="table table-sm">
                 <tbody>
+                  <tr><th>Rol</th><td><?= htmlspecialchars(ucfirst($_SESSION['user_role'] ?? '')) ?></td></tr>
                   <?php if ($isAlumno): ?>
                   <tr><th>Nombre</th><td><?= htmlspecialchars(($user['nombre'] ?? '') . ' ' . ($user['apellido'] ?? '')) ?></td></tr>
                   <tr><th>Matrícula</th><td><?= htmlspecialchars($user['matricula'] ?? '') ?></td></tr>
                   <tr><th>Email</th><td><?= htmlspecialchars($user['email'] ?? '') ?></td></tr>
                   <tr><th>Estado</th><td><?= (int)($user['activo'] ?? 0) ? 'Activo' : 'Inactivo' ?></td></tr>
                   <?php else: ?>
-                  <tr><th>Rol</th><td><?= htmlspecialchars($_SESSION['user_role'] ?? '') ?></td></tr>
                   <tr><th>Matrícula</th><td><?= htmlspecialchars($user['matricula'] ?? '') ?></td></tr>
                   <tr><th>Email</th><td><?= htmlspecialchars($user['email'] ?? ($_SESSION['user_email'] ?? '')) ?></td></tr>
                   <tr><th>Último acceso</th><td><?= htmlspecialchars($user['last_login'] ?? '-') ?></td></tr>

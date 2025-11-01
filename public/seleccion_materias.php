@@ -180,7 +180,7 @@ $grupos = $cicloActual ? $grupoModel->getByCicloAndPrefixes($cicloActual, $prefi
         </a>
   </div>
   <div class="container-fluid d-flex justify-content-end align-items-center">
-    <button class="btn btn-outline-light btn-sm me-3" id="theme-toggle" title="Cambiar tema">
+    <button class="btn btn-outline-light btn-sm me-3" id="themeToggle" title="Cambiar tema">
       <i class="bi bi-moon-fill" id="theme-icon"></i>
     </button>
     <span class="navbar-text text-white">Alumno</span>
@@ -191,7 +191,15 @@ $grupos = $cicloActual ? $grupoModel->getByCicloAndPrefixes($cicloActual, $prefi
   <?php include __DIR__ . '/partials/sidebar.php'; ?>
   <main class="app-content">
     <div class="d-flex align-items-center justify-content-between mb-3">
-      <h1 class="h3 mb-0">Selección de materias</h1>
+      <div>
+        <h1 class="h3 mb-0">Selección de materias</h1>
+        <nav aria-label="breadcrumb" class="small">
+          <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="dashboard.php">Inicio</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Selección de materias</li>
+          </ol>
+        </nav>
+      </div>
       <?php if ($activo): ?>
         <span class="badge bg-success">Ventana activa</span>
       <?php else: ?>
@@ -208,8 +216,17 @@ $grupos = $cicloActual ? $grupoModel->getByCicloAndPrefixes($cicloActual, $prefi
       <?php if (!$activo): ?>
         <div class="alert alert-secondary">La ventana de reinscripción no está activa para tu carrera. Consulta fechas en la sección de Reinscripción.</div>
       <?php endif; ?>
+      <div class="d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap">
+        <div class="flex-grow-1" style="max-width: 320px;">
+          <input type="text" class="form-control" placeholder="Filtrar rápido en la tabla" data-quick-filter-for="#tabla-seleccion">
+        </div>
+        <div class="d-flex align-items-center gap-2">
+           <button class="btn btn-outline-primary btn-sm" data-export="csv" data-target="#tabla-seleccion" data-filename="seleccion_materias.csv" data-timestamp="true"><i class="bi bi-filetype-csv"></i> Exportar CSV</button>
+        <button class="btn btn-outline-secondary btn-sm" data-export="pdf" data-target="#tabla-seleccion"><i class="bi bi-filetype-pdf"></i> Exportar PDF</button>
+        </div>
+      </div>
       <div class="table-responsive">
-        <table class="table table-striped align-middle">
+        <table id="tabla-seleccion" class="table table-striped align-middle table-hover table-sort">
           <thead>
             <tr>
               <th>Clave</th>
@@ -221,6 +238,9 @@ $grupos = $cicloActual ? $grupoModel->getByCicloAndPrefixes($cicloActual, $prefi
             </tr>
           </thead>
           <tbody>
+          <?php if (count($grupos) === 0): ?>
+            <tr class="empty-state-row"><td colspan="6" class="text-center text-muted">No hay grupos disponibles</td></tr>
+          <?php endif; ?>
           <?php foreach ($grupos as $g): ?>
             <?php $ya = in_array((int)$g['id'], $inscritosIds); ?>
             <?php $ocupados = $calModel->countByGrupo((int)$g['id']); ?>

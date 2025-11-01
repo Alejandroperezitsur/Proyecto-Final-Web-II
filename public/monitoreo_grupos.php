@@ -57,8 +57,8 @@ if ($user['rol'] !== 'admin') {
   <div class="card">
     <div class="card-body">
         <div class="d-flex justify-content-end mb-3 gap-2">
-          <button class="btn btn-outline-primary" data-export="csv" data-target="#tabla-monitoreo" data-filename="monitoreo_grupos.csv"><i class="bi bi-filetype-csv"></i> Exportar CSV</button>
-          <button class="btn btn-outline-secondary" data-export="pdf"><i class="bi bi-filetype-pdf"></i> Exportar PDF</button>
+           <button class="btn btn-outline-primary btn-sm" data-export="csv" data-target="#tabla-monitoreo" data-filename="monitoreo_grupos.csv" data-timestamp="true"><i class="bi bi-filetype-csv"></i> Exportar CSV</button>
+           <button class="btn btn-outline-secondary btn-sm" data-export="pdf" data-target="#tabla-monitoreo"><i class="bi bi-filetype-pdf"></i> Exportar PDF</button>
         </div>
         <div class="table-responsive">
           <table id="tabla-monitoreo" class="table table-striped table-hover">
