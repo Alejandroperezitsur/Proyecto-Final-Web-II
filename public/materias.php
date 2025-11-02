@@ -166,30 +166,34 @@ if ($edit_id > 0) {
         <button class="btn btn-outline-secondary btn-sm" data-export="pdf" data-target="#tabla-materias"><i class="bi bi-filetype-pdf"></i> Exportar PDF</button>
                       </div>
                     </div>
-                    <table class="table table-striped table-hover table-sort" id="tabla-materias">
-                        <thead><tr><th>ID</th><th>Nombre</th><th>Clave</th><th>Acciones</th></tr></thead>
-                        <tbody>
-                        <?php if (count($materias) === 0): ?>
-                          <tr class="empty-state-row"><td colspan="4" class="text-center text-muted">No hay materias registradas</td></tr>
-                        <?php endif; ?>
-                        <?php foreach ($materias as $m): ?>
-                            <tr>
-                                <td><?= (int)$m['id'] ?></td>
-                                <td><?= htmlspecialchars($m['nombre']) ?></td>
-                                <td><?= htmlspecialchars($m['clave'] ?? '') ?></td>
-                                <td>
-                                    <a href="?edit_id=<?= (int)$m['id'] ?>" class="btn btn-sm btn-outline-primary">Editar</a>
-                                    <form method="POST" style="display:inline" onsubmit="return confirm('¿Eliminar esta materia?');">
-                                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
-                                        <input type="hidden" name="action" value="delete">
-                                        <input type="hidden" name="id" value="<?= (int)$m['id'] ?>">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
-                                    </form>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                        </tbody>
-                    </table>
+                    <div class="table-responsive">
+                      <table class="table table-striped table-hover table-sort" id="tabla-materias">
+                          <thead><tr><th class="d-none d-sm-table-cell">ID</th><th>Nombre</th><th class="d-none d-sm-table-cell">Clave</th><th>Acciones</th></tr></thead>
+                          <tbody>
+                          <?php if (count($materias) === 0): ?>
+                            <tr class="empty-state-row"><td colspan="4" class="text-center text-muted">No hay materias registradas</td></tr>
+                          <?php endif; ?>
+                          <?php foreach ($materias as $m): ?>
+                              <tr>
+                                  <td class="d-none d-sm-table-cell"><?= (int)$m['id'] ?></td>
+                                  <td><?= htmlspecialchars($m['nombre']) ?></td>
+                                  <td class="d-none d-sm-table-cell"><?= htmlspecialchars($m['clave'] ?? '') ?></td>
+                                  <td>
+                                      <div class="d-flex flex-column flex-sm-row gap-1">
+                                        <a href="?edit_id=<?= (int)$m['id'] ?>" class="btn btn-sm btn-outline-primary">Editar</a>
+                                        <form method="POST" class="d-inline" onsubmit="return confirm('¿Eliminar esta materia?');">
+                                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
+                                            <input type="hidden" name="action" value="delete">
+                                            <input type="hidden" name="id" value="<?= (int)$m['id'] ?>">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
+                                        </form>
+                                      </div>
+                                  </td>
+                              </tr>
+                          <?php endforeach; ?>
+                          </tbody>
+                      </table>
+                    </div>
                     <nav>
                         <ul class="pagination">
                             <?php for ($p = 1; $p <= $totalPages; $p++): ?>

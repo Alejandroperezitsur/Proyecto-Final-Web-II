@@ -266,6 +266,8 @@ function printTable(tableSelector) {
     <!DOCTYPE html>
     <html>
     <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
       <title>${title}</title>
       <style>
         body { font-family: Arial, sans-serif; margin: 20px; color: #000; }
@@ -275,6 +277,9 @@ function printTable(tableSelector) {
         tr:nth-child(even) { background-color: #f9f9f9; }
         h1 { color: #333; margin-bottom: 10px; }
         .empty-state-row { font-style: italic; color: #666; }
+        @media (max-width: 576px) {
+          th, td { padding: 6px; font-size: 12px; }
+        }
         @media print {
           body { margin: 0; }
           table { page-break-inside: auto; }

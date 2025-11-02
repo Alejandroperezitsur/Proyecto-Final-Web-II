@@ -241,35 +241,39 @@ $profesores = $usuarioModel->getAll(1, 100, "WHERE rol = 'profesor' AND activo =
                         <?php endif; ?>
                       </div>
                     </div>
-                    <table id="tabla-grupos" class="table table-striped table-hover table-sort">
-                        <thead><tr><th>ID</th><th>Grupo</th><th>Ciclo</th><th>Materia</th><th>Profesor</th><th>Cupo</th><?php if ($isAdmin): ?><th>Acciones</th><?php endif; ?></tr></thead>
-                        <tbody>
-                        <?php if (count($grupos) === 0): ?>
-                          <tr class="empty-state-row"><td colspan="<?= $isAdmin ? 7 : 6 ?>" class="text-center text-muted">No hay grupos registrados</td></tr>
-                        <?php endif; ?>
-                        <?php foreach ($grupos as $g): ?>
-                            <tr>
-                                <td><?= (int)$g['id'] ?></td>
-                                <td><?= htmlspecialchars($g['nombre']) ?></td>
-                                <td><?= htmlspecialchars($g['ciclo'] ?? '') ?></td>
-                                <td><?= htmlspecialchars($g['materia_nombre']) ?> (<?= htmlspecialchars($g['materia_clave'] ?? '') ?>)</td>
-                                <td><?= htmlspecialchars($g['profesor_email']) ?> (<?= htmlspecialchars($g['profesor_matricula'] ?? '') ?>)</td>
-                                <td><?= (int)($g['cupo'] ?? 30) ?></td>
-                                <?php if ($isAdmin): ?>
-                                <td>
-                                    <a href="?edit_id=<?= (int)$g['id'] ?>" class="btn btn-sm btn-outline-primary">Editar</a>
-                                    <form method="POST" style="display:inline" onsubmit="return confirm('¿Eliminar este grupo?');">
-                                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
-        								<input type="hidden" name="action" value="delete">
-                                        <input type="hidden" name="id" value="<?= (int)$g['id'] ?>">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
-                                    </form>
-                                </td>
-                                <?php endif; ?>
-                            </tr>
-                        <?php endforeach; ?>
-                        </tbody>
-                    </table>
+                    <div class="table-responsive">
+                      <table id="tabla-grupos" class="table table-striped table-hover table-sort">
+                          <thead><tr><th class="d-none d-sm-table-cell">ID</th><th>Grupo</th><th class="d-none d-md-table-cell">Ciclo</th><th>Materia</th><th class="d-none d-lg-table-cell">Profesor</th><th class="d-none d-md-table-cell">Cupo</th><?php if ($isAdmin): ?><th>Acciones</th><?php endif; ?></tr></thead>
+                          <tbody>
+                          <?php if (count($grupos) === 0): ?>
+                            <tr class="empty-state-row"><td colspan="<?= $isAdmin ? 7 : 6 ?>" class="text-center text-muted">No hay grupos registrados</td></tr>
+                          <?php endif; ?>
+                          <?php foreach ($grupos as $g): ?>
+                              <tr>
+                                  <td class="d-none d-sm-table-cell"><?= (int)$g['id'] ?></td>
+                                  <td><?= htmlspecialchars($g['nombre']) ?></td>
+                                  <td class="d-none d-md-table-cell"><?= htmlspecialchars($g['ciclo'] ?? '') ?></td>
+                                  <td><?= htmlspecialchars($g['materia_nombre']) ?> (<?= htmlspecialchars($g['materia_clave'] ?? '') ?>)</td>
+                                  <td class="d-none d-lg-table-cell"><?= htmlspecialchars($g['profesor_email']) ?> (<?= htmlspecialchars($g['profesor_matricula'] ?? '') ?>)</td>
+                                  <td class="d-none d-md-table-cell"><?= (int)($g['cupo'] ?? 30) ?></td>
+                                  <?php if ($isAdmin): ?>
+                                  <td>
+                                      <div class="d-flex flex-column flex-sm-row gap-1">
+                                        <a href="?edit_id=<?= (int)$g['id'] ?>" class="btn btn-sm btn-outline-primary">Editar</a>
+                                        <form method="POST" class="d-inline" onsubmit="return confirm('¿Eliminar este grupo?');">
+                                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
+            								<input type="hidden" name="action" value="delete">
+                                            <input type="hidden" name="id" value="<?= (int)$g['id'] ?>">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
+                                        </form>
+                                      </div>
+                                  </td>
+                                  <?php endif; ?>
+                              </tr>
+                          <?php endforeach; ?>
+                          </tbody>
+                      </table>
+                    </div>
                     <nav>
                         <ul class="pagination">
                             <?php for ($p = 1; $p <= $totalPages; $p++): ?>
