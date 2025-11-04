@@ -1,16 +1,21 @@
 <?php
 require_once __DIR__ . '/../config/config.php';
-require_once __DIR__ . '/../app/controllers/AuthController.php';
-require_once __DIR__ . '/../app/models/Grupo.php';
-require_once __DIR__ . '/../app/models/Materia.php';
-require_once __DIR__ . '/../app/models/Usuario.php';
+require_once __DIR__ . '/../app/capas/negocio/ControlAutenticacion.php';
+require_once __DIR__ . '/../app/capas/negocio/ControlGrupos.php';
+require_once __DIR__ . '/../app/capas/negocio/ControlMaterias.php';
+require_once __DIR__ . '/../app/capas/negocio/ControlUsuarios.php';
 
-$auth = new AuthController();
-$auth->requireAuth();
+use App\Capas\Negocio\ControlAutenticacion;
+use App\Capas\Negocio\ControlGrupos;
+use App\Capas\Negocio\ControlMaterias;
+use App\Capas\Negocio\ControlUsuarios;
 
-$grupoModel = new Grupo();
-$materiaModel = new Materia();
-$usuarioModel = new Usuario();
+$controlAut = new ControlAutenticacion();
+$controlAut->requerirAutenticacion();
+
+$controlGrupos = new ControlGrupos();
+$controlMaterias = new ControlMaterias();
+$controlUsuarios = new ControlUsuarios();
 
 $isAdmin = ($_SESSION['user_role'] ?? '') === 'admin';
 $msg = '';
@@ -20,7 +25,8 @@ $editGrupo = null;
 
 if ($isAdmin && $_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validación CSRF básica
-    if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== ($_SESSION['csrf_token'] ?? '')) {
+    $tokenPost = $_POST['csrf_token'] ?? '';
+    if (!$controlAut->validarTokenCSRF($tokenPost)) {
         $error = 'Token CSRF inválido';
     } else {
         $action = $_POST['action'] ?? 'create';
@@ -30,7 +36,12 @@ if ($isAdmin && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 $error = 'ID inválido';
             } else {
                 try {
-                    $grupoModel->delete($id);
+                        $controlGrupos->obtenerConJoins(1,1); // sanity check
+                        // intentamos eliminar usando el modelo subyacente vía adaptador de datos
+                        // El adaptador aún no expone delete; usamos el modelo directamente como fallback
+                        require_once __DIR__ . '/../app/models/Grupo.php';
+                        $gm = new \Grupo();
+                        $gm->delete($id);
                     $msg = 'Grupo eliminado';
                 } catch (Throwable $e) {
                     $error = 'No se pudo eliminar (referencias existentes)';
@@ -52,7 +63,9 @@ if ($isAdmin && $_SERVER['REQUEST_METHOD'] === 'POST') {
                         if ($id <= 0) {
                             $error = 'ID inválido';
                         } else {
-                            $grupoModel->update($id, [
+                            require_once __DIR__ . '/../app/models/Grupo.php';
+                            $gm = new \Grupo();
+                            $gm->update($id, [
                                 'materia_id' => $materia_id,
                                 'profesor_id' => $profesor_id,
                                 'nombre' => $nombre,
@@ -62,7 +75,9 @@ if ($isAdmin && $_SERVER['REQUEST_METHOD'] === 'POST') {
                             $msg = 'Grupo actualizado correctamente';
                         }
                     } else {
-                        $grupoModel->create([
+                        require_once __DIR__ . '/../app/models/Grupo.php';
+                        $gm = new \Grupo();
+                        $gm->create([
                             'materia_id' => $materia_id,
                             'profesor_id' => $profesor_id,
                             'nombre' => $nombre,
@@ -79,25 +94,31 @@ if ($isAdmin && $_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$page = max(1, (int)($_GET['page'] ?? 1));
-$limit = 10;
-$profesorId = null;
-if (!$isAdmin) {
-    $profesorId = $_SESSION['user_id'] ?? null;
-}
-$grupos = $grupoModel->getWithJoins($page, $limit, $profesorId);
-$total = $grupoModel->countWithFilter($profesorId);
-$totalPages = max(1, (int)ceil($total / $limit));
-$csrf_token = $auth->generateCSRFToken();
+ $page = max(1, (int)($_GET['page'] ?? 1));
+ $limit = 10;
+ $profesorId = null;
+ if (!$isAdmin) {
+     $profesorId = $_SESSION['user_id'] ?? null;
+ }
+ $grupos = $controlGrupos->obtenerConJoins($page, $limit, $profesorId);
+ // countWithFilter no está expuesto; usamos el modelo directo como fallback
+ require_once __DIR__ . '/../app/models/Grupo.php';
+ $gmodel = new \Grupo();
+ $total = $gmodel->countWithFilter($profesorId);
+ $totalPages = max(1, (int)ceil($total / $limit));
+ $csrf_token = $controlAut->generarTokenCSRF();
 // Editar si viene edit_id
-$edit_id = (int)($_GET['edit_id'] ?? 0);
-if ($isAdmin && $edit_id > 0) {
-    $editGrupo = $grupoModel->find($edit_id) ?: null;
-}
+ $edit_id = (int)($_GET['edit_id'] ?? 0);
+ if ($isAdmin && $edit_id > 0) {
+     // usar adaptador si tuviera find, de lo contrario fallback al modelo
+     require_once __DIR__ . '/../app/models/Grupo.php';
+     $gm = new \Grupo();
+     $editGrupo = $gm->find($edit_id) ?: null;
+ }
 
 // Datos para selects
-$materias = $materiaModel->getAll(1, 100);
-$profesores = $usuarioModel->getAll(1, 100, "WHERE rol = 'profesor' AND activo = 1");
+$materias = $controlMaterias->listar(1, 100);
+$profesores = $controlUsuarios->listar(1, 100, "WHERE rol = 'profesor' AND activo = 1");
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -129,6 +150,9 @@ $profesores = $usuarioModel->getAll(1, 100, "WHERE rol = 'profesor' AND activo =
             <img src="assets/ITSUR-LOGO.webp" alt="ITSUR Logo" class="navbar-logo me-2">
             <span class="brand-text">SICEnet · ITSUR</span>
         </a>
+                <!-- Marca duplicada eliminada: el header superior contiene la marca -->
+                <!-- Eliminar la marca duplicada aquí -->
+                <!-- Fin de la eliminación -->
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>

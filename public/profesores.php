@@ -168,13 +168,10 @@ $csrf = $auth->generateCSRFToken();
 </header>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container-fluid">
-        <a class="navbar-brand d-flex align-items-center" href="dashboard.php">
-          <img src="assets/ITSUR-LOGO.webp" alt="ITSUR Logo" class="navbar-logo me-2">
-          <span class="brand-text">SICEnet · ITSUR</span>
-        </a>
-        <button class="btn btn-outline-light btn-sm ms-auto me-2" id="themeToggle" title="Cambiar tema">
-          <i class="bi bi-sun-fill"></i>
-        </button>
+        <!-- Marca duplicada eliminada: header superior ya muestra el logo -->
+                      <li class="nav-item">
+                          <!-- Theme toggle eliminado: tema fijo oscuro -->
+                      </li>
   </div>
   <div class="container-fluid">
     <span class="navbar-text text-white">Admin</span>

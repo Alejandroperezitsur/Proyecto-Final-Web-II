@@ -85,13 +85,7 @@ if ($matricula !== '') {
 <!-- Header institucional compacto -->
 <header class="institutional-header">
     <div class="container-fluid">
-        <a href="dashboard.php" class="institutional-brand">
-            <img src="assets/ITSUR-LOGO.webp" alt="ITSUR Logo" class="institutional-logo">
-            <div class="institutional-text">
-                <h1 class="institutional-title">SICEnet · ITSUR</h1>
-                <p class="institutional-subtitle">Sistema Integral de Control Escolar</p>
-            </div>
-        </a>
+        <!-- Marca duplicada eliminada: header superior ya muestra el logo -->
     </div>
 </header>
 

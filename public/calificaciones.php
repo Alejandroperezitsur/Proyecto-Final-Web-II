@@ -1,20 +1,25 @@
 <?php
-require_once __DIR__ . '/../app/controllers/AuthController.php';
-require_once __DIR__ . '/../app/models/Alumno.php';
-require_once __DIR__ . '/../app/models/Grupo.php';
-require_once __DIR__ . '/../app/models/Materia.php';
+require_once __DIR__ . '/../app/capas/negocio/ControlAutenticacion.php';
+require_once __DIR__ . '/../app/capas/negocio/ControlGrupos.php';
+require_once __DIR__ . '/../app/capas/negocio/ControlMaterias.php';
+require_once __DIR__ . '/../app/capas/negocio/ControlAlumnos.php';
+require_once __DIR__ . '/../app/capas/negocio/ControlCalificaciones.php';
 require_once __DIR__ . '/../app/models/SavedView.php';
-require_once __DIR__ . '/../app/models/Calificacion.php';
 
-$auth = new AuthController();
-$auth->requireAuth();
-$user = $auth->getCurrentUser();
+use App\Capas\Negocio\ControlAutenticacion;
+use App\Capas\Negocio\ControlGrupos;
+use App\Capas\Negocio\ControlMaterias;
+use App\Capas\Negocio\ControlAlumnos;
+use App\Capas\Negocio\ControlCalificaciones;
 
-$grupoModel = new Grupo();
-$materiaModel = new Materia();
-$savedViewModel = new SavedView();
-$alumnoModel = new Alumno();
-$calificacionModel = new Calificacion();
+$controlAut = new ControlAutenticacion();
+$controlAut->requerirAutenticacion();
+$user = $controlAut->obtenerUsuarioActual();
+
+$controlGrupos = new ControlGrupos();
+$controlMaterias = new ControlMaterias();
+$controlAlumnos = new ControlAlumnos();
+$controlCalifs = new ControlCalificaciones();
 
 $message = '';
 $role = $user['rol'] ?? 'alumno';
@@ -22,20 +27,22 @@ $page = max(1, (int)($_GET['page'] ?? 1));
 $limit = 10;
 
 // Grupos disponibles para el profesor (o todos para admin)
-if ($role === 'profesor') {
-    $grupos = $grupoModel->getWithJoins($page, $limit, (int)$user['id']);
+if (method_exists($controlGrupos, 'obtenerConJoins')) {
+  $grupos = $controlGrupos->obtenerConJoins($page, $limit, $role === 'profesor' ? (int)$user['id'] : null);
 } else {
-    $grupos = $grupoModel->getWithJoins($page, $limit, null);
+  require_once __DIR__ . '/../app/models/Grupo.php';
+  $gm = new \Grupo();
+  $grupos = $gm->getWithJoins($page, $limit, $role === 'profesor' ? (int)$user['id'] : null);
 }
 
 // Manejo de alta/actualización de calificación por profesor
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $token = $_POST['csrf_token'] ?? '';
-    if (!$auth->validateCSRFToken($token)) {
-        http_response_code(400);
-        echo 'CSRF inválido';
-        exit;
-    }
+  $token = $_POST['csrf_token'] ?? '';
+  if (!$controlAut->validarTokenCSRF($token)) {
+    http_response_code(400);
+    echo 'CSRF inválido';
+    exit;
+  }
 
     if ($role !== 'profesor') {
         http_response_code(403);
@@ -61,7 +68,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!$esDelProfesor) {
             $message = 'No puedes calificar grupos que no te pertenecen';
         } else {
-            $alumno = $alumnoModel->findByMatricula($alumnoMatricula);
+      if (method_exists($controlAlumnos, 'buscarPorMatricula')) {
+        $alumno = $controlAlumnos->buscarPorMatricula($alumnoMatricula);
+      } else {
+        require_once __DIR__ . '/../app/models/Alumno.php';
+        $alumnoModel = new \Alumno();
+        $alumno = $alumnoModel->findByMatricula($alumnoMatricula);
+      }
             if (!$alumno) {
                 $message = 'No se encontró alumno con esa matrícula';
             } else {
@@ -71,39 +84,73 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $final = max(0, min(100, $final));
 
                 // Upsert de calificación
-                $existente = $calificacionModel->findOne((int)$alumno['id'], $grupoId);
-                try {
-                    if ($existente) {
-                        $calificacionModel->update((int)$existente['id'], [
-                            'parcial1' => $parcial1,
-                            'parcial2' => $parcial2,
-                            'final' => $final,
-                        ]);
-                        $message = 'Calificación actualizada';
-                    } else {
-                        $calificacionModel->create([
-                            'alumno_id' => (int)$alumno['id'],
-                            'grupo_id' => $grupoId,
-                            'parcial1' => $parcial1,
-                            'parcial2' => $parcial2,
-                            'final' => $final,
-                        ]);
-                        $message = 'Calificación registrada';
-                    }
-                } catch (Throwable $e) {
-                    $message = 'Error al guardar calificación: ' . $e->getMessage();
-                }
+        if (method_exists($controlCalifs, 'findOne')) {
+          $existente = $controlCalifs->findOne((int)$alumno['id'], $grupoId);
+        } else {
+          require_once __DIR__ . '/../app/models/Calificacion.php';
+          $calificacionModel = new \Calificacion();
+          $existente = $calificacionModel->findOne((int)$alumno['id'], $grupoId);
+        }
+        try {
+          if ($existente) {
+            if (method_exists($controlCalifs, 'actualizar')) {
+              $controlCalifs->actualizar((int)$existente['id'], [
+                'parcial1' => $parcial1,
+                'parcial2' => $parcial2,
+                'final' => $final,
+              ]);
+            } else {
+              if (!isset($calificacionModel)) { require_once __DIR__ . '/../app/models/Calificacion.php'; $calificacionModel = new \Calificacion(); }
+              $calificacionModel->update((int)$existente['id'], [
+                'parcial1' => $parcial1,
+                'parcial2' => $parcial2,
+                'final' => $final,
+              ]);
+            }
+            $message = 'Calificación actualizada';
+          } else {
+            if (method_exists($controlCalifs, 'crear')) {
+              $controlCalifs->crear([
+                'alumno_id' => (int)$alumno['id'],
+                'grupo_id' => $grupoId,
+                'parcial1' => $parcial1,
+                'parcial2' => $parcial2,
+                'final' => $final,
+              ]);
+            } else {
+              if (!isset($calificacionModel)) { require_once __DIR__ . '/../app/models/Calificacion.php'; $calificacionModel = new \Calificacion(); }
+              $calificacionModel->create([
+                'alumno_id' => (int)$alumno['id'],
+                'grupo_id' => $grupoId,
+                'parcial1' => $parcial1,
+                'parcial2' => $parcial2,
+                'final' => $final,
+              ]);
+            }
+            $message = 'Calificación registrada';
+          }
+        } catch (Throwable $e) {
+          $message = 'Error al guardar calificación: ' . $e->getMessage();
+        }
             }
         }
     }
 }
 
-$csrf = $auth->generateCSRFToken();
+// Generar token CSRF vía wrapper
+$csrf = $controlAut->generarTokenCSRF();
 
 // Listado de calificaciones
 if ($role === 'profesor') {
-    $calificaciones = $calificacionModel->getByProfesor((int)$user['id'], $page, $limit);
-    $total = $calificacionModel->countByProfesor((int)$user['id']);
+  if (method_exists($controlCalifs, 'getByProfesor')) {
+    $calificaciones = $controlCalifs->getByProfesor((int)$user['id'], $page, $limit);
+    $total = $controlCalifs->countByProfesor((int)$user['id']);
+  } else {
+    require_once __DIR__ . '/../app/models/Calificacion.php';
+    $cm = new \Calificacion();
+    $calificaciones = $cm->getByProfesor((int)$user['id'], $page, $limit);
+    $total = $cm->countByProfesor((int)$user['id']);
+  }
 } else {
     // Admin: ver todas las calificaciones (reutilizamos getByProfesor sin filtro usando un JOIN manual)
     $page = max(1, (int)($_GET['page'] ?? 1));
@@ -127,8 +174,22 @@ if ($role === 'profesor') {
 $totalPages = max(1, (int)ceil($total / $limit));
 
 // Catálogos para filtros
-$materiasCatalog = $materiaModel->getCatalog();
-$ciclosCatalog = $grupoModel->getDistinctCiclos($role === 'profesor' ? (int)$user['id'] : null);
+$materiasCatalog = null;
+if (method_exists($controlMaterias, 'getCatalog')) {
+  $materiasCatalog = $controlMaterias->getCatalog();
+} else {
+  require_once __DIR__ . '/../app/models/Materia.php';
+  $mm = new \Materia();
+  $materiasCatalog = $mm->getCatalog();
+}
+$ciclosCatalog = null;
+if (method_exists($controlGrupos, 'ciclosDistintos')) {
+  $ciclosCatalog = $controlGrupos->ciclosDistintos($role === 'profesor' ? (int)$user['id'] : null);
+} else {
+  require_once __DIR__ . '/../app/models/Grupo.php';
+  $gm = new \Grupo();
+  $ciclosCatalog = $gm->getDistinctCiclos($role === 'profesor' ? (int)$user['id'] : null);
+}
 ?>
 <!doctype html>
 <html lang="es">
@@ -163,13 +224,8 @@ $ciclosCatalog = $grupoModel->getDistinctCiclos($role === 'profesor' ? (int)$use
 </header>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container-fluid">
-        <a class="navbar-brand d-flex align-items-center" href="dashboard.php">
-          <img src="assets/ITSUR-LOGO.webp" alt="ITSUR Logo" class="navbar-logo me-2">
-          <span class="brand-text">SICEnet · ITSUR</span>
-        </a>
-        <button class="btn btn-outline-light btn-sm ms-auto me-2" id="themeToggle" title="Cambiar tema">
-          <i class="bi bi-sun-fill"></i>
-        </button>
+        <!-- Marca duplicada eliminada: el header institucional superior ya muestra el logo -->
+        <!-- Botón de cambio de tema eliminado: tema oscuro forzado en assets/js/main.js (lógica comentada) -->
   </div>
   <div class="container-fluid">
     <span class="navbar-text text-white"><?= htmlspecialchars(ucfirst($role)) ?></span>

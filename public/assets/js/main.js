@@ -43,58 +43,28 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Toggle de tema oscuro/claro
+  // Tema: forzamos 'dark' (modo oscuro) para toda la app.
+  // Se eliminó el botón toggle del navbar por decisión del equipo. Si quieres
+  // restaurar el toggle en el futuro, puedes descomentar la lógica original
+  // que almacenaba la preferencia en localStorage y creaba/gestionaba el botón.
   const applyTheme = (theme) => {
     document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('sicenet-theme', theme);
   };
+  // Forzamos modo oscuro
+  applyTheme('dark');
 
-  const getSystemPref = () => {
-    try { return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; } catch { return 'dark'; }
-  };
-  const getCurrentTheme = () => localStorage.getItem('sicenet-theme') || getSystemPref() || 'dark';
-  let currentTheme = getCurrentTheme();
-  applyTheme(currentTheme);
-  
-  const nav = document.querySelector('nav.navbar .container-fluid');
-  const existingToggle = document.getElementById('themeToggle') || document.getElementById('theme-toggle');
-  
-  const updateIconEl = (el, theme) => {
-    if (!el) return;
-    const icon = el.querySelector('i');
-    if (icon) {
-      icon.className = theme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
-    } else {
-      el.innerHTML = theme === 'dark' ? '<i class="bi bi-sun-fill"></i>' : '<i class="bi bi-moon-fill"></i>';
-    }
-  };
-  
-  if (existingToggle) {
-    updateIconEl(existingToggle, currentTheme);
-    existingToggle.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const nextTheme = getCurrentTheme() === 'dark' ? 'light' : 'dark';
-      applyTheme(nextTheme);
-      currentTheme = nextTheme;
-      updateIconEl(existingToggle, currentTheme);
-    });
-  } else if (nav) {
-    const btn = document.createElement('button');
-    btn.className = 'btn btn-sm btn-outline-secondary ms-2';
-    btn.type = 'button';
-    btn.title = 'Cambiar tema';
-    updateIconEl(btn, currentTheme);
-    btn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const nextTheme = getCurrentTheme() === 'dark' ? 'light' : 'dark';
-      applyTheme(nextTheme);
-      currentTheme = nextTheme;
-      updateIconEl(btn, currentTheme);
-    });
-    nav.appendChild(btn);
-  }
+  /* LOGICA DEL TOGGLE (comentada)
+  // const getSystemPref = () => {
+  //   try { return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; } catch { return 'dark'; }
+  // };
+  // const getCurrentTheme = () => localStorage.getItem('sicenet-theme') || getSystemPref() || 'dark';
+  // let currentTheme = getCurrentTheme();
+  // applyTheme(currentTheme);
+  // const nav = document.querySelector('nav.navbar .container-fluid');
+  // const existingToggle = document.getElementById('themeToggle') || document.getElementById('theme-toggle');
+  // const updateIconEl = (el, theme) => { ... }
+  // if (existingToggle) { ... } else if (nav) { ... }
+  */
 
   // Autoactivar ordenamiento en tablas con clase .table-sort
   document.querySelectorAll('table.table-sort').forEach(tbl => enableTableSort(tbl));

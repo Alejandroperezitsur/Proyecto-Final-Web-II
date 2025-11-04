@@ -35,10 +35,7 @@ if ($user['rol'] !== 'admin') {
 </header>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container-fluid">
-        <a class="navbar-brand d-flex align-items-center" href="dashboard.php">
-          <img src="assets/ITSUR-LOGO.webp" alt="ITSUR Logo" class="navbar-logo me-2">
-          <span class="brand-text">SICEnet · ITSUR</span>
-        </a>
+    <!-- Marca duplicada eliminada: header superior ya muestra el logo -->
         <button class="btn btn-outline-light btn-sm ms-auto me-2" id="themeToggle" title="Cambiar tema">
           <i class="bi bi-sun-fill"></i>
         </button>

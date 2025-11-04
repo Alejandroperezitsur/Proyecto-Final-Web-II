@@ -1,33 +1,36 @@
 <?php
-require_once __DIR__ . '/../app/controllers/AuthController.php';
-require_once __DIR__ . '/../app/models/Alumno.php';
+require_once __DIR__ . '/../app/capas/negocio/ControlAutenticacion.php';
+require_once __DIR__ . '/../app/capas/negocio/ControlAlumnos.php';
 
-$auth = new AuthController();
-$auth->requireAuth();
-$user = $auth->getCurrentUser();
+use App\Capas\Negocio\ControlAutenticacion;
+use App\Capas\Negocio\ControlAlumnos;
+
+$controlAut = new ControlAutenticacion();
+$controlAut->requerirAutenticacion();
+$user = $controlAut->obtenerUsuarioActual();
 if ($user['rol'] !== 'admin') {
     http_response_code(403);
     echo 'Acceso denegado';
     exit;
 }
 
-$alumnoModel = new Alumno();
+$alumnoModel = new ControlAlumnos();
 $message = '';
 $error = '';
 $editAlumno = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $token = $_POST['csrf_token'] ?? '';
-    if (!$auth->validateCSRFToken($token)) {
+  $token = $_POST['csrf_token'] ?? '';
+  if (!$controlAut->validarTokenCSRF($token)) {
         http_response_code(400);
         $error = 'CSRF inválido';
     } else {
         $action = $_POST['action'] ?? 'create';
         if ($action === 'delete') {
             $id = (int)($_POST['id'] ?? 0);
-            if ($id > 0) {
+        if ($id > 0) {
                 try {
-                    $ok = $alumnoModel->delete($id);
+          $ok = $alumnoModel->delete($id);
                     if ($ok) {
                         $message = 'Alumno eliminado correctamente';
                     } else {
@@ -74,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $error = 'Todos los campos son obligatorios para registrar';
                 } else {
                     try {
-                        $alumnoModel->create([
+            $alumnoModel->create([
                             'matricula' => $matricula,
                             'nombre' => $nombre,
                             'apellido' => $apellido,
@@ -116,6 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+$
 // Cargar alumno para edición si corresponde
 $editId = max(0, (int)($_GET['edit_id'] ?? 0));
 if ($editId > 0) {
@@ -145,7 +149,7 @@ if ($q !== '') {
   }
 }
 $totalPages = max(1, (int)ceil($total / $limit));
-$csrf = $auth->generateCSRFToken();
+$csrf = $controlAut->generarTokenCSRF();
 ?>
 <!doctype html>
 <html lang="es">
@@ -156,6 +160,7 @@ $csrf = $auth->generateCSRFToken();
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
   <link href="assets/css/styles.css" rel="stylesheet">
+  <link href="assets/css/desktop-fixes.css" rel="stylesheet">
 </head>
 <body>
 <!-- Header institucional compacto -->
@@ -176,11 +181,10 @@ $csrf = $auth->generateCSRFToken();
                 <img src="assets/ITSUR-LOGO.webp" alt="ITSUR" class="navbar-logo me-2">
                 <span class="brand-text">SICEnet · ITSUR</span>
             </a>
+    <!-- Marca duplicada eliminada: header superior ya muestra el logo -->
   </div>
   <div class="container-fluid d-flex justify-content-end align-items-center">
-    <button class="btn btn-outline-light btn-sm me-3" id="themeToggle" title="Cambiar tema">
-      <i class="bi bi-moon-fill" id="theme-icon"></i>
-    </button>
+    <!-- Theme toggle eliminado: tema fijo oscuro. Restaurar desde assets/js/main.js si es necesario -->
     <span class="navbar-text text-white">Admin</span>
   </div>
 </nav>

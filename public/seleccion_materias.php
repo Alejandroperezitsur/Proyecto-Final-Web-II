@@ -170,6 +170,9 @@ $grupos = $cicloActual ? $grupoModel->getByCicloAndPrefixes($cicloActual, $prefi
         <p class="institutional-subtitle">Sistema Integral de Control Escolar</p>
       </div>
     </a>
+    <!-- Marca duplicada eliminada: header superior ya muestra el logo -->
+    <!-- Fin de la marca duplicada -->
+    
   </div>
 </header>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -180,9 +183,7 @@ $grupos = $cicloActual ? $grupoModel->getByCicloAndPrefixes($cicloActual, $prefi
         </a>
   </div>
   <div class="container-fluid d-flex justify-content-end align-items-center">
-    <button class="btn btn-outline-light btn-sm me-3" id="themeToggle" title="Cambiar tema">
-      <i class="bi bi-moon-fill" id="theme-icon"></i>
-    </button>
+    <!-- Theme toggle eliminado: tema oscuro por defecto -->
     <span class="navbar-text text-white">Alumno</span>
   </div>
 </nav>

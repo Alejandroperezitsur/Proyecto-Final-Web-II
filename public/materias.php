@@ -1,21 +1,30 @@
 <?php
 require_once __DIR__ . '/../config/config.php';
-require_once __DIR__ . '/../app/controllers/AuthController.php';
-require_once __DIR__ . '/../app/models/Materia.php';
+require_once __DIR__ . '/../app/capas/negocio/ControlAutenticacion.php';
+require_once __DIR__ . '/../app/capas/negocio/ControlMaterias.php';
 
-$auth = new AuthController();
-$auth->requireAuth();
-$auth->requireRole(['admin']);
+use App\Capas\Negocio\ControlAutenticacion;
+use App\Capas\Negocio\ControlMaterias;
 
-$materiaModel = new Materia();
+$controlAut = new ControlAutenticacion();
+$controlAut->requerirAutenticacion();
+$usuario = $controlAut->obtenerUsuarioActual();
+if (($usuario['rol'] ?? '') !== 'admin') {
+    http_response_code(403);
+    echo 'Acceso denegado';
+    exit;
+}
+
+$controlMaterias = new ControlMaterias();
 $msg = '';
 $error = '';
 // Para edición
 $editMateria = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Validación CSRF básica
-    if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== ($_SESSION['csrf_token'] ?? '')) {
+    // Validación CSRF usando el wrapper
+    $tokenPost = $_POST['csrf_token'] ?? '';
+    if (!$controlAut->validarTokenCSRF($tokenPost)) {
         $error = 'Token CSRF inválido';
     } else {
         $action = $_POST['action'] ?? 'create';
@@ -25,7 +34,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $error = 'ID inválido';
             } else {
                 try {
-                    $materiaModel->delete($id);
+                    if (method_exists($controlMaterias, 'eliminar')) {
+                        $controlMaterias->eliminar($id);
+                    } else {
+                        require_once __DIR__ . '/../app/models/Materia.php';
+                        $m = new \Materia();
+                        $m->delete($id);
+                    }
                     $msg = 'Materia eliminada';
                 } catch (Throwable $e) {
                     $error = 'No se pudo eliminar (referencias existentes)';
@@ -43,11 +58,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         if ($id <= 0) {
                             $error = 'ID inválido';
                         } else {
-                            $materiaModel->update($id, ['nombre' => $nombre, 'clave' => $clave ?: null]);
+                            if (method_exists($controlMaterias, 'actualizar')) {
+                                $controlMaterias->actualizar($id, ['nombre' => $nombre, 'clave' => $clave ?: null]);
+                            } else {
+                                require_once __DIR__ . '/../app/models/Materia.php';
+                                $m = new \Materia();
+                                $m->update($id, ['nombre' => $nombre, 'clave' => $clave ?: null]);
+                            }
                             $msg = 'Materia actualizada correctamente';
                         }
                     } else {
-                        $materiaModel->create(['nombre' => $nombre, 'clave' => $clave ?: null]);
+                        if (method_exists($controlMaterias, 'crear')) {
+                            $controlMaterias->crear(['nombre' => $nombre, 'clave' => $clave ?: null]);
+                        } else {
+                            require_once __DIR__ . '/../app/models/Materia.php';
+                            $m = new \Materia();
+                            $m->create(['nombre' => $nombre, 'clave' => $clave ?: null]);
+                        }
                         $msg = 'Materia creada correctamente';
                     }
                 } catch (Throwable $e) {
@@ -60,14 +87,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $page = max(1, (int)($_GET['page'] ?? 1));
 $limit = 10;
-$materias = $materiaModel->getAll($page, $limit);
-$total = $materiaModel->count('');
+$materias = null;
+if (method_exists($controlMaterias, 'listar')) {
+    $materias = $controlMaterias->listar($page, $limit);
+} else {
+    require_once __DIR__ . '/../app/models/Materia.php';
+    $mm = new \Materia();
+    $materias = $mm->getAll($page, $limit);
+}
+$total = null;
+if (method_exists($controlMaterias, 'count')) {
+    $total = $controlMaterias->count('');
+} else {
+    if (!isset($mm)) { require_once __DIR__ . '/../app/models/Materia.php'; $mm = new \Materia(); }
+    $total = $mm->count('');
+}
 $totalPages = max(1, (int)ceil($total / $limit));
-$csrf_token = $auth->generateCSRFToken();
+$csrf_token = $controlAut->generarTokenCSRF();
 // Cargar datos de edición si se envía edit_id por GET
 $edit_id = (int)($_GET['edit_id'] ?? 0);
 if ($edit_id > 0) {
-    $editMateria = $materiaModel->find($edit_id) ?: null;
+    if (method_exists($controlMaterias, 'find')) {
+        $editMateria = $controlMaterias->find($edit_id) ?: null;
+    } else {
+        if (!isset($mm)) { require_once __DIR__ . '/../app/models/Materia.php'; $mm = new \Materia(); }
+        $editMateria = $mm->find($edit_id) ?: null;
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -80,6 +125,7 @@ if ($edit_id > 0) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <link href="assets/css/styles.css" rel="stylesheet">
+    <link href="assets/css/desktop-fixes.css" rel="stylesheet">
 </head>
 <body>
 <!-- Header institucional compacto -->
@@ -96,10 +142,7 @@ if ($edit_id > 0) {
 </header>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
-        <a class="navbar-brand d-flex align-items-center" href="dashboard.php">
-            <img src="assets/ITSUR-LOGO.webp" alt="ITSUR Logo" class="navbar-logo me-2">
-            <span class="brand-text">SICEnet · ITSUR</span>
-        </a>
+        <!-- Marca duplicada eliminada: header superior ya muestra el logo -->
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -110,11 +153,7 @@ if ($edit_id > 0) {
                 <li class="nav-item"><a class="nav-link" href="grupos.php">Grupos</a></li>
             </ul>
             <ul class="navbar-nav ms-auto align-items-center">
-              <li class="nav-item me-2">
-                <button class="btn btn-outline-light btn-sm" id="themeToggle" title="Cambiar tema">
-                  <i class="bi bi-sun-fill"></i>
-                </button>
-              </li>
+                            <!-- Theme toggle eliminado: tema fijo oscuro. Ver assets/js/main.js para restaurarlo -->
               <li class="nav-item"><a class="nav-link" href="logout.php">Salir</a></li>
             </ul>
         </div>

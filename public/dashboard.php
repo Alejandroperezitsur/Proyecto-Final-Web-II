@@ -1,22 +1,26 @@
 <?php
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../app/controllers/AuthController.php';
-require_once __DIR__ . '/../app/models/Grupo.php';
-require_once __DIR__ . '/../app/models/Calificacion.php';
+require_once __DIR__ . '/../app/capas/negocio/ControlGrupos.php';
+require_once __DIR__ . '/../app/capas/negocio/ControlCalificaciones.php';
 
-$auth = new AuthController();
-$auth->requireAuth();
+use App\Capas\Negocio\ControlGrupos;
+use App\Capas\Negocio\ControlCalificaciones;
 
-$currentUser = $auth->getCurrentUser();
-$isAdmin = $_SESSION['user_role'] === 'admin';
+$controlGrupos = new ControlGrupos();
+$controlCal = new ControlCalificaciones();
+
+$controlAut = new \AuthController();
+$controlAut->requireAuth();
+
+$usuarioActual = $controlAut->getCurrentUser();
+$esAdmin = $_SESSION['user_role'] === 'admin';
 // KPIs globales (solo admin)
-$calModel = new Calificacion();
-$stats = $calModel->getGlobalAggregates();
-$avgByCiclo = $calModel->getAveragesByCiclo();
+$estadisticas = $controlCal->obtenerAgregadosGlobales();
+$promediosPorCiclo = $controlCal->obtenerPromediosPorCiclo();
 // Catálogo de ciclos y filtros
-$grupoModel = new Grupo();
-$ciclosCatalog = $grupoModel->getDistinctCiclos(null);
-$cicloSel = trim((string)($_GET['ciclo'] ?? ''));
+$ciclosCatalog = $controlGrupos->obtenerCiclosDistintos(null);
+$cicloSeleccionado = trim((string)($_GET['ciclo'] ?? ''));
 if ($cicloSel !== '') {
     // Si hay ciclo seleccionado, recalculamos KPIs para ese ciclo
     foreach ($calModel->getAggregatesByCicloDetailed() as $row) {
@@ -49,7 +53,8 @@ if ($cicloSel !== '') {
           rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" 
           rel="stylesheet">
-    <link href="assets/css/styles.css" rel="stylesheet">
+  <link href="assets/css/styles.css" rel="stylesheet">
+  <link href="assets/css/desktop-fixes.css" rel="stylesheet">
     <style>
     /* impresión: solo listado/tabla en páginas con clase .print-list */
     @media print {
@@ -76,17 +81,14 @@ if ($cicloSel !== '') {
 
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
-            <a class="navbar-brand d-flex align-items-center" href="dashboard.php">
-                <img src="assets/ITSUR-LOGO.webp" alt="ITSUR Logo" class="navbar-logo me-2">
-                <span class="brand-text">SICEnet · ITSUR</span>
-            </a>
+      <!-- Marca duplicada eliminada: el header superior contiene la marca con logo -->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" 
                     data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                    <?php if ($isAdmin): ?>
+                    <?php if ($esAdmin): ?>
                     <li class="nav-item">
                         <a class="nav-link" href="alumnos.php">
                             <i class="bi bi-people"></i> Alumnos
@@ -120,11 +122,9 @@ if ($cicloSel !== '') {
                             <i class="bi bi-question-circle"></i>
                         </button>
                     </li>
-                    <li class="nav-item">
-                        <button class="btn btn-outline-light btn-sm me-2" id="themeToggle" title="Cambiar tema">
-                            <i class="bi bi-moon-fill" id="theme-icon"></i>
-                        </button>
-                    </li>
+          <li class="nav-item">
+            <!-- Theme toggle eliminado: tema fijo oscuro. Lógica comentada en assets/js/main.js -->
+          </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" 
                            data-bs-toggle="dropdown">
@@ -163,7 +163,7 @@ if ($cicloSel !== '') {
             <a href="perfil.php" class="btn btn-outline-secondary"><i class="bi bi-person"></i> Mi Perfil</a>
           </div>
         </div>
-        <?php if ($isAdmin): ?>
+                    <?php if ($esAdmin): ?>
         <div class="card mb-4 border-0 shadow-sm">
           <div class="card-body">
             <div class="row align-items-center">
@@ -203,7 +203,7 @@ if ($cicloSel !== '') {
         </div>
         <?php endif; ?>
         <div class="row g-4">
-            <?php if ($isAdmin): ?>
+                    <?php if ($esAdmin): ?>
             <div class="col-md-6 col-lg-3">
                 <div class="card">
                     <div class="card-body">
@@ -254,17 +254,17 @@ if ($cicloSel !== '') {
                             <i class="bi bi-grid-3x3 text-warning"></i> Grupos
                         </h5>
                         <p class="card-text">
-                            <?= $isAdmin ? 'Administra los grupos y horarios.' : 
+                            <?= $esAdmin ? 'Administra los grupos y horarios.' : 
                                          'Ver tus grupos asignados.' ?>
                         </p>
                         <a href="grupos.php" class="btn btn-warning">
-                            <?= $isAdmin ? 'Administrar' : 'Ver Grupos' ?>
+                            <?= $esAdmin ? 'Administrar' : 'Ver Grupos' ?>
                         </a>
                     </div>
                 </div>
             </div>
 
-            <?php if (!$isAdmin): ?>
+            <?php if (!$esAdmin): ?>
             <div class="col-md-6 col-lg-3">
                 <div class="card">
                     <div class="card-body">
@@ -280,7 +280,7 @@ if ($cicloSel !== '') {
             </div>
             <?php endif; ?>
 
-            <?php if ($isAdmin): ?>
+            <?php if ($esAdmin): ?>
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">KPIs Globales</div>
@@ -289,25 +289,25 @@ if ($cicloSel !== '') {
                             <div class="col-md-3">
                                 <div class="p-3 border rounded">
                                     <div class="text-muted">Calificaciones</div>
-                                    <div class="fs-4"><?= (int)$stats['total'] ?></div>
+                                    <div class="fs-4"><?= (int)$estadisticas['total'] ?></div>
                                 </div>
                             </div>
                             <div class="col-md-3">
                                 <div class="p-3 border rounded">
                                     <div class="text-muted">Promedio final</div>
-                                    <div class="fs-4"><?= number_format((float)$stats['promedio'], 2) ?></div>
+                                    <div class="fs-4"><?= number_format((float)$estadisticas['promedio'], 2) ?></div>
                                 </div>
                             </div>
                             <div class="col-md-3">
                                 <div class="p-3 border rounded">
                                     <div class="text-muted">Aprobadas</div>
-                                    <div class="fs-4"><?= (int)$stats['aprobados'] ?></div>
+                                    <div class="fs-4"><?= (int)$estadisticas['aprobados'] ?></div>
                                 </div>
                             </div>
                             <div class="col-md-3">
                                 <div class="p-3 border rounded">
                                     <div class="text-muted">Reprobadas</div>
-                                    <div class="fs-4"><?= (int)$stats['reprobados'] ?></div>
+                                    <div class="fs-4"><?= (int)$estadisticas['reprobados'] ?></div>
                                 </div>
                             </div>
                         </div>
@@ -341,7 +341,7 @@ if ($cicloSel !== '') {
                             </thead>
                             <tbody>
                               <?php
-                                $topMaterias = $cicloSel !== '' ? $calModel->getAveragesByMateriaForCiclo($cicloSel) : $calModel->getAveragesByMateria();
+                                $topMaterias = $cicloSeleccionado !== '' ? $controlCal->promediosPorMateria($cicloSeleccionado) : $controlCal->promediosPorMateria(null);
                                 usort($topMaterias, function($a,$b){ return ($b['promedio'] <=> $a['promedio']); });
                                 $topMaterias = array_slice($topMaterias, 0, 5);
                                 foreach ($topMaterias as $tm):
