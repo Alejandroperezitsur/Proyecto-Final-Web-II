@@ -80,4 +80,12 @@ class AlumnoAcademicoApiController extends Controller {
         $rows = $stmt->fetchAll();
         $this->jsonResponse(['success' => true, 'data' => $rows]);
     }
+
+    // GET estadísticas del alumno autenticado
+    public function estadisticas() {
+        $alumnoId = (int)($_SESSION['user_id'] ?? 0);
+        $ciclo = trim(strip_tags((string)filter_input(INPUT_GET, 'ciclo', FILTER_UNSAFE_RAW))) ?: null;
+        $stats = $this->calModel->getStudentStats($alumnoId, $ciclo);
+        $this->jsonResponse(['success' => true, 'data' => $stats]);
+    }
 }

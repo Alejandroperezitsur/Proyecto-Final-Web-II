@@ -58,6 +58,100 @@ class Calificacion extends Model {
         return (int)$stmt->fetchColumn();
     }
 
+    // Estadísticas para un alumno: materias inscritas, pendientes y promedio general
+    public function getStudentStats(int $alumnoId, ?string $ciclo = null): array {
+        $params = [':alumno_id' => $alumnoId];
+        $whereCiclo = '';
+        if ($ciclo !== null && $ciclo !== '') { $whereCiclo = ' AND g.ciclo = :ciclo'; $params[':ciclo'] = $ciclo; }
+        // Materias inscritas (distinct materias por grupos donde tiene calificación)
+        $sqlMaterias = "SELECT COUNT(DISTINCT m.id)
+                        FROM calificaciones c
+                        JOIN grupos g ON c.grupo_id = g.id
+                        JOIN materias m ON g.materia_id = m.id
+                        WHERE c.alumno_id = :alumno_id" . $whereCiclo;
+        $stmt = $this->db->prepare($sqlMaterias);
+        foreach ($params as $k => $v) { $stmt->bindValue($k, $v); }
+        $stmt->execute();
+        $materias = (int)($stmt->fetchColumn() ?? 0);
+
+        // Calificaciones pendientes: cualquier parcial o final NULL
+        $sqlPend = "SELECT COUNT(*)
+                    FROM calificaciones c
+                    JOIN grupos g ON c.grupo_id = g.id
+                    WHERE c.alumno_id = :alumno_id" . $whereCiclo . " AND (c.parcial1 IS NULL OR c.parcial2 IS NULL OR c.final IS NULL)";
+        $stmt = $this->db->prepare($sqlPend);
+        foreach ($params as $k => $v) { $stmt->bindValue($k, $v); }
+        $stmt->execute();
+        $pendientes = (int)($stmt->fetchColumn() ?? 0);
+
+        // Promedio general (final no nulo)
+        $sqlProm = "SELECT AVG(c.final)
+                    FROM calificaciones c
+                    JOIN grupos g ON c.grupo_id = g.id
+                    WHERE c.alumno_id = :alumno_id" . $whereCiclo . " AND c.final IS NOT NULL";
+        $stmt = $this->db->prepare($sqlProm);
+        foreach ($params as $k => $v) { $stmt->bindValue($k, $v); }
+        $stmt->execute();
+        $promedio = $stmt->fetchColumn();
+        return [
+            'materias_inscritas' => $materias,
+            'calificaciones_pendientes' => $pendientes,
+            'promedio_general' => $promedio !== null ? round((float)$promedio, 2) : 0.0,
+        ];
+    }
+
+    // Estadísticas para un profesor: grupos activos, alumnos totales, pendientes y promedio general
+    public function getTeacherStats(int $profesorId, ?string $ciclo = null): array {
+        $params = [':profesor_id' => $profesorId];
+        $whereCiclo = '';
+        if ($ciclo !== null && $ciclo !== '') { $whereCiclo = ' AND g.ciclo = :ciclo'; $params[':ciclo'] = $ciclo; }
+        else { $whereCiclo = ' AND g.ciclo = (SELECT MAX(ciclo) FROM grupos)'; }
+
+        // Grupos activos
+        $sqlGrupos = "SELECT COUNT(*) FROM grupos g WHERE g.profesor_id = :profesor_id" . $whereCiclo;
+        $stmt = $this->db->prepare($sqlGrupos);
+        foreach ($params as $k => $v) { $stmt->bindValue($k, $v); }
+        $stmt->execute();
+        $gruposActivos = (int)($stmt->fetchColumn() ?? 0);
+
+        // Alumnos totales (distintos) en sus grupos
+        $sqlAlumnos = "SELECT COUNT(DISTINCT c.alumno_id)
+                       FROM calificaciones c
+                       JOIN grupos g ON c.grupo_id = g.id
+                       WHERE g.profesor_id = :profesor_id" . $whereCiclo;
+        $stmt = $this->db->prepare($sqlAlumnos);
+        foreach ($params as $k => $v) { $stmt->bindValue($k, $v); }
+        $stmt->execute();
+        $alumnosTotales = (int)($stmt->fetchColumn() ?? 0);
+
+        // Evaluaciones pendientes: filas con calificaciones incompletas en sus grupos
+        $sqlPend = "SELECT COUNT(*)
+                    FROM calificaciones c
+                    JOIN grupos g ON c.grupo_id = g.id
+                    WHERE g.profesor_id = :profesor_id" . $whereCiclo . " AND (c.parcial1 IS NULL OR c.parcial2 IS NULL OR c.final IS NULL)";
+        $stmt = $this->db->prepare($sqlPend);
+        foreach ($params as $k => $v) { $stmt->bindValue($k, $v); }
+        $stmt->execute();
+        $pendientes = (int)($stmt->fetchColumn() ?? 0);
+
+        // Promedio general del profesor (final no nulo)
+        $sqlProm = "SELECT AVG(c.final)
+                    FROM calificaciones c
+                    JOIN grupos g ON c.grupo_id = g.id
+                    WHERE g.profesor_id = :profesor_id" . $whereCiclo . " AND c.final IS NOT NULL";
+        $stmt = $this->db->prepare($sqlProm);
+        foreach ($params as $k => $v) { $stmt->bindValue($k, $v); }
+        $stmt->execute();
+        $promedio = $stmt->fetchColumn();
+
+        return [
+            'grupos_activos' => $gruposActivos,
+            'alumnos_totales' => $alumnosTotales,
+            'evaluaciones_pendientes' => $pendientes,
+            'promedio_general' => $promedio !== null ? round((float)$promedio, 2) : 0.0,
+        ];
+    }
+
     public function getWithFilters($page = 1, $limit = 10, array $filters = []) {
         $page = max(1, (int)$page);
         $limit = max(1, (int)$limit);

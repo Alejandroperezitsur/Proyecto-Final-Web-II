@@ -45,6 +45,12 @@ $csrf = $auth->generateCSRFToken();
       </div>
     </div>
 
+    <div class="mb-4" id="stats-profesor"></div>
+
+    <div class="row g-3 mb-4" id="grupos-activos">
+      <!-- Mis Grupos Activos -->
+    </div>
+
     <div class="row g-3" id="grupos-list">
       <!-- Grupos del profesor (2/3/4 columnas a md/xl/xxl) -->
     </div>
@@ -81,6 +87,11 @@ $csrf = $auth->generateCSRFToken();
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="assets/js/main.js"></script>
+<script type="module">
+  import { loadProfesorStats, loadActiveGroups } from './assets/js/profesores.js';
+  loadProfesorStats('#stats-profesor');
+  loadActiveGroups('#grupos-activos');
+</script>
 <script>
   (function(){
     const list = document.getElementById('grupos-list');

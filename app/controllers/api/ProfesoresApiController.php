@@ -33,6 +33,21 @@ class ProfesoresApiController extends Controller {
         }
     }
 
+    // GET /api/profesores/estadisticas
+    public function estadisticas() {
+        $profesorId = (int)($_SESSION['user_id'] ?? 0);
+        $ciclo = trim(strip_tags((string)filter_input(INPUT_GET, 'ciclo', FILTER_UNSAFE_RAW))) ?: null;
+        $stats = $this->calModel->getTeacherStats($profesorId, $ciclo);
+        $this->jsonResponse(['success' => true, 'data' => $stats]);
+    }
+
+    // GET /api/profesores/grupos_activos
+    public function gruposActivos() {
+        $profesorId = (int)($_SESSION['user_id'] ?? 0);
+        $rows = $this->grupoModel->getActiveTeacherGroups($profesorId);
+        $this->jsonResponse(['success' => true, 'data' => $rows]);
+    }
+
     // GET /api/profesores/grupos/{id}/alumnos
     public function alumnosGrupo($grupoId) {
         $profesorId = (int)($_SESSION['user_id'] ?? 0);
