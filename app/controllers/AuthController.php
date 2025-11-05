@@ -23,6 +23,20 @@ class AuthController extends Controller {
         if (empty($identifier) || empty($password)) {
             return false;
         }
+        // Protección básica contra fuerza bruta: limitar intentos por sesión
+        require_once __DIR__ . '/../init.php';
+        $now = time();
+        $_SESSION['login_attempts'] = $_SESSION['login_attempts'] ?? [];
+        // limpiar intentos antiguos (más de 10 minutos)
+        $_SESSION['login_attempts'] = array_filter(
+            (array)$_SESSION['login_attempts'],
+            function($ts) use ($now) { return ($now - (int)$ts) < 600; }
+        );
+        if (count($_SESSION['login_attempts']) >= 10) {
+            // Demora leve para desalentar scripts
+            usleep(250000); // 250ms
+            return false;
+        }
         // Detectar si es matrícula: prefijo de ingeniería + 8 dígitos
         // Prefijos inventados (solo ingenierías):
         // S (Sistemas Computacionales), I (Industrial), C (Civil), M (Mecánica),
@@ -38,6 +52,12 @@ class AuthController extends Controller {
                 $_SESSION['user_email'] = $alumno['email'] ?? '';
                 $_SESSION['user_role'] = 'alumno';
                 $_SESSION['user_identifier'] = $alumno['matricula'];
+                // Rehash transparente si cambian los parámetros del algoritmo
+                if (password_needs_rehash($alumno['password'], PASSWORD_DEFAULT)) {
+                    $alumnoModel->update($alumno['id'], ['password' => $password]);
+                }
+                // Reiniciar contador de intentos al éxito
+                $_SESSION['login_attempts'] = [];
                 return true;
             }
 
@@ -47,6 +67,7 @@ class AuthController extends Controller {
                 return false;
             }
             if (!password_verify($password, $usuarioProfesor['password'])) {
+                $_SESSION['login_attempts'][] = $now;
                 return false;
             }
 
@@ -56,6 +77,10 @@ class AuthController extends Controller {
             $_SESSION['user_role'] = 'profesor';
             $_SESSION['user_identifier'] = $identifier; // matrícula del profesor
             $this->model->updateLastLogin($usuarioProfesor['id']);
+            if (password_needs_rehash($usuarioProfesor['password'], PASSWORD_DEFAULT)) {
+                $this->model->update($usuarioProfesor['id'], ['password' => $password]);
+            }
+            $_SESSION['login_attempts'] = [];
             return true;
         } else {
             // Solo el administrador puede ingresar por email
@@ -64,6 +89,7 @@ class AuthController extends Controller {
                 return false;
             }
             if (!password_verify($password, $usuario['password'])) {
+                $_SESSION['login_attempts'][] = $now;
                 return false;
             }
 
@@ -73,6 +99,10 @@ class AuthController extends Controller {
             $_SESSION['user_role'] = $usuario['rol'];
             $_SESSION['user_identifier'] = $usuario['email'];
             $this->model->updateLastLogin($usuario['id']);
+            if (password_needs_rehash($usuario['password'], PASSWORD_DEFAULT)) {
+                $this->model->update($usuario['id'], ['password' => $password]);
+            }
+            $_SESSION['login_attempts'] = [];
             return true;
         }
     }
@@ -133,5 +163,46 @@ class AuthController extends Controller {
         }
         // Para admin y profesor: tabla usuarios
         return $this->model->find($id);
+    }
+
+    public function changePassword($currentPassword, $newPassword) {
+        require_once __DIR__ . '/../init.php';
+        if (!$this->isLoggedIn()) {
+            return false;
+        }
+        // Requisitos mínimos: 8+ caracteres, letras y números
+        $len = strlen((string)$newPassword);
+        if ($len < 8 || !preg_match('/[A-Za-z]/', $newPassword) || !preg_match('/\d/', $newPassword)) {
+            return false;
+        }
+
+        $userId = (int)($_SESSION['user_id'] ?? 0);
+        $role = (string)($_SESSION['user_role'] ?? '');
+        if ($userId <= 0 || $role === '') {
+            return false;
+        }
+
+        if ($role === 'alumno') {
+            $alumnoModel = new Alumno();
+            $user = $alumnoModel->find($userId);
+            $hash = $user['password'] ?? null;
+            if (!$hash || !password_verify($currentPassword, $hash)) {
+                return false;
+            }
+            // El modelo aplicará hash internamente
+            $ok = $alumnoModel->update($userId, ['password' => $newPassword]);
+        } else {
+            $user = $this->model->find($userId);
+            $hash = $user['password'] ?? null;
+            if (!$hash || !password_verify($currentPassword, $hash)) {
+                return false;
+            }
+            $ok = $this->model->update($userId, ['password' => $newPassword]);
+        }
+
+        if ($ok) {
+            session_regenerate_id(true);
+        }
+        return (bool)$ok;
     }
 }

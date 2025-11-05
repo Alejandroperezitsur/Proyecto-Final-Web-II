@@ -48,6 +48,16 @@ RewriteRule ^(.*)$ index.php [QSA,L]
     ExpiresByType application/javascript "access plus 1 month"
 </IfModule>
 
+# Cabeceras de seguridad
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+    # CSP compatible con CDNs de Bootstrap y scripts inline mínimos en páginas existentes
+    Header set Content-Security-Policy "default-src 'self' https:; img-src 'self' https: data:; style-src 'self' https: 'unsafe-inline'; script-src 'self' https: 'unsafe-inline'; font-src 'self' https: data:; connect-src 'self' https:"
+</IfModule>
+
 # Deshabilitar listado de directorios
 Options -Indexes
 

@@ -14,18 +14,24 @@ if (isset($_SESSION['user_id'])) {
 $mensajeError = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $identificador = trim((string)filter_input(INPUT_POST, 'identifier', FILTER_UNSAFE_RAW));
-    $contrasena = filter_input(INPUT_POST, 'password', FILTER_UNSAFE_RAW);
-    
-    try {
-        if ($controlAut->iniciarSesion($identificador, $contrasena)) {
-            header('Location: dashboard.php');
-            exit;
-        } else {
-            $mensajeError = 'Credenciales inválidas';
+    // Validar CSRF del formulario
+    $postToken = (string)($_POST['csrf_token'] ?? '');
+    if (!$controlAut->validarTokenCSRF($postToken)) {
+        $mensajeError = 'Token de seguridad inválido. Intenta de nuevo.';
+    } else {
+        $identificador = trim((string)filter_input(INPUT_POST, 'identifier', FILTER_UNSAFE_RAW));
+        $contrasena = filter_input(INPUT_POST, 'password', FILTER_UNSAFE_RAW);
+        
+        try {
+            if ($controlAut->iniciarSesion($identificador, $contrasena)) {
+                header('Location: dashboard.php');
+                exit;
+            } else {
+                $mensajeError = 'Credenciales inválidas';
+            }
+        } catch (Exception $e) {
+            $mensajeError = 'Error al intentar iniciar sesión';
         }
-    } catch (Exception $e) {
-        $mensajeError = 'Error al intentar iniciar sesión';
     }
 }
 

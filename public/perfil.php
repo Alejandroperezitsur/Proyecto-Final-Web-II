@@ -106,6 +106,11 @@ $isAlumno = ($_SESSION['user_role'] ?? '') === 'alumno';
               <li>Cierra sesión en equipos compartidos.</li>
               <li>Usa contraseñas fuertes y únicas.</li>
             </ul>
+            <div class="mt-3">
+              <a href="cambiar_password.php" class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-key"></i> Cambiar contraseña
+              </a>
+            </div>
           </div>
         </div>
       </div>

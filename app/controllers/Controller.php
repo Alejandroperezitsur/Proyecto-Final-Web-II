@@ -28,8 +28,9 @@ abstract class Controller {
 
     protected function validateCSRF() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            if (!isset($_POST['csrf_token']) || !isset($_SESSION['csrf_token']) || 
-                $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+            $postToken = $_POST['csrf_token'] ?? null;
+            $sessionToken = $_SESSION['csrf_token'] ?? null;
+            if (!is_string($postToken) || !is_string($sessionToken) || !hash_equals($sessionToken, $postToken)) {
                 if ($this->isApi) {
                     $this->jsonResponse(['success' => false, 'error' => 'Token CSRF inválido'], 400);
                 } else {

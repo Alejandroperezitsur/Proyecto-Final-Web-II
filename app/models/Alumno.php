@@ -114,22 +114,48 @@ class Alumno extends Model {
 
     private function processFoto($foto) {
         $config = require __DIR__ . '/../../config/config.php';
-        $maxSize = $config['security']['upload_max_size'];
-        $allowedTypes = $config['security']['allowed_extensions'];
+        $maxSize = (int)$config['security']['upload_max_size'];
+        $allowedExts = array_map('strtolower', (array)$config['security']['allowed_extensions']);
 
-        if ($foto['size'] > $maxSize) {
+        if (!isset($foto['tmp_name']) || !is_uploaded_file($foto['tmp_name'])) {
+            throw new Exception('Archivo de subida inválido');
+        }
+
+        if ((int)$foto['size'] > $maxSize) {
             throw new Exception('El archivo excede el tamaño permitido');
         }
 
-        $fileInfo = pathinfo($foto['name']);
-        $extension = strtolower($fileInfo['extension']);
-
-        if (!in_array($extension, $allowedTypes)) {
-            throw new Exception('Tipo de archivo no permitido');
+        // Validar tipo MIME real
+        $finfo = function_exists('finfo_open') ? finfo_open(FILEINFO_MIME_TYPE) : null;
+        $mime = $finfo ? finfo_file($finfo, $foto['tmp_name']) : null;
+        if ($finfo) { finfo_close($finfo); }
+        $validMimes = ['image/jpeg', 'image/png', 'image/gif'];
+        if (!$mime || !in_array($mime, $validMimes, true)) {
+            throw new Exception('El archivo no es una imagen válida');
         }
 
-        $newFileName = uniqid() . '.' . $extension;
-        $uploadPath = __DIR__ . '/../../uploads/fotos/' . $newFileName;
+        // Validar contenido como imagen
+        if (!@getimagesize($foto['tmp_name'])) {
+            throw new Exception('Contenido de imagen inválido');
+        }
+
+        $fileInfo = pathinfo($foto['name']);
+        $extension = strtolower($fileInfo['extension'] ?? '');
+        if (!in_array($extension, $allowedExts, true)) {
+            throw new Exception('Extensión de archivo no permitida');
+        }
+
+        // Asegurar directorio destino
+        $uploadDir = __DIR__ . '/../../uploads/fotos/';
+        if (!is_dir($uploadDir)) {
+            if (!mkdir($uploadDir, 0775, true) && !is_dir($uploadDir)) {
+                throw new Exception('No se pudo crear el directorio de subida');
+            }
+        }
+
+        // Nombre aleatorio robusto
+        $newFileName = bin2hex(random_bytes(16)) . '.' . $extension;
+        $uploadPath = $uploadDir . $newFileName;
 
         if (!move_uploaded_file($foto['tmp_name'], $uploadPath)) {
             throw new Exception('Error al subir el archivo');
