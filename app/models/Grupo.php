@@ -91,6 +91,57 @@ class Grupo extends Model {
         return array_intersect_key($data, array_flip($this->allowedFields));
     }
 
+    /**
+     * Cuenta los grupos activos de un profesor
+     */
+    public function countTeacherGroups(int $profesorId): int {
+        $sql = "SELECT COUNT(*) FROM grupos 
+                WHERE profesor_id = :profesor_id 
+                AND ciclo = (SELECT MAX(ciclo) FROM grupos)";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':profesor_id', $profesorId);
+        $stmt->execute();
+        return (int)$stmt->fetchColumn();
+    }
+
+    /**
+     * Cuenta el total de alumnos en los grupos de un profesor
+     */
+    public function countTeacherStudents(int $profesorId): int {
+    // Algunas instalaciones generan calificaciones sin tabla de inscripciones.
+    // Contamos alumnos distintos usando la tabla `calificaciones` si existe.
+    $sql = "SELECT COUNT(DISTINCT c.alumno_id)
+        FROM calificaciones c
+        JOIN grupos g ON c.grupo_id = g.id
+        WHERE g.profesor_id = :profesor_id
+        AND g.ciclo = (SELECT MAX(ciclo) FROM grupos)";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':profesor_id', $profesorId);
+        $stmt->execute();
+        return (int)$stmt->fetchColumn();
+    }
+
+    /**
+     * Obtiene los grupos activos de un profesor con estadísticas
+     */
+    public function getActiveTeacherGroups(int $profesorId): array {
+        // Usar la tabla `calificaciones` (campo `promedio` generado) para estadísticas.
+        $sql = "SELECT g.id, m.nombre as materia, g.nombre as grupo,
+                       COUNT(DISTINCT c.alumno_id) as alumnos,
+                       ROUND(AVG(c.promedio), 2) as promedio
+                FROM grupos g
+                JOIN materias m ON g.materia_id = m.id
+                LEFT JOIN calificaciones c ON c.grupo_id = g.id
+                WHERE g.profesor_id = :profesor_id 
+                AND g.ciclo = (SELECT MAX(ciclo) FROM grupos)
+                GROUP BY g.id, m.nombre, g.nombre
+                ORDER BY m.nombre, g.nombre";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':profesor_id', $profesorId);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
     // Obtener grupos por ciclo filtrados por prefijos de clave de materia
     public function getByCicloAndPrefixes($ciclo, array $prefixes) {
         $conditions = [];

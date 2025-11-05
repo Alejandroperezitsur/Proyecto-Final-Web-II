@@ -98,7 +98,7 @@ $estatusDefault = $config['academic']['estatus_alumno_default'] ?? 'Inscrito';
 </nav>
 
 <div class="app-shell">
-  <?php include __DIR__ . '/partials/sidebar.php'; ?>
+  <!-- Sidebar eliminado: accesos centralizados en dashboard -->
   <main class="app-content">
     <h1 class="h3 mb-3">Reinscripción</h1>
     <?php if ($role === 'alumno'): ?>

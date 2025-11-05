@@ -103,7 +103,7 @@ if ($matricula !== '') {
 </nav>
 
 <div class="app-shell">
-  <?php include __DIR__ . '/partials/sidebar.php'; ?>
+  <!-- Sidebar eliminado: accesos centralizados en dashboard -->
   <main class="app-content">
     <h1 class="h3 mb-3">Kardex</h1>
     <p class="text-muted">Consulta y gestión del historial académico del alumno.</p>

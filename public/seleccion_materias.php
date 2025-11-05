@@ -189,7 +189,7 @@ $grupos = $cicloActual ? $grupoModel->getByCicloAndPrefixes($cicloActual, $prefi
 </nav>
 
 <div class="app-shell">
-  <?php include __DIR__ . '/partials/sidebar.php'; ?>
+  <!-- Sidebar eliminado: accesos centralizados en dashboard -->
   <main class="app-content">
     <div class="d-flex align-items-center justify-content-between mb-3">
       <div>

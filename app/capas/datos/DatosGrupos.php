@@ -24,4 +24,19 @@ class DatosGrupos
     {
         return $this->modelo->getWithJoins($pagina, $limite, $profesorId);
     }
+
+    public function contarGruposProfesor(int $profesorId): int 
+    {
+        return $this->modelo->countTeacherGroups($profesorId);
+    }
+
+    public function contarAlumnosProfesor(int $profesorId): int
+    {
+        return $this->modelo->countTeacherStudents($profesorId);
+    }
+
+    public function obtenerGruposActivosProfesor(int $profesorId): array 
+    {
+        return $this->modelo->getActiveTeacherGroups($profesorId);
+    }
 }

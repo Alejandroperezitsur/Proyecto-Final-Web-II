@@ -40,4 +40,20 @@ class ControlCalificaciones
     {
         return $this->datos->promediosPorMateria($ciclo);
     }
+
+    public function contarEvaluacionesPendientes(int $profesorId): int
+    {
+        if (method_exists($this->datos, 'contarEvaluacionesPendientesProfesor')) {
+            return $this->datos->contarEvaluacionesPendientesProfesor($profesorId);
+        }
+        return 0;
+    }
+
+    public function obtenerPromedioProfesor(int $profesorId): float
+    {
+        if (method_exists($this->datos, 'obtenerPromedioProfesor')) {
+            return $this->datos->obtenerPromedioProfesor($profesorId);
+        }
+        return 0.0;
+    }
 }

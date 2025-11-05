@@ -57,7 +57,7 @@ $isAlumno = ($_SESSION['user_role'] ?? '') === 'alumno';
  </nav>
 
 <div class="app-shell">
-  <?php include __DIR__ . '/partials/sidebar.php'; ?>
+  <!-- Sidebar eliminado: accesos centralizados en dashboard -->
   <main class="app-content">
     <h1 class="h3 mb-3">Mi Perfil</h1>
     <p class="text-muted">Información de tu cuenta y acceso.</p>

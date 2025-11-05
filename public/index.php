@@ -57,13 +57,13 @@ $tokenCSRF = $controlAut->generarTokenCSRF();
                         <!-- Theme toggle eliminado: tema fijo oscuro. Si quieres restaurarlo, el botón original estaba aquí -->
         </div>
     </header>
-    <div class="container login-container">
-        <div class="row justify-content-center mt-5">
-            <div class="col-12 col-md-8 col-lg-5">
+    <div class="container-fluid login-container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-11 col-lg-9 col-xl-8">
                 <div class="login-card">
-                    <div class="">
-                        <h3 class="login-title text-center mb-2">Bienvenido</h3>
-                        <p class="login-subtitle text-center">Accede con tu matrícula o correo institucional</p>
+                    <div class="login-content">
+                        <h3 class="login-title text-center mb-3">Bienvenido</h3>
+                        <p class="login-subtitle text-center mb-4">Accede con tu matrícula o correo institucional</p>
                         
                         <?php if (!empty($mensajeError)): ?>
                             <div class="alert alert-danger">
