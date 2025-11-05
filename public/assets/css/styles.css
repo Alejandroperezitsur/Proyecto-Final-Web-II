@@ -176,6 +176,9 @@ body {
 @media (min-width: 1280px) {
   .card .card-body { padding: 2rem; }
 }
+/* Mejorar contraste de subtítulos debajo de títulos de cards (modo oscuro) */
+.card .text-muted, .card .small.text-muted { color: rgba(255,255,255,.86) !important; }
+[data-theme="light"] .card .text-muted, [data-theme="light"] .card .small.text-muted { color: #374151 !important; }
 
 /* Botones */
 .btn-primary { background: linear-gradient(180deg, var(--primary), var(--primary-600)); border: 0; box-shadow: 0 8px 20px rgba(34,197,94,.25); }

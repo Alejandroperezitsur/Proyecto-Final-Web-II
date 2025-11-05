@@ -176,7 +176,7 @@ if ($careerKey && isset($plantillasPorCarrera[$careerKey])) {
     @media (min-width: 992px) { .grid { grid-template-columns: repeat(4, 1fr); } }
     @media (max-width: 991px) { .grid { grid-template-columns: repeat(2, 1fr); } }
     .sem-card { border: 1px solid #dee2e6; border-radius: 8px; }
-    .sem-header { background: #f8f9fa; border-bottom: 1px solid #dee2e6; padding: 8px 12px; font-weight: 600; }
+    .sem-header { background: #f8f9fa; border-bottom: 1px solid #dee2e6; padding: 8px 12px; font-weight: 600; color: #000; }
     .sem-body { padding: 8px 12px; }
     .pending { color: #6c757d; font-style: italic; }
     .print-header { display:none; text-align:center; margin-bottom:12px; }

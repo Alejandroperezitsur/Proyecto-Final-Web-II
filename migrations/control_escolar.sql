@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS `calificaciones` (
 -- Datos de ejemplo (seguro): usuarios y alumnos con contraseñas hasheadas
 -- Admin (login interno por email)
 INSERT INTO `usuarios` (`email`, `password`, `rol`, `activo`) VALUES
-('admin@local', '$2y$10$iy.ePorFR/2j6ZvmJEFy1uMniVFux3/bIOlFsw.IrggPjURr8eCOG', 'admin', 1);
+('admin@local.test', '$2y$10$iy.ePorFR/2j6ZvmJEFy1uMniVFux3/bIOlFsw.IrggPjURr8eCOG', 'admin', 1);
 
 -- Profesores (login por matrícula)
 INSERT INTO `usuarios` (`matricula`, `email`, `password`, `rol`, `activo`) VALUES

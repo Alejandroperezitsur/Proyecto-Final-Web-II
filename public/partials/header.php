@@ -52,6 +52,8 @@ $modules = $config['modules'] ?? [
           <?php if (!empty($modules['profesores'])): ?><li class="nav-item"><a class="nav-link" href="profesores.php"><i class="bi bi-person-badge"></i> Profesores</a></li><?php endif; ?>
           <?php if (!empty($modules['materias'])): ?><li class="nav-item"><a class="nav-link" href="materias.php"><i class="bi bi-book"></i> Materias</a></li><?php endif; ?>
           <li class="nav-item"><a class="nav-link" href="admin_dashboard.php"><i class="bi bi-tools"></i> Panel Admin</a></li>
+          <li class="nav-item"><a class="nav-link" href="verify_seed.php"><i class="bi bi-check2-circle"></i> Verificación Seed</a></li>
+          <li class="nav-item"><a class="nav-link" href="admin_seed.php"><i class="bi bi-rocket"></i> Datos Demo</a></li>
         <?php endif; ?>
         <?php if (!empty($modules['grupos'])): ?><li class="nav-item"><a class="nav-link" href="grupos.php"><i class="bi bi-grid-3x3"></i> Grupos</a></li><?php endif; ?>
         <?php if (!empty($modules['calificaciones']) && $role === 'profesor'): ?><li class="nav-item"><a class="nav-link" href="calificaciones.php"><i class="bi bi-card-checklist"></i> Calificaciones</a></li><?php endif; ?>

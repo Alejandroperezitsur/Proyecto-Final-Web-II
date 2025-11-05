@@ -14,7 +14,10 @@ $controlAut = new \AuthController();
 $controlAut->requireAuth();
 
 $usuarioActual = $controlAut->getCurrentUser();
-$esAdmin = $_SESSION['user_role'] === 'admin';
+$role = $_SESSION['user_role'] ?? '';
+$esAdmin = ($role === 'admin');
+$esProfesor = ($role === 'profesor');
+$esAlumno = ($role === 'alumno');
 // KPIs globales (solo admin)
 $estadisticas = $controlCal->obtenerAgregadosGlobales();
 $promediosPorCiclo = $controlCal->obtenerPromediosPorCiclo();
@@ -101,56 +104,68 @@ if ($cicloSeleccionado !== '') {
           </div>
         </div>
         <?php endif; ?>
-        <!-- Bloque de navegación rápida: tarjetas con accesos directos (reemplaza el antiguo sidebar) -->
+        <!-- Bloque de navegación rápida: tarjetas por rol (reemplaza el antiguo sidebar) -->
         <div class="row g-4 mb-3 dashboard-grid">
-            <?php $role = $_SESSION['user_role'] ?? 'profesor'; $esProfesor = ($role === 'profesor'); ?>
+            <?php if ($esAlumno): ?>
             <div class="col-md-6 col-lg-3">
                 <div class="card h-100">
                     <div class="card-body d-flex flex-column">
                         <h5 class="card-title"><i class="bi bi-journal-text text-primary"></i> Kardex</h5>
                         <p class="card-text text-muted">Consulta tu historial académico y calificaciones.</p>
-                        <div class="mt-auto">
-                            <a href="kardex.php" class="btn btn-sm btn-primary">Abrir Kardex</a>
-                        </div>
+                        <div class="mt-auto"><a href="kardex.php" class="btn btn-sm btn-primary">Abrir Kardex</a></div>
                     </div>
                 </div>
             </div>
-
             <div class="col-md-6 col-lg-3">
                 <div class="card h-100">
                     <div class="card-body d-flex flex-column">
                         <h5 class="card-title"><i class="bi bi-list-check text-success"></i> Mi Carga Académica</h5>
                         <p class="card-text text-muted">Ver materias y horarios asignados.</p>
-                        <div class="mt-auto">
-                            <a href="mi_carga.php" class="btn btn-sm btn-success">Ver Carga</a>
-                        </div>
+                        <div class="mt-auto"><a href="mi_carga.php" class="btn btn-sm btn-success">Ver Carga</a></div>
                     </div>
                 </div>
             </div>
-
+            <?php endif; ?>
+            <?php if ($esProfesor): ?>
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title"><i class="bi bi-collection text-primary"></i> Mis Grupos</h5>
+                        <p class="card-text text-muted">Gestiona tus grupos y alumnos inscritos.</p>
+                        <div class="mt-auto"><a href="profesor_grupos.php" class="btn btn-sm btn-primary">Abrir Mis Grupos</a></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title"><i class="bi bi-card-checklist text-danger"></i> Calificaciones</h5>
+                        <p class="card-text text-muted">Registra y actualiza calificaciones de tus grupos.</p>
+                        <div class="mt-auto"><a href="calificaciones.php" class="btn btn-sm btn-danger">Calificar</a></div>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
             <div class="col-md-6 col-lg-3">
                 <div class="card h-100">
                     <div class="card-body d-flex flex-column">
                         <h5 class="card-title"><i class="bi bi-diagram-3 text-info"></i> Retícula</h5>
                         <p class="card-text text-muted">Consulta la retícula y requisitos por carrera.</p>
-                        <div class="mt-auto">
-                            <a href="reticula.php" class="btn btn-sm btn-info">Abrir Retícula</a>
-                        </div>
+                        <div class="mt-auto"><a href="reticula.php" class="btn btn-sm btn-info">Abrir Retícula</a></div>
                     </div>
                 </div>
             </div>
-
+            <?php if ($esAlumno): ?>
             <div class="col-md-6 col-lg-3">
                 <div class="card h-100">
                     <div class="card-body d-flex flex-column">
                         <h5 class="card-title"><i class="bi bi-arrow-repeat text-warning"></i> Reinscripción</h5>
                         <p class="card-text text-muted">Proceso de reinscripción y trámites académicos.</p>
-                        <div class="mt-auto">
-                            <a href="reinscripcion.php" class="btn btn-sm btn-warning">Ir a Reinscripción</a>
-                        </div>
+                        <div class="mt-auto"><a href="reinscripcion.php" class="btn btn-sm btn-warning">Ir a Reinscripción</a></div>
                     </div>
                 </div>
             </div>
+            <?php endif; ?>
 
             <!-- Gestión: visible solo para admin -->
             <?php if ($esAdmin): ?>
@@ -212,19 +227,6 @@ if ($cicloSeleccionado !== '') {
             </div>
 
             <?php if ($esProfesor): ?>
-            <div class="col-md-6 col-lg-3">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">
-                            <i class="bi bi-card-checklist text-danger"></i> Calificaciones
-                        </h5>
-                        <p class="card-text">Registra las calificaciones de tus grupos.</p>
-                        <a href="calificaciones.php" class="btn btn-danger">
-                            Calificar
-                        </a>
-                    </div>
-                </div>
-            </div>
             <!-- KPIs específicos para profesor -->
             <div class="col-12">
                 <div class="card">
@@ -438,6 +440,32 @@ if ($cicloSeleccionado !== '') {
     </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="assets/js/main.js"></script>
+    <script>
+      // Fallback: bloquear accesos si por alguna razón aparece un enlace no permitido
+      (function(){
+        const role = '<?= htmlspecialchars($role) ?>';
+        const adminOnly = ['alumnos.php','profesores.php','materias.php','admin_dashboard.php','verify_seed.php','admin_seed.php'];
+        document.querySelectorAll('a[href]').forEach(a => {
+          const href = a.getAttribute('href') || '';
+          if (adminOnly.includes(href) && role !== 'admin') {
+            a.addEventListener('click', (ev) => {
+              ev.preventDefault();
+              const m = document.createElement('div');
+              m.className = 'modal fade'; m.tabIndex = -1; m.innerHTML = `
+                <div class="modal-dialog"><div class="modal-content">
+                  <div class="modal-header"><h5 class="modal-title">Acceso denegado</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                  <div class="modal-body"><p>No tienes permisos para acceder a esta sección. Si necesitas acceso, contacta al administrador.</p></div>
+                  <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button></div>
+                </div></div>`;
+              document.body.appendChild(m);
+              const modal = new bootstrap.Modal(m); modal.show();
+              m.addEventListener('hidden.bs.modal', ()=> m.remove());
+            }, { once:true });
+          }
+        });
+      })();
+    </script>
     <?php if ($esAdmin): ?>
     <script>
       (function(){

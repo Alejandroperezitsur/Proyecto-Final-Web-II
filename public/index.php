@@ -86,13 +86,13 @@ $tokenCSRF = $controlAut->generarTokenCSRF();
                     value="<?= htmlspecialchars($tokenCSRF) ?>">
                             
                             <div class="mb-3">
-                                <label for="identifier" class="form-label">Matrícula</label>
+                                <label for="identifier" class="form-label">Matrícula o correo</label>
                                 <input type="text" class="form-control" id="identifier" 
                                        name="identifier" required 
-                                       pattern="^[SICMQEA][0-9]{8}$|^.+@.+\..+$" 
-                                       placeholder="Ej: S12345678">
+                                       pattern="^[SICMQEA][0-9]{8}$|^.+@.+$" 
+                                       placeholder="Ej: S12345678 o admin@local">
                                 <div class="invalid-feedback">
-                                    Ingresa una matrícula válida (prefijo de ingeniería + 8 dígitos).
+                                    Ingresa una matrícula válida (prefijo de ingeniería + 8 dígitos) o un correo electrónico.
                                 </div>
                             </div>
 
