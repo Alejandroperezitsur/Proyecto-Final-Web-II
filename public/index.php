@@ -48,6 +48,7 @@ $tokenCSRF = $controlAut->generarTokenCSRF();
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <link href="assets/css/styles.css" rel="stylesheet">
     <link href="assets/css/desktop-fixes.css" rel="stylesheet">
+    <meta name="csrf-token" content="<?= htmlspecialchars($tokenCSRF) ?>">
 </head>
 <body>
     <!-- Header institucional compacto -->
@@ -60,7 +61,9 @@ $tokenCSRF = $controlAut->generarTokenCSRF();
                     <p class="institutional-subtitle">Sistema Integral de Control Escolar</p>
                 </div>
             </a>
-                        <!-- Theme toggle eliminado: tema fijo oscuro. Si quieres restaurarlo, el botón original estaba aquí -->
+            <button id="theme-toggle" class="btn btn-outline-light btn-sm ms-auto" aria-label="Cambiar tema" title="Cambiar tema">
+              <i class="bi bi-brightness-high"></i>
+            </button>
         </div>
     </header>
     <div class="container-fluid login-container">
@@ -78,7 +81,7 @@ $tokenCSRF = $controlAut->generarTokenCSRF();
                         <?php endif; ?>
 
                         <form method="POST" action="<?= htmlspecialchars($_SERVER['PHP_SELF']) ?>"
-                              class="needs-validation" novalidate>
+                              class="needs-validation" novalidate id="login-form">
                 <input type="hidden" name="csrf_token" 
                     value="<?= htmlspecialchars($tokenCSRF) ?>">
                             
@@ -115,20 +118,23 @@ $tokenCSRF = $controlAut->generarTokenCSRF();
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="assets/js/main.js"></script>
     <script>
-    // Validación del formulario
+    // Validación ligera y UX: prevenir envíos vacíos, trimming y feedback
     (function() {
         'use strict';
-        const forms = document.querySelectorAll('.needs-validation');
-        
-        Array.from(forms).forEach(form => {
-            form.addEventListener('submit', event => {
-                if (!form.checkValidity()) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                }
-                form.classList.add('was-validated');
-            }, false);
-        });
+        const form = document.getElementById('login-form');
+        if (!form) return;
+        form.addEventListener('submit', (event) => {
+            const idEl = document.getElementById('identifier');
+            const passEl = document.getElementById('password');
+            if (idEl) idEl.value = (idEl.value || '').trim();
+            if (passEl) passEl.value = (passEl.value || '').trim();
+            const valid = form.checkValidity();
+            if (!valid) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        }, false);
     })();
     </script>
 </body>

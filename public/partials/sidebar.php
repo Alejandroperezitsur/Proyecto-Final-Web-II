@@ -19,7 +19,7 @@ $role = $_SESSION['user_role'] ?? null;
           <li><a href="reinscripcion.php" data-icon="bi-arrow-repeat">Reinscripción</a></li>
         </ul>
       </div>
-    <?php else: ?>
+    <?php elseif ($role === 'admin'): ?>
       <div class="menu-section">
         <div class="menu-section-title">Operaciones Académicas</div>
         <ul>
@@ -36,6 +36,16 @@ $role = $_SESSION['user_role'] ?? null;
           <li><a href="alumnos.php" data-icon="bi-people">Alumnos</a></li>
           <li><a href="profesores.php" data-icon="bi-person-badge">Profesores</a></li>
           <li><a href="materias.php" data-icon="bi-book">Materias</a></li>
+        </ul>
+      </div>
+    <?php else: ?>
+      <div class="menu-section">
+        <div class="menu-section-title">Operaciones Académicas</div>
+        <ul>
+          <li><a href="kardex.php" data-icon="bi-journal-text">Kardex</a></li>
+          <li><a href="mi_carga.php" data-icon="bi-list-check">Mi Carga Académica</a></li>
+          <li><a href="reticula.php" data-icon="bi-diagram-3">Retícula Académica</a></li>
+          <li><a href="reinscripcion.php" data-icon="bi-arrow-repeat">Reinscripción</a></li>
         </ul>
       </div>
     <?php endif; ?>

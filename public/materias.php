@@ -1,19 +1,14 @@
 <?php
 require_once __DIR__ . '/../config/config.php';
-require_once __DIR__ . '/../app/capas/negocio/ControlAutenticacion.php';
+require_once __DIR__ . '/../app/controllers/AuthController.php';
 require_once __DIR__ . '/../app/capas/negocio/ControlMaterias.php';
 
-use App\Capas\Negocio\ControlAutenticacion;
 use App\Capas\Negocio\ControlMaterias;
 
-$controlAut = new ControlAutenticacion();
-$controlAut->requerirAutenticacion();
-$usuario = $controlAut->obtenerUsuarioActual();
-if (($usuario['rol'] ?? '') !== 'admin') {
-    http_response_code(403);
-    echo 'Acceso denegado';
-    exit;
-}
+$auth = new AuthController();
+$auth->requireAuth();
+$auth->requireRole(['admin']);
+$usuario = $auth->getCurrentUser();
 
 $controlMaterias = new ControlMaterias();
 $msg = '';
@@ -22,9 +17,9 @@ $error = '';
 $editMateria = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Validación CSRF usando el wrapper
+    // Validación CSRF
     $tokenPost = $_POST['csrf_token'] ?? '';
-    if (!$controlAut->validarTokenCSRF($tokenPost)) {
+    if (!$auth->validateCSRFToken($tokenPost)) {
         $error = 'Token CSRF inválido';
     } else {
         $action = $_POST['action'] ?? 'create';
@@ -103,7 +98,7 @@ if (method_exists($controlMaterias, 'count')) {
     $total = $mm->count('');
 }
 $totalPages = max(1, (int)ceil($total / $limit));
-$csrf_token = $controlAut->generarTokenCSRF();
+$csrf_token = $auth->generateCSRFToken();
 // Cargar datos de edición si se envía edit_id por GET
 $edit_id = (int)($_GET['edit_id'] ?? 0);
 if ($edit_id > 0) {
@@ -120,7 +115,7 @@ if ($edit_id > 0) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
+    <meta name="csrf-token" content="<?= htmlspecialchars($csrf_token) ?>">
   <title>SICEnet · ITSUR — Materias</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">

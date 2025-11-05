@@ -12,7 +12,7 @@ class AlumnosApiController extends Controller {
     public function index() {
         $page = filter_input(INPUT_GET, 'page', FILTER_VALIDATE_INT) ?: 1;
         $limit = filter_input(INPUT_GET, 'limit', FILTER_VALIDATE_INT) ?: 10;
-        $search = filter_input(INPUT_GET, 'search', FILTER_SANITIZE_STRING);
+        $search = trim(strip_tags((string)filter_input(INPUT_GET, 'search', FILTER_UNSAFE_RAW)));
 
         try {
             if ($search) {
@@ -72,11 +72,11 @@ class AlumnosApiController extends Controller {
         $this->validateCSRF();
 
         $data = [
-            'matricula' => filter_input(INPUT_POST, 'matricula', FILTER_SANITIZE_STRING),
-            'nombre' => filter_input(INPUT_POST, 'nombre', FILTER_SANITIZE_STRING),
-            'apellido' => filter_input(INPUT_POST, 'apellido', FILTER_SANITIZE_STRING),
+            'matricula' => trim(strip_tags((string)filter_input(INPUT_POST, 'matricula', FILTER_UNSAFE_RAW))),
+            'nombre' => trim(strip_tags((string)filter_input(INPUT_POST, 'nombre', FILTER_UNSAFE_RAW))),
+            'apellido' => trim(strip_tags((string)filter_input(INPUT_POST, 'apellido', FILTER_UNSAFE_RAW))),
             'email' => filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL),
-            'fecha_nac' => filter_input(INPUT_POST, 'fecha_nac', FILTER_SANITIZE_STRING)
+            'fecha_nac' => trim(strip_tags((string)filter_input(INPUT_POST, 'fecha_nac', FILTER_UNSAFE_RAW)))
         ];
 
         if (isset($_FILES['foto'])) {
@@ -117,11 +117,11 @@ class AlumnosApiController extends Controller {
         }
 
         $data = [
-            'matricula' => filter_input(INPUT_POST, 'matricula', FILTER_SANITIZE_STRING),
-            'nombre' => filter_input(INPUT_POST, 'nombre', FILTER_SANITIZE_STRING),
-            'apellido' => filter_input(INPUT_POST, 'apellido', FILTER_SANITIZE_STRING),
+            'matricula' => trim(strip_tags((string)filter_input(INPUT_POST, 'matricula', FILTER_UNSAFE_RAW))),
+            'nombre' => trim(strip_tags((string)filter_input(INPUT_POST, 'nombre', FILTER_UNSAFE_RAW))),
+            'apellido' => trim(strip_tags((string)filter_input(INPUT_POST, 'apellido', FILTER_UNSAFE_RAW))),
             'email' => filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL),
-            'fecha_nac' => filter_input(INPUT_POST, 'fecha_nac', FILTER_SANITIZE_STRING)
+            'fecha_nac' => trim(strip_tags((string)filter_input(INPUT_POST, 'fecha_nac', FILTER_UNSAFE_RAW)))
         ];
 
         if (isset($_FILES['foto']) && $_FILES['foto']['error'] === 0) {

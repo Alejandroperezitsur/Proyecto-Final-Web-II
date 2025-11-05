@@ -58,6 +58,58 @@ class Calificacion extends Model {
         return (int)$stmt->fetchColumn();
     }
 
+    public function getWithFilters($page = 1, $limit = 10, array $filters = []) {
+        $page = max(1, (int)$page);
+        $limit = max(1, (int)$limit);
+        $offset = ($page - 1) * $limit;
+        $where = [];
+        $params = [];
+        if (!empty($filters['materia_id'])) { $where[] = 'g.materia_id = :materia_id'; $params[':materia_id'] = (int)$filters['materia_id']; }
+        if (!empty($filters['grupo_id'])) { $where[] = 'c.grupo_id = :grupo_id'; $params[':grupo_id'] = (int)$filters['grupo_id']; }
+        if (!empty($filters['alumno_id'])) { $where[] = 'c.alumno_id = :alumno_id'; $params[':alumno_id'] = (int)$filters['alumno_id']; }
+        if (!empty($filters['q'])) {
+            $where[] = '(a.matricula LIKE :q OR a.nombre LIKE :q OR a.apellido LIKE :q OR m.nombre LIKE :q OR m.clave LIKE :q OR g.nombre LIKE :q)';
+            $params[':q'] = '%'.trim((string)$filters['q']).'%';
+        }
+        $whereSql = count($where) ? ('WHERE '.implode(' AND ', $where)) : '';
+        $sql = "SELECT c.*, a.matricula AS alumno_matricula, a.nombre AS alumno_nombre, a.apellido AS alumno_apellido,
+                       g.nombre AS grupo_nombre, g.ciclo AS grupo_ciclo, m.nombre AS materia_nombre, m.clave AS materia_clave
+                FROM calificaciones c
+                JOIN alumnos a ON c.alumno_id = a.id
+                JOIN grupos g ON c.grupo_id = g.id
+                JOIN materias m ON g.materia_id = m.id
+                $whereSql
+                ORDER BY m.nombre, g.nombre, a.apellido
+                LIMIT {$limit} OFFSET {$offset}";
+        $stmt = $this->db->prepare($sql);
+        foreach ($params as $k => $v) { $stmt->bindValue($k, $v); }
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    public function countWithFilters(array $filters = []) {
+        $where = [];
+        $params = [];
+        if (!empty($filters['materia_id'])) { $where[] = 'g.materia_id = :materia_id'; $params[':materia_id'] = (int)$filters['materia_id']; }
+        if (!empty($filters['grupo_id'])) { $where[] = 'c.grupo_id = :grupo_id'; $params[':grupo_id'] = (int)$filters['grupo_id']; }
+        if (!empty($filters['alumno_id'])) { $where[] = 'c.alumno_id = :alumno_id'; $params[':alumno_id'] = (int)$filters['alumno_id']; }
+        if (!empty($filters['q'])) {
+            $where[] = '(a.matricula LIKE :q OR a.nombre LIKE :q OR a.apellido LIKE :q OR m.nombre LIKE :q OR m.clave LIKE :q OR g.nombre LIKE :q)';
+            $params[':q'] = '%'.trim((string)$filters['q']).'%';
+        }
+        $whereSql = count($where) ? ('WHERE '.implode(' AND ', $where)) : '';
+        $sql = "SELECT COUNT(*)
+                FROM calificaciones c
+                JOIN alumnos a ON c.alumno_id = a.id
+                JOIN grupos g ON c.grupo_id = g.id
+                JOIN materias m ON g.materia_id = m.id
+                $whereSql";
+        $stmt = $this->db->prepare($sql);
+        foreach ($params as $k => $v) { $stmt->bindValue($k, $v); }
+        $stmt->execute();
+        return (int)$stmt->fetchColumn();
+    }
+
     // Agregados globales: total, promedio final, aprobados/reprobados
     public function getGlobalAggregates() {
         $sql = "SELECT 

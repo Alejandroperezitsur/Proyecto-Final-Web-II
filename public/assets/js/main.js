@@ -43,15 +43,29 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Tema: forzamos 'dark' (modo oscuro) para toda la app.
-  // Se eliminó el botón toggle del navbar por decisión del equipo. Si quieres
-  // restaurar el toggle en el futuro, puedes descomentar la lógica original
-  // que almacenaba la preferencia en localStorage y creaba/gestionaba el botón.
-  const applyTheme = (theme) => {
-    document.documentElement.setAttribute('data-theme', theme);
+  // Tema claro/oscuro: detectar preferencia y persistir en localStorage
+  const THEME_KEY = 'sicenet-theme';
+  const getSystemPref = () => {
+    try { return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; } catch { return 'dark'; }
   };
-  // Forzamos modo oscuro
-  applyTheme('dark');
+  const getStoredTheme = () => {
+    try { return localStorage.getItem(THEME_KEY); } catch { return null; }
+  };
+  const applyTheme = (theme) => {
+    const t = theme === 'light' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', t);
+  };
+  const currentTheme = getStoredTheme() || getSystemPref();
+  applyTheme(currentTheme);
+  // Permitir toggle si existe #theme-toggle
+  const btnToggle = document.getElementById('theme-toggle');
+  if (btnToggle) {
+    btnToggle.addEventListener('click', () => {
+      const now = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      applyTheme(now);
+      try { localStorage.setItem(THEME_KEY, now); } catch {}
+    });
+  }
 
   /* LOGICA DEL TOGGLE (comentada)
   // const getSystemPref = () => {
@@ -273,3 +287,58 @@ function printTable(tableSelector) {
     printWindow.close();
   }, 250);
 }
+
+// -------- CSRF helpers: lectura y uso automático --------
+(function setupCSRF() {
+  const meta = document.querySelector('meta[name="csrf-token"]');
+  const token = meta?.content || '';
+  // Helper: añade csrf_token a FormData o URLSearchParams
+  function appendCSRF(body) {
+    try {
+      if (!token) return body;
+      if (body instanceof FormData) {
+        if (!body.has('csrf_token')) body.append('csrf_token', token);
+        return body;
+      }
+      if (body instanceof URLSearchParams) {
+        if (!body.has('csrf_token')) body.set('csrf_token', token);
+        return body;
+      }
+      // Si es JSON, transformar a URLSearchParams para compatibilidad con PHP $_POST
+      if (typeof body === 'string') {
+        // No tocar
+        return body;
+      }
+      if (body && typeof body === 'object') {
+        const params = new URLSearchParams();
+        Object.entries(body).forEach(([k,v]) => params.append(k, v));
+        params.set('csrf_token', token);
+        return params;
+      }
+      return body;
+    } catch { return body; }
+  }
+  // Wrapper fetch: si método es POST/PUT/DELETE, asegurar csrf_token en cuerpo
+  const _fetch = window.fetch.bind(window);
+  window.csrfFetch = async function(url, options = {}) {
+    const opts = { ...options };
+    const method = (opts.method || 'GET').toUpperCase();
+    if (['POST','PUT','DELETE','PATCH'].includes(method)) {
+      opts.body = appendCSRF(opts.body);
+    }
+    return _fetch(url, opts);
+  };
+  // XMLHttpRequest: interceptar send para añadir en FormData/URLSearchParams
+  const _send = XMLHttpRequest.prototype.send;
+  XMLHttpRequest.prototype.send = function(body) {
+    const method = (this._method || 'GET');
+    try { this._method = method; } catch {}
+    const b = appendCSRF(body);
+    return _send.call(this, b);
+  };
+  const _open = XMLHttpRequest.prototype.open;
+  XMLHttpRequest.prototype.open = function(method, url, async, user, password) {
+    this._method = method ? method.toUpperCase() : 'GET';
+    return _open.call(this, method, url, async, user, password);
+  };
+})();

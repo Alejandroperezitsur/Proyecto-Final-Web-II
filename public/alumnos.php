@@ -1,18 +1,13 @@
 <?php
-require_once __DIR__ . '/../app/capas/negocio/ControlAutenticacion.php';
+require_once __DIR__ . '/../app/controllers/AuthController.php';
 require_once __DIR__ . '/../app/capas/negocio/ControlAlumnos.php';
 
-use App\Capas\Negocio\ControlAutenticacion;
 use App\Capas\Negocio\ControlAlumnos;
 
-$controlAut = new ControlAutenticacion();
-$controlAut->requerirAutenticacion();
-$user = $controlAut->obtenerUsuarioActual();
-if ($user['rol'] !== 'admin') {
-    http_response_code(403);
-    echo 'Acceso denegado';
-    exit;
-}
+$auth = new AuthController();
+$auth->requireAuth();
+$auth->requireRole(['admin']);
+$user = $auth->getCurrentUser();
 
 $alumnoModel = new ControlAlumnos();
 $message = '';
@@ -21,7 +16,7 @@ $editAlumno = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $token = $_POST['csrf_token'] ?? '';
-  if (!$controlAut->validarTokenCSRF($token)) {
+  if (!$auth->validateCSRFToken($token)) {
         http_response_code(400);
         $error = 'CSRF inválido';
     } else {
@@ -149,7 +144,7 @@ if ($q !== '') {
   }
 }
 $totalPages = max(1, (int)ceil($total / $limit));
-$csrf = $controlAut->generarTokenCSRF();
+$csrf = $auth->generateCSRFToken();
 ?>
 <!doctype html>
 <html lang="es">
@@ -161,6 +156,7 @@ $csrf = $controlAut->generarTokenCSRF();
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
   <link href="assets/css/styles.css" rel="stylesheet">
   <link href="assets/css/desktop-fixes.css" rel="stylesheet">
+  <meta name="csrf-token" content="<?= htmlspecialchars($csrf) ?>">
 </head>
 <body>
 <?php require __DIR__ . '/partials/header.php'; ?>

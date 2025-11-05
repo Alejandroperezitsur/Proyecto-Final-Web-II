@@ -27,5 +27,35 @@ if (session_status() === PHP_SESSION_NONE) {
     }
 
     session_start();
+
+    // Control de expiración de sesión por inactividad
+    try {
+        $config = @include __DIR__ . '/../config/config.php';
+        $timeout = 3600; // 1 hora por defecto
+        if (is_array($config) && isset($config['security']['session_timeout'])) {
+            $timeout = (int)$config['security']['session_timeout'] ?: $timeout;
+        }
+        $now = time();
+        $last = isset($_SESSION['last_activity']) ? (int)$_SESSION['last_activity'] : $now;
+        // Si hay usuario autenticado y excede el tiempo, destruir sesión
+        if (isset($_SESSION['user_id']) && ($now - $last) > $timeout) {
+            // Regenerar ID y limpiar datos de sesión
+            session_regenerate_id(true);
+            $_SESSION = [];
+            if (ini_get('session.use_cookies')) {
+                $params = session_get_cookie_params();
+                setcookie(session_name(), '', time() - 42000, $params['path'], $params['domain'], $params['secure'], $params['httponly']);
+            }
+            session_destroy();
+            // Redirigir a login con código de expiración
+            header('Location: /index.php?code=440');
+            exit;
+        }
+        // Actualizar marca de tiempo de actividad
+        $_SESSION['last_activity'] = $now;
+    } catch (Throwable $e) {
+        // No bloquear la app por errores en lectura de config
+        $_SESSION['last_activity'] = time();
+    }
 }
 ?>

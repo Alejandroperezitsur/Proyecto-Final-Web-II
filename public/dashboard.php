@@ -62,9 +62,6 @@ if ($cicloSeleccionado !== '') {
     <div class="app-shell">
         <!-- Sidebar removed: todas las operaciones están ahora disponibles como tarjetas en el Dashboard -->
         <main class="app-content">
-        <div class="d-flex align-items-center justify-content-between mb-3">
-          <h2 class="mb-0">Dashboard</h2>
-        </div>
                     <?php if ($esAdmin): ?>
         <div class="card mb-4 border-0 shadow-sm">
           <div class="card-body">
@@ -105,8 +102,8 @@ if ($cicloSeleccionado !== '') {
         </div>
         <?php endif; ?>
         <!-- Bloque de navegación rápida: tarjetas con accesos directos (reemplaza el antiguo sidebar) -->
-        <div class="row g-4 mb-3">
-            <?php $role = $_SESSION['user_role'] ?? 'profesor'; ?>
+        <div class="row g-4 mb-3 dashboard-grid">
+            <?php $role = $_SESSION['user_role'] ?? 'profesor'; $esProfesor = ($role === 'profesor'); ?>
             <div class="col-md-6 col-lg-3">
                 <div class="card h-100">
                     <div class="card-body d-flex flex-column">
@@ -155,7 +152,8 @@ if ($cicloSeleccionado !== '') {
                 </div>
             </div>
 
-            <!-- Gestión: ahora visible para todos los usuarios como tarjetas -->
+            <!-- Gestión: visible solo para admin -->
+            <?php if ($esAdmin): ?>
             <div class="col-md-6 col-lg-3">
                 <div class="card h-100">
                     <div class="card-body d-flex flex-column">
@@ -191,10 +189,11 @@ if ($cicloSeleccionado !== '') {
                     </div>
                 </div>
             </div>
+            <?php endif; ?>
             
         </div>
 
-        <div class="row g-4">
+        <div class="row g-4 dashboard-grid">
             <div class="col-md-6 col-lg-3">
                 <div class="card">
                     <div class="card-body">
@@ -212,7 +211,7 @@ if ($cicloSeleccionado !== '') {
                 </div>
             </div>
 
-            <?php if (!$esAdmin): ?>
+            <?php if ($esProfesor): ?>
             <div class="col-md-6 col-lg-3">
                 <div class="card">
                     <div class="card-body">
@@ -226,7 +225,6 @@ if ($cicloSeleccionado !== '') {
                     </div>
                 </div>
             </div>
-
             <!-- KPIs específicos para profesor -->
             <div class="col-12">
                 <div class="card">

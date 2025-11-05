@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../../includes/response.php';
 abstract class Controller {
     protected $model;
     protected $isApi = false;
@@ -48,11 +49,9 @@ abstract class Controller {
         return $_SESSION['csrf_token'];
     }
 
-    protected function jsonResponse($data, $code = 200) {
-        http_response_code($code);
-        header('Content-Type: application/json; charset=utf-8');
-        echo json_encode($data);
-        exit;
+    public function jsonResponse($data, $code = 200) {
+        // Delegar al helper global para unificar formato y flags
+        jsonResponse($data, $code);
     }
 
     protected function redirect($url) {

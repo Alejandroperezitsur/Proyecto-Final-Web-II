@@ -16,11 +16,11 @@
 }
 
 [data-theme="light"] {
-  --bg: #f8fafc;
+  --bg: #f6f8fb;
   --surface: #ffffff;
-  --surface-2: #f1f5f9;
-  --text: #0f172a;
-  --muted: #334155;
+  --surface-2: #f4f7fb;
+  --text: #0b1220; /* texto más oscuro para mejor contraste */
+  --muted: #1f2937; /* evitar grises demasiado bajos en blanco */
   --primary: #2563eb;
   --primary-600: #1d4ed8;
   --primary-700: #1e40af;
@@ -134,12 +134,13 @@ body {
               var(--bg);
   color: var(--text);
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+  font-size: 16px;
 }
 
 /* Navbar */
 .navbar { background: linear-gradient(90deg, var(--surface) 0%, #0f1a2b 100%) !important; box-shadow: var(--shadow); }
 .navbar-brand { font-weight: 700; letter-spacing: .3px; color: var(--text) !important; }
-.nav-link { color: var(--muted) !important; transition: color .2s ease; }
+.nav-link { color: var(--muted) !important; transition: color .2s ease; padding: .5rem .75rem; font-size: 1rem; }
 .nav-link:hover { color: var(--text) !important; }
 /* Navbar en tema claro */
 [data-theme="light"] .navbar { background: linear-gradient(90deg, #ffffff 0%, #eef2ff 100%) !important; }
@@ -170,6 +171,11 @@ body {
 .card-title { font-weight: 700; }
 .card .btn { border-radius: 12px; }
 .card:hover { transform: translateY(-2px); transition: transform .2s ease; }
+/* Expand cards with generous padding on wide screens */
+.card .card-body { padding: 1.25rem; }
+@media (min-width: 1280px) {
+  .card .card-body { padding: 2rem; }
+}
 
 /* Botones */
 .btn-primary { background: linear-gradient(180deg, var(--primary), var(--primary-600)); border: 0; box-shadow: 0 8px 20px rgba(34,197,94,.25); }
@@ -183,8 +189,16 @@ body {
 /* Formularios */
 .form-control, .form-select { background: var(--surface-2); border: 1px solid rgba(255,255,255,.1); color: var(--text); border-radius: 12px; }
 [data-theme="light"] .form-control, [data-theme="light"] .form-select { background: #ffffff; border-color: rgba(2,6,23,.12); color: #0f172a; }
+.form-control:focus, .form-select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(96,165,250,.12); }
+[data-theme="light"] .form-control::placeholder, [data-theme="light"] .form-select { color: #374151; }
 .form-control::placeholder { color: var(--muted); }
 .form-label { color: var(--muted); }
+/* Large controls for better usability */
+.form-control.input-lg, .form-select.input-lg { padding: .8rem 1rem; font-size: 1rem; min-height: 46px; }
+.btn { padding: .6rem 1rem; font-size: 1rem; }
+.btn:focus-visible { box-shadow: 0 0 0 0.25rem rgba(96,165,250,.35); }
+/* Hover/active visibility */
+.form-select:hover, .form-control:hover { border-color: var(--accent); }
 
 /* Tablas modernas */
 .table { color: var(--text); }
@@ -192,6 +206,8 @@ body {
 .table tbody tr:hover { background: rgba(255,255,255,.04); }
 [data-theme="light"] .table thead th { background: #f8fafc; color: #334155; border-bottom-color: rgba(2,6,23,.08); }
 [data-theme="light"] .table tbody tr:hover { background: #f1f5f9; }
+/* Mejorar contraste de cabeceras en tema claro */
+[data-theme="light"] .table thead th { color: #111827; }
 
 /* Tablas: mejoras móviles */
 @media (max-width: 576px) {

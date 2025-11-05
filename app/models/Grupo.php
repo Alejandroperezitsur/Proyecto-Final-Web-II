@@ -20,17 +20,22 @@ class Grupo extends Model {
         return parent::update($id, $data);
     }
 
-    public function getWithJoins($page = 1, $limit = 10, $profesorId = null) {
+    public function getWithJoins($page = 1, $limit = 10, $profesorId = null, $materiaId = null) {
         $page = max(1, (int)$page);
         $limit = max(1, (int)$limit);
         $offset = ($page - 1) * $limit;
 
-        $where = '';
+        $whereClauses = [];
         $params = [];
         if ($profesorId) {
-            $where = 'WHERE g.profesor_id = :profesor_id';
+            $whereClauses[] = 'g.profesor_id = :profesor_id';
             $params[':profesor_id'] = $profesorId;
         }
+        if ($materiaId) {
+            $whereClauses[] = 'g.materia_id = :materia_id';
+            $params[':materia_id'] = (int)$materiaId;
+        }
+        $where = count($whereClauses) ? ('WHERE '.implode(' AND ', $whereClauses)) : '';
 
         $sql = "SELECT g.*, m.nombre AS materia_nombre, m.clave AS materia_clave,
                        u.email AS profesor_email, u.matricula AS profesor_matricula
@@ -48,13 +53,18 @@ class Grupo extends Model {
         return $stmt->fetchAll();
     }
 
-    public function countWithFilter($profesorId = null) {
-        $where = '';
+    public function countWithFilter($profesorId = null, $materiaId = null) {
+        $whereClauses = [];
         $params = [];
         if ($profesorId) {
-            $where = 'WHERE profesor_id = :profesor_id';
+            $whereClauses[] = 'profesor_id = :profesor_id';
             $params[':profesor_id'] = $profesorId;
         }
+        if ($materiaId) {
+            $whereClauses[] = 'materia_id = :materia_id';
+            $params[':materia_id'] = (int)$materiaId;
+        }
+        $where = count($whereClauses) ? ('WHERE '.implode(' AND ', $whereClauses)) : '';
         $sql = "SELECT COUNT(*) FROM grupos $where";
         $stmt = $this->db->prepare($sql);
         foreach ($params as $k => $v) {

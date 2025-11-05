@@ -4,12 +4,7 @@ require_once __DIR__ . '/../app/models/Usuario.php';
 
 $auth = new AuthController();
 $auth->requireAuth();
-$user = $auth->getCurrentUser();
-if ($user['rol'] !== 'admin') {
-    http_response_code(403);
-    echo 'Acceso denegado';
-    exit;
-}
+$auth->requireRole(['admin']);
 
 $usuarioModel = new Usuario();
 $message = '';
@@ -153,6 +148,7 @@ $csrf = $auth->generateCSRFToken();
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
   <link href="assets/css/styles.css" rel="stylesheet">
   <link href="assets/css/desktop-fixes.css" rel="stylesheet">
+  <meta name="csrf-token" content="<?= htmlspecialchars($csrf) ?>">
 </head>
 <body>
 <?php require __DIR__ . '/partials/header.php'; ?>
