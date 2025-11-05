@@ -128,39 +128,19 @@ if ($edit_id > 0) {
     <link href="assets/css/desktop-fixes.css" rel="stylesheet">
 </head>
 <body>
-<!-- Header institucional compacto -->
-<header class="institutional-header">
-    <div class="container-fluid">
-        <a href="dashboard.php" class="institutional-brand">
-            <img src="assets/ITSUR-LOGO.webp" alt="ITSUR Logo" class="institutional-logo">
-            <div class="institutional-text">
-                <h1 class="institutional-title">SICEnet · ITSUR</h1>
-                <p class="institutional-subtitle">Sistema Integral de Control Escolar</p>
-            </div>
-        </a>
-    </div>
-</header>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container-fluid">
-        <!-- Marca duplicada eliminada: header superior ya muestra el logo -->
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav me-auto">
-                <li class="nav-item"><a class="nav-link" href="dashboard.php">Dashboard</a></li>
-                <li class="nav-item"><a class="nav-link active" href="materias.php">Materias</a></li>
-                <li class="nav-item"><a class="nav-link" href="grupos.php">Grupos</a></li>
-            </ul>
-            <ul class="navbar-nav ms-auto align-items-center">
-                            <!-- Theme toggle eliminado: tema fijo oscuro. Ver assets/js/main.js para restaurarlo -->
-              <li class="nav-item"><a class="nav-link" href="logout.php">Salir</a></li>
-            </ul>
-        </div>
-    </div>
-    </nav>
+<?php require __DIR__ . '/partials/header.php'; ?>
 
 <div class="container mt-4">
+    <div class="row">
+        <div class="col-12 mb-3">
+            <div>
+                <?php $pageTitle = 'Materias'; ?>
+                <h1 class="h3 mb-0"><?= $pageTitle ?></h1>
+                <?php $breadcrumbs = [ ['label' => 'Inicio', 'url' => 'dashboard.php'], ['label' => $pageTitle, 'url' => null] ]; ?>
+                <?php require __DIR__ . '/partials/breadcrumb.php'; ?>
+            </div>
+        </div>
+    </div>
     <div class="row">
         <div class="col-md-6">
             <div class="card">

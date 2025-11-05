@@ -152,44 +152,24 @@ $csrf = $auth->generateCSRFToken();
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
   <link href="assets/css/styles.css" rel="stylesheet">
+  <link href="assets/css/desktop-fixes.css" rel="stylesheet">
 </head>
 <body>
-<!-- Header institucional compacto -->
-<header class="institutional-header">
-  <div class="container-fluid">
-    <a href="dashboard.php" class="institutional-brand">
-      <img src="assets/ITSUR-LOGO.webp" alt="ITSUR Logo" class="institutional-logo">
-      <div class="institutional-text">
-        <h1 class="institutional-title">SICEnet · ITSUR</h1>
-        <p class="institutional-subtitle">Sistema Integral de Control Escolar</p>
-      </div>
-    </a>
-  </div>
-</header>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <div class="container-fluid">
-        <!-- Marca duplicada eliminada: header superior ya muestra el logo -->
-                      <li class="nav-item">
-                          <!-- Theme toggle eliminado: tema fijo oscuro -->
-                      </li>
-  </div>
-  <div class="container-fluid">
-    <span class="navbar-text text-white">Admin</span>
-  </div>
- </nav>
+<?php require __DIR__ . '/partials/header.php'; ?>
 
 <div class="app-shell">
   <!-- Sidebar eliminado: accesos centralizados en dashboard -->
   <main class="app-content">
   <div class="d-flex justify-content-between align-items-center mb-3">
     <div>
-      <h1 class="h3 mb-0">Profesores</h1>
-      <nav aria-label="breadcrumb" class="small">
-        <ol class="breadcrumb mb-0">
-          <li class="breadcrumb-item"><a href="dashboard.php">Inicio</a></li>
-          <li class="breadcrumb-item active" aria-current="page">Profesores</li>
-        </ol>
-      </nav>
+      <?php $pageTitle = 'Profesores'; ?>
+      <h1 class="h3 mb-0"><?= $pageTitle ?></h1>
+      <?php $breadcrumbs = [
+        ['label' => 'Inicio', 'url' => 'dashboard.php'],
+        ['label' => 'Gestión Académica', 'url' => null],
+        ['label' => $pageTitle, 'url' => null],
+      ]; ?>
+      <?php require __DIR__ . '/partials/breadcrumb.php'; ?>
       <div class="text-muted small">Mostrando <?= count($profesores) ?> de <?= (int)$total ?></div>
     </div>
     <div class="d-flex align-items-center gap-2">

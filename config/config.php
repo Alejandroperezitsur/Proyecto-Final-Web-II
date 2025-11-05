@@ -31,5 +31,19 @@ return [
         'csrf_token_name' => 'csrf_token',
         'upload_max_size' => 5242880, // 5MB
         'allowed_extensions' => ['jpg', 'jpeg', 'png']
+    ],
+    // Toggles de módulos visibles en el header/nav
+    'modules' => [
+        'dashboard' => true,
+        'alumnos' => true,
+        'profesores' => true,
+        'materias' => true,
+        'grupos' => true,
+        'calificaciones' => true,
+        'kardex' => true,
+        'mi_carga' => true,
+        'reticula' => true,
+        'reinscripcion' => true,
+        'monitoreo_grupos' => true
     ]
 ];

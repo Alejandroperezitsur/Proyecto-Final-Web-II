@@ -158,48 +158,24 @@ $grupos = $cicloActual ? $grupoModel->getByCicloAndPrefixes($cicloActual, $prefi
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
   <link href="assets/css/styles.css" rel="stylesheet">
+  <link href="assets/css/desktop-fixes.css" rel="stylesheet">
 </head>
 <body>
-<!-- Header institucional compacto -->
-<header class="institutional-header">
-  <div class="container-fluid">
-    <a href="dashboard.php" class="institutional-brand">
-      <img src="assets/ITSUR-LOGO.webp" alt="ITSUR Logo" class="institutional-logo">
-      <div class="institutional-text">
-        <h1 class="institutional-title">SICEnet · ITSUR</h1>
-        <p class="institutional-subtitle">Sistema Integral de Control Escolar</p>
-      </div>
-    </a>
-    <!-- Marca duplicada eliminada: header superior ya muestra el logo -->
-    <!-- Fin de la marca duplicada -->
-    
-  </div>
-</header>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <div class="container-fluid">
-        <a class="navbar-brand d-flex align-items-center" href="dashboard.php">
-          <img src="assets/ITSUR-LOGO.webp" alt="ITSUR" class="navbar-logo me-2">
-          <span class="brand-text">SICEnet · ITSUR</span>
-        </a>
-  </div>
-  <div class="container-fluid d-flex justify-content-end align-items-center">
-    <!-- Theme toggle eliminado: tema oscuro por defecto -->
-    <span class="navbar-text text-white">Alumno</span>
-  </div>
-</nav>
+<?php require __DIR__ . '/partials/header.php'; ?>
 
 <div class="app-shell">
   <!-- Sidebar eliminado: accesos centralizados en dashboard -->
   <main class="app-content">
     <div class="d-flex align-items-center justify-content-between mb-3">
       <div>
-        <h1 class="h3 mb-0">Selección de materias</h1>
-        <nav aria-label="breadcrumb" class="small">
-          <ol class="breadcrumb mb-0">
-            <li class="breadcrumb-item"><a href="dashboard.php">Inicio</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Selección de materias</li>
-          </ol>
-        </nav>
+        <?php $pageTitle = 'Selección de materias'; ?>
+        <h1 class="h3 mb-0"><?= $pageTitle ?></h1>
+        <?php $breadcrumbs = [
+          ['label' => 'Inicio', 'url' => 'dashboard.php'],
+          ['label' => 'Operaciones Académicas', 'url' => null],
+          ['label' => $pageTitle, 'url' => null],
+        ]; ?>
+        <?php require __DIR__ . '/partials/breadcrumb.php'; ?>
       </div>
       <?php if ($activo): ?>
         <span class="badge bg-success">Ventana activa</span>

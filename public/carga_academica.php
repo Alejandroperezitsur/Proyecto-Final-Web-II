@@ -19,36 +19,20 @@ if ($user['rol'] !== 'admin') {
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
   <link href="assets/css/styles.css" rel="stylesheet">
+  <link href="assets/css/desktop-fixes.css" rel="stylesheet">
 </head>
 <body>
-<!-- Header institucional compacto -->
-<header class="institutional-header">
-  <div class="container-fluid">
-    <a href="dashboard.php" class="institutional-brand">
-      <img src="assets/ITSUR-LOGO.webp" alt="ITSUR Logo" class="institutional-logo">
-      <div class="institutional-text">
-        <h1 class="institutional-title">SICEnet · ITSUR</h1>
-        <p class="institutional-subtitle">Sistema Integral de Control Escolar</p>
-      </div>
-    </a>
-  </div>
-</header>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <div class="container-fluid">
-    <!-- Marca duplicada eliminada: header superior ya muestra el logo -->
-        <button class="btn btn-outline-light btn-sm ms-auto me-2" id="themeToggle" title="Cambiar tema">
-          <i class="bi bi-sun-fill"></i>
-        </button>
-  </div>
-  <div class="container-fluid">
-    <span class="navbar-text text-white">Admin</span>
-  </div>
-</nav>
+<?php require __DIR__ . '/partials/header.php'; ?>
 
 <div class="app-shell">
   <!-- Sidebar eliminado: accesos centralizados en dashboard -->
   <main class="app-content">
-    <h1 class="h3 mb-3">Carga Académica</h1>
+    <?php $pageTitle = 'Carga Académica'; ?>
+    <div class="d-flex flex-column mb-3">
+      <h1 class="h3 mb-0"><?= $pageTitle ?></h1>
+      <?php $breadcrumbs = [ ['label' => 'Inicio', 'url' => 'dashboard.php'], ['label' => $pageTitle, 'url' => null] ]; ?>
+      <?php require __DIR__ . '/partials/breadcrumb.php'; ?>
+    </div>
     <p class="text-muted">Asignación de materias y grupos para el periodo.</p>
 
     <div class="card">

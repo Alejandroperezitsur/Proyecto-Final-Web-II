@@ -42,37 +42,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
   <link href="assets/css/styles.css" rel="stylesheet">
+  <link href="assets/css/desktop-fixes.css" rel="stylesheet">
 </head>
 <body>
-<header class="institutional-header">
-    <div class="container-fluid">
-        <a href="dashboard.php" class="institutional-brand">
-            <img src="assets/ITSUR-LOGO.webp" alt="ITSUR Logo" class="institutional-logo">
-            <div class="institutional-text">
-                <h1 class="institutional-title">SICEnet · ITSUR</h1>
-                <p class="institutional-subtitle">Sistema Integral de Control Escolar</p>
-            </div>
-        </a>
-    </div>
- </header>
-
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <div class="container-fluid">
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav ms-auto">
-        <li class="nav-item">
-          <a class="nav-link" href="perfil.php"><i class="bi bi-person"></i> Mi Perfil</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="logout.php"><i class="bi bi-box-arrow-right"></i> Cerrar Sesión</a>
-        </li>
-      </ul>
-    </div>
-  </div>
- </nav>
+<?php require __DIR__ . '/partials/header.php'; ?>
 
 <div class="app-shell">
   <main class="app-content">

@@ -49,39 +49,24 @@ foreach ($rows as $r) {
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
   <link href="assets/css/styles.css" rel="stylesheet">
+  <link href="assets/css/desktop-fixes.css" rel="stylesheet">
 </head>
 <body>
-<!-- Header institucional compacto -->
-<header class="institutional-header">
-  <div class="container-fluid">
-    <!-- Marca duplicada eliminada: header superior ya muestra el logo -->
-  </div>
-</header>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <div class="container-fluid">
-        <a class="navbar-brand d-flex align-items-center" href="dashboard.php">
-          <img src="assets/ITSUR-LOGO.webp" alt="ITSUR Logo" class="navbar-logo me-2">
-          <span class="brand-text">SICEnet · ITSUR</span>
-        </a>
-          <!-- Theme toggle eliminado: tema fijo oscuro -->
-  </div>
-  <div class="container-fluid">
-    <span class="navbar-text text-white">Alumno</span>
-  </div>
-</nav>
+<?php require __DIR__ . '/partials/header.php'; ?>
 
 <div class="app-shell">
   <!-- Sidebar eliminado: accesos centralizados en dashboard -->
   <main class="app-content">
     <div class="d-flex justify-content-between align-items-center mb-3">
       <div>
-        <h1 class="h3 mb-0">Mi Carga Académica</h1>
-        <nav aria-label="breadcrumb" class="small">
-          <ol class="breadcrumb mb-0">
-            <li class="breadcrumb-item"><a href="dashboard.php">Inicio</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Mi Carga Académica</li>
-          </ol>
-        </nav>
+        <?php $pageTitle = 'Mi Carga Académica'; ?>
+        <h1 class="h3 mb-0"><?= $pageTitle ?></h1>
+        <?php $breadcrumbs = [
+          ['label' => 'Inicio', 'url' => 'dashboard.php'],
+          ['label' => 'Operaciones Académicas', 'url' => null],
+          ['label' => $pageTitle, 'url' => null],
+        ]; ?>
+        <?php require __DIR__ . '/partials/breadcrumb.php'; ?>
         <div class="text-muted small">Total materias: <?= count($rows) ?></div>
       </div>
       <div>

@@ -129,65 +129,25 @@ $profesores = $controlUsuarios->listar(1, 100, "WHERE rol = 'profesor' AND activ
   <title>SICEnet · ITSUR — Grupos</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="assets/css/styles.css" rel="stylesheet">
+  <link href="assets/css/styles.css" rel="stylesheet">
+  <link href="assets/css/desktop-fixes.css" rel="stylesheet">
 </head>
 <body>
-<!-- Header institucional compacto -->
-<header class="institutional-header">
-    <div class="container-fluid">
-        <a href="dashboard.php" class="institutional-brand">
-            <img src="assets/ITSUR-LOGO.webp" alt="ITSUR Logo" class="institutional-logo">
-            <div class="institutional-text">
-                <h1 class="institutional-title">SICEnet · ITSUR</h1>
-                <p class="institutional-subtitle">Sistema Integral de Control Escolar</p>
-            </div>
-        </a>
-    </div>
-</header>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand d-flex align-items-center" href="dashboard.php">
-            <img src="assets/ITSUR-LOGO.webp" alt="ITSUR Logo" class="navbar-logo me-2">
-            <span class="brand-text">SICEnet · ITSUR</span>
-        </a>
-                <!-- Marca duplicada eliminada: el header superior contiene la marca -->
-                <!-- Eliminar la marca duplicada aquí -->
-                <!-- Fin de la eliminación -->
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav me-auto">
-                <li class="nav-item"><a class="nav-link" href="dashboard.php">Dashboard</a></li>
-                <?php if ($isAdmin): ?>
-                <li class="nav-item"><a class="nav-link" href="materias.php">Materias</a></li>
-                <?php endif; ?>
-                <li class="nav-item"><a class="nav-link active" href="grupos.php">Grupos</a></li>
-            </ul>
-            <ul class="navbar-nav ms-auto align-items-center">
-              <li class="nav-item me-2">
-                <button class="btn btn-outline-light btn-sm" id="themeToggle" title="Cambiar tema">
-                  <i class="bi bi-sun-fill"></i>
-                </button>
-              </li>
-              <li class="nav-item"><a class="nav-link" href="logout.php">Salir</a></li>
-            </ul>
-        </div>
-    </div>
-    </nav>
+<?php require __DIR__ . '/partials/header.php'; ?>
 
 <div class="container mt-4">
     <div class="row">
         <div class="col-12 mb-3">
           <div class="d-flex justify-content-between align-items-center">
             <div>
-              <h1 class="h3 mb-0">Grupos</h1>
-              <nav aria-label="breadcrumb" class="small">
-                <ol class="breadcrumb mb-0">
-                  <li class="breadcrumb-item"><a href="dashboard.php">Inicio</a></li>
-                  <li class="breadcrumb-item active" aria-current="page">Grupos</li>
-                </ol>
-              </nav>
+              <?php $pageTitle = 'Grupos'; ?>
+              <h1 class="h3 mb-0"><?= $pageTitle ?></h1>
+              <?php $breadcrumbs = [
+                ['label' => 'Inicio', 'url' => 'dashboard.php'],
+                ['label' => 'Gestión Académica', 'url' => null],
+                ['label' => $pageTitle, 'url' => null],
+              ]; ?>
+              <?php require __DIR__ . '/partials/breadcrumb.php'; ?>
             </div>
             <div class="text-muted small">Mostrando <?= count($grupos) ?> de <?= (int)$total ?></div>
           </div>

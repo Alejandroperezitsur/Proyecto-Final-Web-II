@@ -200,6 +200,7 @@ if (method_exists($controlGrupos, 'ciclosDistintos')) {
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
   <link href="assets/css/styles.css" rel="stylesheet">
+  <link href="assets/css/desktop-fixes.css" rel="stylesheet">
   <style>
   @media print {
     body * { visibility: hidden; }
@@ -210,34 +211,21 @@ if (method_exists($controlGrupos, 'ciclosDistintos')) {
   </style>
 </head>
 <body>
-<!-- Header institucional compacto -->
-<header class="institutional-header">
-  <div class="container-fluid">
-    <a href="dashboard.php" class="institutional-brand">
-      <img src="assets/ITSUR-LOGO.webp" alt="ITSUR Logo" class="institutional-logo">
-      <div class="institutional-text">
-        <h1 class="institutional-title">SICEnet · ITSUR</h1>
-        <p class="institutional-subtitle">Sistema Integral de Control Escolar</p>
-      </div>
-    </a>
-  </div>
-</header>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <div class="container-fluid">
-        <!-- Marca duplicada eliminada: el header institucional superior ya muestra el logo -->
-        <!-- Botón de cambio de tema eliminado: tema oscuro forzado en assets/js/main.js (lógica comentada) -->
-  </div>
-  <div class="container-fluid">
-    <span class="navbar-text text-white"><?= htmlspecialchars(ucfirst($role)) ?></span>
-  </div>
-</nav>
+<?php require __DIR__ . '/partials/header.php'; ?>
 
 <div class="app-shell">
   <!-- Sidebar eliminado: accesos centralizados en dashboard -->
   <main class="app-content">
   <div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h3">Calificaciones</h1>
-        <a href="dashboard.php" class="btn btn-outline-secondary">Volver</a>
+    <div>
+      <?php $pageTitle = 'Calificaciones'; ?>
+      <h1 class="h3 mb-0"><?= $pageTitle ?></h1>
+      <?php $breadcrumbs = [ ['label' => 'Inicio', 'url' => 'dashboard.php'], ['label' => $pageTitle, 'url' => null] ]; ?>
+      <?php require __DIR__ . '/partials/breadcrumb.php'; ?>
+    </div>
+    <div>
+      <a href="dashboard.php" class="btn btn-outline-secondary">Volver</a>
+    </div>
   </div>
 
   <?php if ($message): ?>

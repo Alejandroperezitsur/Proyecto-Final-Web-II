@@ -22,6 +22,12 @@ class ControlGrupos
         return $this->datos->ciclosDistintos($profesorId);
     }
 
+    // Alias para compatibilidad con vistas existentes
+    public function ciclosDistintos(?int $profesorId = null): array
+    {
+        return $this->datos->ciclosDistintos($profesorId);
+    }
+
     public function obtenerConJoins(int $pagina, int $limite, $profesorId = null)
     {
         return $this->datos->listarConJoins($pagina, $limite, $profesorId);

@@ -19,47 +19,20 @@ $isAlumno = ($_SESSION['user_role'] ?? '') === 'alumno';
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
   <link href="assets/css/styles.css" rel="stylesheet">
+  <link href="assets/css/desktop-fixes.css" rel="stylesheet">
 </head>
 <body>
-<!-- Header institucional compacto -->
-<header class="institutional-header">
-    <div class="container-fluid">
-        <a href="dashboard.php" class="institutional-brand">
-            <img src="assets/ITSUR-LOGO.webp" alt="ITSUR Logo" class="institutional-logo">
-            <div class="institutional-text">
-                <h1 class="institutional-title">SICEnet · ITSUR</h1>
-                <p class="institutional-subtitle">Sistema Integral de Control Escolar</p>
-            </div>
-        </a>
-    </div>
-</header>
-
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <div class="container-fluid">
-        <!-- Marca duplicada eliminada: el header institucional superior ya muestra el logo -->
-        <!-- Botón de cambio de tema eliminado: tema oscuro forzado en assets/js/main.js (lógica comentada) -->
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav ms-auto">
-        <li class="nav-item">
-          <button class="btn btn-outline-light btn-sm me-2" id="themeToggle" title="Cambiar tema">
-            <i class="bi bi-sun-fill"></i>
-          </button>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="logout.php"><i class="bi bi-box-arrow-right"></i> Cerrar Sesión</a>
-        </li>
-      </ul>
-    </div>
-  </div>
- </nav>
+<?php require __DIR__ . '/partials/header.php'; ?>
 
 <div class="app-shell">
   <!-- Sidebar eliminado: accesos centralizados en dashboard -->
   <main class="app-content">
-    <h1 class="h3 mb-3">Mi Perfil</h1>
+    <?php $pageTitle = 'Mi Perfil'; ?>
+    <div class="d-flex flex-column mb-3">
+      <h1 class="h3 mb-0"><?= $pageTitle ?></h1>
+      <?php $breadcrumbs = [ ['label' => 'Inicio', 'url' => 'dashboard.php'], ['label' => $pageTitle, 'url' => null] ]; ?>
+      <?php require __DIR__ . '/partials/breadcrumb.php'; ?>
+    </div>
     <p class="text-muted">Información de tu cuenta y acceso.</p>
 
     <div class="row g-4">

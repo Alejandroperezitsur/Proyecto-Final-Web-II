@@ -28,6 +28,12 @@ class ControlAlumnos
         return $this->datos->listar($pagina, $limite);
     }
 
+    // Alias para compatibilidad con vistas que invocan getAll
+    public function getAll(int $pagina = 1, int $limite = 20)
+    {
+        return $this->listar($pagina, $limite);
+    }
+
     // Métodos compatibles con la API previa (nombrados como el modelo original)
     public function delete(int $id)
     {

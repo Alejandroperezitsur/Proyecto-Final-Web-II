@@ -163,44 +163,21 @@ $csrf = $controlAut->generarTokenCSRF();
   <link href="assets/css/desktop-fixes.css" rel="stylesheet">
 </head>
 <body>
-<!-- Header institucional compacto -->
-<header class="institutional-header">
-  <div class="container-fluid">
-    <a href="dashboard.php" class="institutional-brand">
-      <img src="assets/ITSUR-LOGO.webp" alt="ITSUR Logo" class="institutional-logo">
-      <div class="institutional-text">
-        <h1 class="institutional-title">SICEnet · ITSUR</h1>
-        <p class="institutional-subtitle">Sistema Integral de Control Escolar</p>
-      </div>
-    </a>
-  </div>
-</header>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <div class="container-fluid">
-        <a class="navbar-brand d-flex align-items-center" href="dashboard.php">
-                <img src="assets/ITSUR-LOGO.webp" alt="ITSUR" class="navbar-logo me-2">
-                <span class="brand-text">SICEnet · ITSUR</span>
-            </a>
-    <!-- Marca duplicada eliminada: header superior ya muestra el logo -->
-  </div>
-  <div class="container-fluid d-flex justify-content-end align-items-center">
-    <!-- Theme toggle eliminado: tema fijo oscuro. Restaurar desde assets/js/main.js si es necesario -->
-    <span class="navbar-text text-white">Admin</span>
-  </div>
-</nav>
+<?php require __DIR__ . '/partials/header.php'; ?>
 
 <div class="app-shell">
   <!-- Sidebar eliminado: accesos centralizados en dashboard -->
   <main class="app-content">
   <div class="d-flex justify-content-between align-items-center mb-3">
     <div>
-      <h1 class="h3 mb-0">Alumnos</h1>
-      <nav aria-label="breadcrumb" class="small">
-        <ol class="breadcrumb mb-0">
-          <li class="breadcrumb-item"><a href="dashboard.php">Inicio</a></li>
-          <li class="breadcrumb-item active" aria-current="page">Alumnos</li>
-        </ol>
-      </nav>
+      <?php $pageTitle = 'Alumnos'; ?>
+      <h1 class="h3 mb-0"><?= $pageTitle ?></h1>
+      <?php $breadcrumbs = [
+        ['label' => 'Inicio', 'url' => 'dashboard.php'],
+        ['label' => 'Gestión Académica', 'url' => null],
+        ['label' => $pageTitle, 'url' => null],
+      ]; ?>
+      <?php require __DIR__ . '/partials/breadcrumb.php'; ?>
       <div class="text-muted small">Mostrando <?= count($alumnos) ?> de <?= (int)$total ?></div>
     </div>
     <div class="d-flex align-items-center gap-2 flex-wrap">

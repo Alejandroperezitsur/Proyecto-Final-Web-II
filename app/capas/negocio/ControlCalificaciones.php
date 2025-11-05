@@ -27,6 +27,14 @@ class ControlCalificaciones
         return $this->datos->promediosPorCiclo();
     }
 
+    public function obtenerAgregadosPorCiclo(string $ciclo): array
+    {
+        if (method_exists($this->datos, 'agregadosPorCiclo')) {
+            return $this->datos->agregadosPorCiclo($ciclo);
+        }
+        return [];
+    }
+
     public function obtenerAgregadosPorCicloDetallados(): array
     {
         // El modelo original exponía este método; si el adaptador lo necesita, puede añadirse.
@@ -55,5 +63,31 @@ class ControlCalificaciones
             return $this->datos->obtenerPromedioProfesor($profesorId);
         }
         return 0.0;
+    }
+
+    // CRUD y consultas de apoyo usadas en vistas
+    public function findOne(int $alumnoId, int $grupoId)
+    {
+        return $this->datos->findOne($alumnoId, $grupoId);
+    }
+
+    public function crear(array $data)
+    {
+        return $this->datos->crear($data);
+    }
+
+    public function actualizar(int $id, array $data)
+    {
+        return $this->datos->actualizar($id, $data);
+    }
+
+    public function getByProfesor(int $profesorId, int $page = 1, int $limit = 10): array
+    {
+        return $this->datos->getByProfesor($profesorId, $page, $limit);
+    }
+
+    public function countByProfesor(int $profesorId): int
+    {
+        return $this->datos->countByProfesor($profesorId);
     }
 }

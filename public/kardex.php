@@ -72,6 +72,7 @@ if ($matricula !== '') {
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
   <link href="assets/css/styles.css" rel="stylesheet">
+  <link href="assets/css/desktop-fixes.css" rel="stylesheet">
   <style>
   @media print {
     body * { visibility: hidden; }
@@ -82,30 +83,17 @@ if ($matricula !== '') {
   </style>
 </head>
 <body>
-<!-- Header institucional compacto -->
-<header class="institutional-header">
-    <div class="container-fluid">
-        <!-- Marca duplicada eliminada: header superior ya muestra el logo -->
-    </div>
-</header>
-
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <div class="container-fluid">
-        <a class="navbar-brand d-flex align-items-center" href="dashboard.php">
-            <img src="assets/ITSUR-LOGO.webp" alt="ITSUR Logo" class="navbar-logo me-2">
-            <span class="brand-text">SICEnet · ITSUR</span>
-        </a>
-        <button class="btn btn-outline-light btn-sm ms-auto me-2" id="themeToggle" title="Cambiar tema">
-            <i class="bi bi-sun-fill"></i>
-        </button>
-        <span class="navbar-text text-white"><?= htmlspecialchars($role) ?></span>
-  </div>
-</nav>
+<?php require __DIR__ . '/partials/header.php'; ?>
 
 <div class="app-shell">
   <!-- Sidebar eliminado: accesos centralizados en dashboard -->
   <main class="app-content">
-    <h1 class="h3 mb-3">Kardex</h1>
+    <?php $pageTitle = 'Kardex'; ?>
+    <div class="d-flex flex-column mb-3">
+      <h1 class="h3 mb-0"><?= $pageTitle ?></h1>
+      <?php $breadcrumbs = [ ['label' => 'Inicio', 'url' => 'dashboard.php'], ['label' => $pageTitle, 'url' => null] ]; ?>
+      <?php require __DIR__ . '/partials/breadcrumb.php'; ?>
+    </div>
     <p class="text-muted">Consulta y gestión del historial académico del alumno.</p>
 
     <div class="card">
