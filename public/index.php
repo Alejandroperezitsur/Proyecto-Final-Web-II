@@ -1,0 +1,48 @@
+<?php
+session_start();
+
+require_once __DIR__ . '/../core/bootstrap.php';
+
+use Core\Router;
+
+$router = new Router();
+
+// Rutas públicas
+$router->get('/', 'AuthController@home');
+$router->get('login/student', 'AuthController@studentLogin');
+$router->post('login/student', 'AuthController@studentAuth');
+$router->get('login/professor', 'AuthController@professorLogin');
+$router->post('login/professor', 'AuthController@professorAuth');
+$router->get('login/admin', 'AuthController@adminLogin');
+$router->post('login/admin', 'AuthController@adminAuth');
+$router->get('logout', 'AuthController@logout');
+
+// Rutas protegidas
+$router->get('student/dashboard', 'StudentController@dashboard');
+$router->get('student/cardex', 'StudentController@cardex');
+$router->get('student/grades', 'StudentController@grades');
+$router->get('student/schedule', 'StudentController@schedule');
+$router->get('student/reticula', 'StudentController@reticula');
+$router->post('student/reinscripcion', 'StudentController@reinscripcion');
+
+$router->get('professor/dashboard', 'ProfessorController@dashboard');
+$router->get('professor/groups', 'ProfessorController@groups');
+$router->get('professor/group', 'ProfessorController@group');
+$router->post('professor/grades/update', 'ProfessorController@updateGrades');
+
+$router->get('admin/dashboard', 'AdminController@dashboard');
+$router->get('admin/stats', 'AdminController@stats');
+$router->get('admin/crud', 'AdminController@crud');
+$router->post('admin/crud/save', 'AdminController@crudSave');
+$router->post('admin/crud/update', 'AdminController@crudUpdate');
+$router->post('admin/crud/delete', 'AdminController@crudDelete');
+// Exportaciones Admin (PDF/Excel)
+$router->get('admin/export/pdf', 'AdminController@exportPDF');
+$router->post('admin/export/pdf', 'AdminController@exportPDF');
+$router->get('admin/export/excel', 'AdminController@exportExcel');
+$router->post('admin/export/excel', 'AdminController@exportExcel');
+// Control de reinscripción
+$router->get('admin/toggleReinscripcion', 'AdminController@toggleReinscripcion');
+
+// Despachar
+$router->dispatch();
