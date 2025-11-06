@@ -1,7 +1,6 @@
 <h3 class="section-title">CRUD: <?= htmlspecialchars($entity) ?></h3>
 <div class="card">
-  <form method="get" action="/">
-    <input type="hidden" name="route" value="admin/crud" />
+  <form method="get" action="<?= \Core\Url::route('admin/crud') ?>">
     <input type="hidden" name="entity" value="<?= htmlspecialchars($entity) ?>" />
     <div class="row">
       <input class="input" name="q" value="<?= htmlspecialchars($q ?? '') ?>" placeholder="Buscar (nombre, matrícula/usuario)" />
@@ -11,14 +10,14 @@
         <?php endforeach; ?>
       </select>
       <button class="btn" type="submit"><i class="fa fa-magnifying-glass"></i> Filtrar</button>
-      <?php $qv = urlencode($q ?? ''); ?>
-<a class="export-btn" href="?route=admin/export/pdf&entity=<?= htmlspecialchars($entity) ?>&q=<?= $qv ?>"><i class="fa fa-file-pdf"></i> Exportar PDF</a>
-<a class="export-btn" href="?route=admin/export/excel&entity=<?= htmlspecialchars($entity) ?>&q=<?= $qv ?>"><i class="fa fa-file-excel"></i> Exportar Excel</a>
+      <?php $qv = $q ?? ''; ?>
+      <a class="export-btn" href="<?= \Core\Url::route('admin/export/pdf', ['entity'=>htmlspecialchars($entity), 'q'=>$qv]) ?>"><i class="fa fa-file-pdf"></i> Exportar PDF</a>
+      <a class="export-btn" href="<?= \Core\Url::route('admin/export/excel', ['entity'=>htmlspecialchars($entity), 'q'=>$qv]) ?>"><i class="fa fa-file-excel"></i> Exportar Excel</a>
     </div>
   </form>
 </div>
 <div class="card">
-<form method="post" action="?route=admin/crud/save" data-validate>
+<form method="post" action="<?= \Core\Url::route('admin/crud/save') ?>" data-validate>
     <input type="hidden" name="entity" value="<?= htmlspecialchars($entity) ?>" />
     <input type="hidden" name="csrf_token" value="<?= \Core\Security::csrfToken() ?>" />
     <?php if($entity==='carreras'): ?>
@@ -64,7 +63,7 @@
     <button class="btn" type="submit"><i class="fa fa-plus"></i> Crear</button>
   </form>
 </div>
-<div class="card" style="margin-top:12px">
+<div class="card mt-12">
   <table class="table">
     <thead>
       <tr>
@@ -78,7 +77,7 @@
           <?php foreach($r as $k=>$v): ?><td><?= htmlspecialchars((string)$v) ?></td><?php endforeach; ?>
           <td>
             <button class="btn secondary" data-edit='<?= json_encode($r, JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_AMP|JSON_HEX_QUOT) ?>' data-entity="<?= htmlspecialchars($entity) ?>"><i class="fa fa-pen"></i> Editar</button>
-<form method="post" action="?route=admin/crud/delete" style="display:inline" onsubmit="return confirmDelete(this)">
+<form method="post" action="<?= \Core\Url::route('admin/crud/delete') ?>" class="js-confirm-delete inline">
               <input type="hidden" name="entity" value="<?= htmlspecialchars($entity) ?>" />
               <input type="hidden" name="id" value="<?= (int)$r['id'] ?>" />
               <input type="hidden" name="csrf_token" value="<?= \Core\Security::csrfToken() ?>" />
@@ -89,13 +88,13 @@
       <?php endforeach; ?>
     </tbody>
   </table>
-  <div style="margin-top:8px;color:#9e9e9e">Total: <?= (int)($total ?? count($rows)) ?> • Página <?= (int)($page ?? 1) ?></div>
-  <div class="row" style="margin-top:8px">
-    <?php $p = (int)($page ?? 1); $per=(int)($per_page ?? 10); $qv = urlencode($q ?? ''); ?>
+<div class="mt-8 text-muted">Total: <?= (int)($total ?? count($rows)) ?> • Página <?= (int)($page ?? 1) ?></div>
+<div class="row mt-8">
+    <?php $p = (int)($page ?? 1); $per=(int)($per_page ?? 10); $qv = $q ?? ''; ?>
     <?php if($p>1): ?>
-<a class="btn" href="?route=admin/crud&entity=<?= htmlspecialchars($entity) ?>&page=<?= $p-1 ?>&per_page=<?= $per ?>&q=<?= $qv ?>">« Anterior</a>
+      <a class="btn" href="<?= \Core\Url::route('admin/crud', ['entity'=>htmlspecialchars($entity), 'page'=>$p-1, 'per_page'=>$per, 'q'=>$qv]) ?>">« Anterior</a>
     <?php endif; ?>
-<a class="btn" href="?route=admin/crud&entity=<?= htmlspecialchars($entity) ?>&page=<?= $p+1 ?>&per_page=<?= $per ?>&q=<?= $qv ?>">Siguiente »</a>
+    <a class="btn" href="<?= \Core\Url::route('admin/crud', ['entity'=>htmlspecialchars($entity), 'page'=>$p+1, 'per_page'=>$per, 'q'=>$qv]) ?>">Siguiente »</a>
   </div>
 </div>
 
@@ -103,12 +102,12 @@
 <div id="modal" class="modal" hidden>
   <div class="modal-content card">
     <h3>Editar <?= htmlspecialchars($entity) ?></h3>
-<form method="post" action="?route=admin/crud/update" data-validate>
+<form method="post" action="<?= \Core\Url::route('admin/crud/update') ?>" data-validate>
       <input type="hidden" name="entity" value="<?= htmlspecialchars($entity) ?>" />
       <input type="hidden" name="id" />
       <input type="hidden" name="csrf_token" value="<?= \Core\Security::csrfToken() ?>" />
       <div id="modal-fields"></div>
-      <div class="row" style="margin-top:12px">
+<div class="row mt-12">
         <button class="btn" type="submit"><i class="fa fa-floppy-disk"></i> Guardar cambios</button>
         <button class="btn secondary" type="button" onclick="closeModal()">Cancelar</button>
       </div>

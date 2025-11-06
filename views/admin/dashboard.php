@@ -1,11 +1,11 @@
-<div class="row" style="margin-bottom:12px">
-  <a class="export-btn" href="?route=admin/export/pdf&mode=dashboard">📊 Exportar PDF</a>
-  <a class="export-btn" href="?route=admin/export/excel&mode=dashboard">📈 Exportar Excel</a>
+<div class="row mb-12">
+  <a class="export-btn" href="<?= \Core\Url::route('admin/export/pdf', ['mode'=>'dashboard']) ?>">📊 Exportar PDF</a>
+  <a class="export-btn" href="<?= \Core\Url::route('admin/export/excel', ['mode'=>'dashboard']) ?>">📈 Exportar Excel</a>
 </div>
 <div class="grid cols-3">
   <div class="card">
     <h3>Estado general</h3>
-    <div class="badges-row" style="margin-top:6px">
+  <div class="badges-row mt-6">
       <span class="badge cyan"><?= (int)$stats['alumnos'] ?> Alumnos 👨‍🎓</span>
       <span class="badge magenta"><?= (int)$stats['profesores'] ?> Profesores 👩‍🏫</span>
       <span class="badge violet"><?= (int)$stats['grupos'] ?> Grupos 🧩</span>
@@ -23,11 +23,11 @@
   </div>
   <div class="card">
     <h3>Administración</h3>
-    <p><a class="btn" href="?route=admin/crud&entity=carreras">Carreras</a> <span class="badge gray"><?= (int)$stats['carreras'] ?></span></p>
-    <p><a class="btn" href="?route=admin/crud&entity=materias">Materias</a> <span class="badge gray"><?= (int)$stats['materias'] ?></span></p>
-    <p><a class="btn" href="?route=admin/crud&entity=grupos">Grupos</a> <span class="badge gray"><?= (int)$stats['grupos'] ?></span></p>
-    <p><a class="btn" href="?route=admin/crud&entity=alumnos">Alumnos</a> <span class="badge gray"><?= (int)$stats['alumnos'] ?></span></p>
-    <p><a class="btn" href="?route=admin/crud&entity=profesores">Profesores</a> <span class="badge gray"><?= (int)$stats['profesores'] ?></span></p>
+    <p><a class="btn" href="<?= \Core\Url::route('admin/crud', ['entity'=>'carreras']) ?>">Carreras</a> <span class="badge gray"><?= (int)$stats['carreras'] ?></span></p>
+    <p><a class="btn" href="<?= \Core\Url::route('admin/crud', ['entity'=>'materias']) ?>">Materias</a> <span class="badge gray"><?= (int)$stats['materias'] ?></span></p>
+    <p><a class="btn" href="<?= \Core\Url::route('admin/crud', ['entity'=>'grupos']) ?>">Grupos</a> <span class="badge gray"><?= (int)$stats['grupos'] ?></span></p>
+    <p><a class="btn" href="<?= \Core\Url::route('admin/crud', ['entity'=>'alumnos']) ?>">Alumnos</a> <span class="badge gray"><?= (int)$stats['alumnos'] ?></span></p>
+    <p><a class="btn" href="<?= \Core\Url::route('admin/crud', ['entity'=>'profesores']) ?>">Profesores</a> <span class="badge gray"><?= (int)$stats['profesores'] ?></span></p>
   </div>
   <div class="card">
     <h3>Control de reinscripción</h3>
@@ -39,8 +39,8 @@
         <span class="status-inactivo">Inactiva</span>
       <?php endif; ?>
     </div>
-    <p style="margin-top:8px">
-      <a class="btn" href="?route=admin/toggleReinscripcion"><i class="fa fa-rotate"></i> Activar / Desactivar</a>
+    <p class="mt-8">
+      <a class="btn" href="<?= \Core\Url::route('admin/toggleReinscripcion') ?>"><i class="fa fa-rotate"></i> Activar / Desactivar</a>
     </p>
   </div>
   <div class="card">
@@ -53,7 +53,7 @@
     <?php endif; ?>
   </div>
 </div>
-<div class="grid cols-3" style="margin-top:16px">
+<div class="grid cols-3 mt-16">
   <div class="card">
     <h3>Profesores por carrera</h3>
     <?php $hasProfesoresCarrera = !empty($profesores_por_carrera); ?>
@@ -112,7 +112,7 @@ if (cProm) {
 // Sección: Estadísticas generales
 </script>
 
-<div class="grid cols-3" style="margin-top:16px">
+<div class="grid cols-3 mt-16">
   <div class="card">
     <h3>📊 Estadísticas generales</h3>
     <canvas id="statsChart"></canvas>

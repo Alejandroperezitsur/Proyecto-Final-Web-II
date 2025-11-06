@@ -9,7 +9,7 @@
         <td><?= htmlspecialchars($r['clave']) ?></td>
         <td><?= htmlspecialchars($r['materia']) ?></td>
         <td><?= htmlspecialchars($r['salon']) ?></td>
-        <td><a class="btn" href="?route=professor/group&id=<?= (int)$r['id'] ?>"><i class="fa fa-users"></i> Alumnos</a></td>
+        <td><a class="btn" href="<?= \Core\Url::route('professor/group', ['id'=>(int)$r['id']]) ?>"><i class="fa fa-users"></i> Alumnos</a></td>
       </tr>
     <?php endforeach; ?>
   </tbody>

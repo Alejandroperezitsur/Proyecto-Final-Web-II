@@ -1,10 +1,10 @@
 <h3 class="section-title">Alumnos del grupo</h3>
-<form method="post" action="?route=professor/grades/update">
+<form method="post" action="<?= \Core\Url::route('professor/grades/update') ?>">
   <input type="hidden" name="csrf_token" value="<?= \Core\Security::csrfToken() ?>" />
   <input type="hidden" name="grupo_id" value="<?= (int)$grupoId ?>" />
   <label>Unidades (3 a 11):</label>
   <input class="input" type="number" name="unidades" min="3" max="11" value="5" />
-  <table class="table" style="margin-top:12px">
+<table class="table mt-12">
     <thead>
       <tr>
         <th>Matrícula</th><th>Alumno</th>

@@ -7,12 +7,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SICEnet</title>
-  <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="stylesheet" href="<?= \Core\Url::asset('css/style.css') ?>" />
+  <link rel="stylesheet" href="<?= \Core\Url::asset('css/utilities.css') ?>" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
-<body class="with-sidebar">
+<body class="with-sidebar" data-route="<?= htmlspecialchars($route) ?>">
   <?php $route = $_GET['route'] ?? '/'; $role = $_SESSION['role'] ?? null; $entity = $_GET['entity'] ?? ''; ?>
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
@@ -22,35 +23,35 @@
     </div>
     <nav class="menu">
       <?php if(!$role): ?>
-        <a href="?route=/" class="<?= ($route === '/') ? 'active' : '' ?>"><i class="fa fa-house"></i><span>Inicio</span></a>
-        <a href="?route=login/student" class="<?= ($route === 'login/student') ? 'active' : '' ?>"><i class="fa fa-user-graduate"></i><span>Alumno</span></a>
-        <a href="?route=login/professor" class="<?= ($route === 'login/professor') ? 'active' : '' ?>"><i class="fa fa-chalkboard-teacher"></i><span>Profesor</span></a>
-        <a href="?route=login/admin" class="<?= ($route === 'login/admin') ? 'active' : '' ?>"><i class="fa fa-user-shield"></i><span>Admin</span></a>
+        <a href="<?= \Core\Url::route('/') ?>" class="<?= ($route === '/') ? 'active' : '' ?>"><i class="fa fa-house"></i><span>Inicio</span></a>
+        <a href="<?= \Core\Url::route('login/student') ?>" class="<?= ($route === 'login/student') ? 'active' : '' ?>"><i class="fa fa-user-graduate"></i><span>Alumno</span></a>
+        <a href="<?= \Core\Url::route('login/professor') ?>" class="<?= ($route === 'login/professor') ? 'active' : '' ?>"><i class="fa fa-chalkboard-teacher"></i><span>Profesor</span></a>
+        <a href="<?= \Core\Url::route('login/admin') ?>" class="<?= ($route === 'login/admin') ? 'active' : '' ?>"><i class="fa fa-user-shield"></i><span>Admin</span></a>
       <?php elseif($role==='admin'): ?>
         <?php $sidebarStats = \Controllers\AdminController::getSidebarStats(); ?>
-        <a href="?route=admin/dashboard" class="<?= str_starts_with($route,'admin/dashboard') || $route==='admin/stats' ? 'active' : '' ?>"><i class="fa fa-gauge"></i><span>Dashboard</span></a>
-        <a href="?route=admin/crud&entity=alumnos" class="<?= ($route==='admin/crud' && $entity==='alumnos') ? 'active' : '' ?>"><i class="fa fa-user-graduate"></i><span>Alumnos</span><span class="menu-badge"><?= (int)($sidebarStats['alumnos'] ?? 0) ?></span></a>
-        <a href="?route=admin/crud&entity=profesores" class="<?= ($route==='admin/crud' && $entity==='profesores') ? 'active' : '' ?>"><i class="fa fa-chalkboard-teacher"></i><span>Profesores</span><span class="menu-badge"><?= (int)($sidebarStats['profesores'] ?? 0) ?></span></a>
-        <a href="?route=admin/crud&entity=carreras" class="<?= ($route==='admin/crud' && $entity==='carreras') ? 'active' : '' ?>"><i class="fa fa-graduation-cap"></i><span>Carreras</span><span class="menu-badge"><?= (int)($sidebarStats['carreras'] ?? 0) ?></span></a>
-        <a href="?route=admin/crud&entity=materias" class="<?= ($route==='admin/crud' && $entity==='materias') ? 'active' : '' ?>"><i class="fa fa-book"></i><span>Materias</span><span class="menu-badge"><?= (int)($sidebarStats['materias'] ?? 0) ?></span></a>
-        <a href="?route=admin/crud&entity=grupos" class="<?= ($route==='admin/crud' && $entity==='grupos') ? 'active' : '' ?>"><i class="fa fa-people-group"></i><span>Grupos</span><span class="menu-badge"><?= (int)($sidebarStats['grupos'] ?? 0) ?></span></a>
-        <a href="?route=admin/stats" class="<?= ($route==='admin/stats') ? 'active' : '' ?>"><i class="fa fa-gear"></i><span>Configuración</span></a>
+        <a href="<?= \Core\Url::route('admin/dashboard') ?>" class="<?= str_starts_with($route,'admin/dashboard') || $route==='admin/stats' ? 'active' : '' ?>"><i class="fa fa-gauge"></i><span>Dashboard</span></a>
+        <a href="<?= \Core\Url::route('admin/crud', ['entity'=>'alumnos']) ?>" class="<?= ($route==='admin/crud' && $entity==='alumnos') ? 'active' : '' ?>"><i class="fa fa-user-graduate"></i><span>Alumnos</span><span class="menu-badge"><?= (int)($sidebarStats['alumnos'] ?? 0) ?></span></a>
+        <a href="<?= \Core\Url::route('admin/crud', ['entity'=>'profesores']) ?>" class="<?= ($route==='admin/crud' && $entity==='profesores') ? 'active' : '' ?>"><i class="fa fa-chalkboard-teacher"></i><span>Profesores</span><span class="menu-badge"><?= (int)($sidebarStats['profesores'] ?? 0) ?></span></a>
+        <a href="<?= \Core\Url::route('admin/crud', ['entity'=>'carreras']) ?>" class="<?= ($route==='admin/crud' && $entity==='carreras') ? 'active' : '' ?>"><i class="fa fa-graduation-cap"></i><span>Carreras</span><span class="menu-badge"><?= (int)($sidebarStats['carreras'] ?? 0) ?></span></a>
+        <a href="<?= \Core\Url::route('admin/crud', ['entity'=>'materias']) ?>" class="<?= ($route==='admin/crud' && $entity==='materias') ? 'active' : '' ?>"><i class="fa fa-book"></i><span>Materias</span><span class="menu-badge"><?= (int)($sidebarStats['materias'] ?? 0) ?></span></a>
+        <a href="<?= \Core\Url::route('admin/crud', ['entity'=>'grupos']) ?>" class="<?= ($route==='admin/crud' && $entity==='grupos') ? 'active' : '' ?>"><i class="fa fa-people-group"></i><span>Grupos</span><span class="menu-badge"><?= (int)($sidebarStats['grupos'] ?? 0) ?></span></a>
+        <a href="<?= \Core\Url::route('admin/stats') ?>" class="<?= ($route==='admin/stats') ? 'active' : '' ?>"><i class="fa fa-gear"></i><span>Configuración</span></a>
       <?php elseif($role==='professor'): ?>
-        <a href="?route=professor/dashboard" class="<?= ($route==='professor/dashboard') ? 'active' : '' ?>"><i class="fa fa-gauge"></i><span>Dashboard</span></a>
-        <a href="?route=professor/groups" class="<?= ($route==='professor/groups' || $route==='professor/group') ? 'active' : '' ?>"><i class="fa fa-people-group"></i><span>Mis grupos</span></a>
-        <a href="?route=professor/groups" class="<?= ($route==='professor/group') ? 'active' : '' ?>"><i class="fa fa-star"></i><span>Calificaciones</span></a>
+        <a href="<?= \Core\Url::route('professor/dashboard') ?>" class="<?= ($route==='professor/dashboard') ? 'active' : '' ?>"><i class="fa fa-gauge"></i><span>Dashboard</span></a>
+        <a href="<?= \Core\Url::route('professor/groups') ?>" class="<?= ($route==='professor/groups' || $route==='professor/group') ? 'active' : '' ?>"><i class="fa fa-people-group"></i><span>Mis grupos</span></a>
+        <a href="<?= \Core\Url::route('professor/groups') ?>" class="<?= ($route==='professor/group') ? 'active' : '' ?>"><i class="fa fa-star"></i><span>Calificaciones</span></a>
       <?php elseif($role==='student'): ?>
-        <a href="?route=student/dashboard" class="<?= ($route==='student/dashboard') ? 'active' : '' ?>"><i class="fa fa-gauge"></i><span>Dashboard</span></a>
-        <a href="?route=student/cardex" class="<?= ($route==='student/cardex') ? 'active' : '' ?>"><i class="fa fa-list"></i><span>Cardex</span></a>
-        <a href="?route=student/grades" class="<?= ($route==='student/grades') ? 'active' : '' ?>"><i class="fa fa-star"></i><span>Calificaciones</span></a>
-        <a href="?route=student/schedule" class="<?= ($route==='student/schedule') ? 'active' : '' ?>"><i class="fa fa-calendar"></i><span>Horario</span></a>
-        <a href="?route=student/reticula" class="<?= ($route==='student/reticula') ? 'active' : '' ?>"><i class="fa fa-diagram-project"></i><span>Retícula</span></a>
-        <a href="?route=student/dashboard" class="<?= ($route==='student/dashboard') ? 'active' : '' ?>"><i class="fa fa-check"></i><span>Reinscripción</span></a>
+        <a href="<?= \Core\Url::route('student/dashboard') ?>" class="<?= ($route==='student/dashboard') ? 'active' : '' ?>"><i class="fa fa-gauge"></i><span>Dashboard</span></a>
+        <a href="<?= \Core\Url::route('student/cardex') ?>" class="<?= ($route==='student/cardex') ? 'active' : '' ?>"><i class="fa fa-list"></i><span>Cardex</span></a>
+        <a href="<?= \Core\Url::route('student/grades') ?>" class="<?= ($route==='student/grades') ? 'active' : '' ?>"><i class="fa fa-star"></i><span>Calificaciones</span></a>
+        <a href="<?= \Core\Url::route('student/schedule') ?>" class="<?= ($route==='student/schedule') ? 'active' : '' ?>"><i class="fa fa-calendar"></i><span>Horario</span></a>
+        <a href="<?= \Core\Url::route('student/reticula') ?>" class="<?= ($route==='student/reticula') ? 'active' : '' ?>"><i class="fa fa-diagram-project"></i><span>Retícula</span></a>
+        <a href="<?= \Core\Url::route('student/dashboard') ?>" class="<?= ($route==='student/dashboard') ? 'active' : '' ?>"><i class="fa fa-check"></i><span>Reinscripción</span></a>
       <?php endif; ?>
     </nav>
     <?php if($role): ?>
     <div class="sidebar-footer">
-      <a href="?route=logout" class="logout"><i class="fa fa-right-from-bracket"></i><span>Salir</span></a>
+      <a href="<?= \Core\Url::route('logout') ?>" class="logout"><i class="fa fa-right-from-bracket"></i><span>Salir</span></a>
     </div>
     <?php endif; ?>
   </aside>
@@ -59,7 +60,7 @@
       <div class="logo">IT</div>
       <div>
         <strong>SICEnet</strong>
-        <div style="font-size:12px;color:#9e9e9e">Sistema Integral de Control Escolar - ITSUR</div>
+        <div class="text-muted text-small">Sistema Integral de Control Escolar - ITSUR</div>
       </div>
     </div>
     <button id="sidebar-toggle-top" class="hamburger" aria-label="Alternar menú"><i class="fa fa-bars"></i></button>
@@ -103,10 +104,9 @@
       }
       if($text !== ''){
         echo '<div class="toast '.htmlspecialchars($type).'">'.htmlspecialchars($text).'</div>';
-        echo '<script>setTimeout(function(){var t=document.querySelector(".toast"); if(t) t.remove();},3000);</script>';
       }
     }
   ?>
-  <script src="assets/js/app.js"></script>
+  <script src="<?= \Core\Url::asset('js/app.js') ?>"></script>
 </body>
 </html>

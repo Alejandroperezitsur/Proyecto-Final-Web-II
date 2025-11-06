@@ -16,7 +16,11 @@ class Controller
 
     protected function redirect(string $route): void
     {
-        header('Location: /?route=' . urlencode($route));
+        // Usar base_path si está configurado (para despliegues en subdirectorios)
+        $base = \Core\Config::get('app')['base_path'] ?? '';
+        $prefix = rtrim($base, '/');
+        $location = ($prefix !== '' ? $prefix . '/' : '') . '?route=' . urlencode($route);
+        header('Location: ' . $location);
         exit;
     }
 

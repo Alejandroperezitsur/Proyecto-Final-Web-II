@@ -8,39 +8,36 @@
   <div class="card">
     <h3>Acciones</h3>
     <p>
-      <a class="btn" href="?route=student/cardex"><i class="fa fa-list"></i> Ver Cardex</a>
+      <a class="btn" href="<?= \Core\Url::route('student/cardex') ?>"><i class="fa fa-list"></i> Ver Cardex</a>
     </p>
     <p>
-      <a class="btn" href="?route=student/grades"><i class="fa fa-star"></i> Calificaciones actuales</a>
+      <a class="btn" href="<?= \Core\Url::route('student/grades') ?>"><i class="fa fa-star"></i> Calificaciones actuales</a>
     </p>
     <p>
-      <a class="btn" href="?route=student/schedule"><i class="fa fa-calendar"></i> Horario escolar</a>
+      <a class="btn" href="<?= \Core\Url::route('student/schedule') ?>"><i class="fa fa-calendar"></i> Horario escolar</a>
     </p>
     <p>
-      <a class="btn" href="?route=student/reticula"><i class="fa fa-diagram-project"></i> Retícula</a>
+      <a class="btn" href="<?= \Core\Url::route('student/reticula') ?>"><i class="fa fa-diagram-project"></i> Retícula</a>
     </p>
   </div>
   <div class="card">
     <h3>Reinscripción</h3>
     <?php if(!empty($reinscripcion_activa)): ?>
       <div class="status"><span class="status-activo">Periodo de reinscripción ACTIVO</span></div>
-      <form method="post" action="?route=student/reinscripcion">
+      <form method="post" action="<?= \Core\Url::route('student/reinscripcion') ?>">
         <input type="hidden" name="csrf_token" value="<?= \Core\Security::csrfToken() ?>" />
         <p>Selecciona materias disponibles:</p>
         <div id="materias-select"></div>
         <button class="btn" type="submit" onclick="return confirm('¿Confirmar reinscripción?')"><i class="fa fa-check"></i> Reinscribirme</button>
       </form>
-      <script>
-        // (Simulación) carga básica; en MVP puede adaptarse según retícula
-        fetch('/?route=student/reticula');
-      </script>
+
     <?php else: ?>
       <div class="status"><span class="status-inactivo">La reinscripción aún no está disponible</span></div>
-      <p style="color:#9e9e9e">Vuelve más tarde. Te avisaremos cuando se active.</p>
+      <p class="text-muted">Vuelve más tarde. Te avisaremos cuando se active.</p>
     <?php endif; ?>
   </div>
 </div>
-<div class="grid cols-3" style="margin-top:16px">
+  <div class="grid cols-3 mt-16">
   <div class="card">
     <h3>Indicadores</h3>
     <div class="status"><span class="badge green">Promedio actual</span> <strong><?= number_format((float)($promedio_actual ?? 0),2) ?></strong></div>
@@ -58,7 +55,7 @@
   </div>
 </div>
 
-<div class="grid cols-3" style="margin-top:16px">
+  <div class="grid cols-3 mt-16">
   <div class="card">
     <h3>📊 Mi Progreso Académico</h3>
     <div class="progress-info">

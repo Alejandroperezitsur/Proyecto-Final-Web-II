@@ -1,4 +1,14 @@
 <?php
+// Endurecer cookies de sesión antes de iniciar la sesión
+$secure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (isset($_ENV['APP_HTTPS']) && $_ENV['APP_HTTPS'] === 'true');
+session_set_cookie_params([
+    'lifetime' => 0,
+    'path' => '/',
+    'domain' => '',
+    'secure' => $secure,
+    'httponly' => true,
+    'samesite' => 'Lax',
+]);
 session_start();
 
 require_once __DIR__ . '/../core/bootstrap.php';
@@ -6,6 +16,13 @@ require_once __DIR__ . '/../core/bootstrap.php';
 use Core\Router;
 
 $router = new Router();
+
+// Cabeceras de seguridad básicas
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: SAMEORIGIN');
+header('Referrer-Policy: no-referrer-when-downgrade');
+// CSP más estricta: sin inline ni eval en JS; mantener inline en estilos por atributos style
+header("Content-Security-Policy: default-src 'self' https: data; script-src 'self' https:; style-src 'self' https: 'unsafe-inline'; img-src 'self' https: data; font-src 'self' https: data; connect-src 'self' https:; object-src 'none'; base-uri 'self'; frame-ancestors 'self'");
 
 // Rutas públicas
 $router->get('/', 'AuthController@home');
