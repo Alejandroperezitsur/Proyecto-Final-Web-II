@@ -91,7 +91,6 @@ CREATE TABLE IF NOT EXISTS calificaciones (
 
 -- Datos mínimos
 INSERT INTO periodos (nombre, activo) VALUES ('2025-1', 1);
-INSERT INTO admins (usuario, nombre, password_hash) VALUES ('admin', 'Administrador', '$2y$10$.rjCwEo9Jm0s1z0tEwKQQeWbqWcQH1Yz6qTj2sV2nqkUQh6d5vYwN6');
 
 -- Configuraciones del sistema
 CREATE TABLE IF NOT EXISTS configuraciones (

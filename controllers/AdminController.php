@@ -166,38 +166,44 @@ class AdminController extends Controller
         $total = 0;
         switch ($entity) {
             case 'carreras':
-                $stmt = $pdo->prepare('SELECT SQL_CALC_FOUND_ROWS * FROM carreras WHERE nombre LIKE ? ORDER BY nombre LIMIT ? OFFSET ?');
-                $stmt->execute(['%'.$q.'%', $per, $offset]);
+                $sql = 'SELECT SQL_CALC_FOUND_ROWS * FROM carreras WHERE nombre LIKE ? ORDER BY nombre LIMIT ' . (int)$per . ' OFFSET ' . (int)$offset;
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute(['%'.$q.'%']);
                 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 $total = (int)$pdo->query('SELECT FOUND_ROWS()')->fetchColumn();
                 break;
             case 'periodos':
-                $stmt = $pdo->prepare('SELECT SQL_CALC_FOUND_ROWS id, nombre, activo FROM periodos WHERE nombre LIKE ? ORDER BY id DESC LIMIT ? OFFSET ?');
-                $stmt->execute(['%'.$q.'%', $per, $offset]);
+                $sql = 'SELECT SQL_CALC_FOUND_ROWS id, nombre, activo FROM periodos WHERE nombre LIKE ? ORDER BY id DESC LIMIT ' . (int)$per . ' OFFSET ' . (int)$offset;
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute(['%'.$q.'%']);
                 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 $total = (int)$pdo->query('SELECT FOUND_ROWS()')->fetchColumn();
                 break;
             case 'materias':
-                $stmt = $pdo->prepare('SELECT SQL_CALC_FOUND_ROWS m.id, m.nombre, m.semestre, c.nombre AS carrera FROM materias m JOIN carreras c ON c.id=m.carrera_id WHERE m.nombre LIKE ? ORDER BY c.nombre, m.semestre LIMIT ? OFFSET ?');
-                $stmt->execute(['%'.$q.'%', $per, $offset]);
+                $sql = 'SELECT SQL_CALC_FOUND_ROWS m.id, m.nombre, m.semestre, c.nombre AS carrera FROM materias m JOIN carreras c ON c.id=m.carrera_id WHERE m.nombre LIKE ? ORDER BY c.nombre, m.semestre LIMIT ' . (int)$per . ' OFFSET ' . (int)$offset;
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute(['%'.$q.'%']);
                 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 $total = (int)$pdo->query('SELECT FOUND_ROWS()')->fetchColumn();
                 break;
             case 'grupos':
-                $stmt = $pdo->prepare('SELECT SQL_CALC_FOUND_ROWS g.id, g.clave, g.salon, m.nombre AS materia FROM grupos g JOIN materias m ON m.id=g.materia_id WHERE g.clave LIKE ? ORDER BY g.clave LIMIT ? OFFSET ?');
-                $stmt->execute(['%'.$q.'%', $per, $offset]);
+                $sql = 'SELECT SQL_CALC_FOUND_ROWS g.id, g.clave, g.salon, m.nombre AS materia FROM grupos g JOIN materias m ON m.id=g.materia_id WHERE g.clave LIKE ? ORDER BY g.clave LIMIT ' . (int)$per . ' OFFSET ' . (int)$offset;
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute(['%'.$q.'%']);
                 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 $total = (int)$pdo->query('SELECT FOUND_ROWS()')->fetchColumn();
                 break;
             case 'alumnos':
-                $stmt = $pdo->prepare('SELECT SQL_CALC_FOUND_ROWS id, matricula, nombre, apellido, semestre_actual, carrera_id FROM alumnos WHERE (matricula LIKE ? OR nombre LIKE ? OR apellido LIKE ?) ORDER BY matricula LIMIT ? OFFSET ?');
-                $stmt->execute(['%'.$q.'%','%'.$q.'%','%'.$q.'%', $per, $offset]);
+                $sql = 'SELECT SQL_CALC_FOUND_ROWS id, matricula, nombre, apellido, semestre_actual, carrera_id FROM alumnos WHERE (matricula LIKE ? OR nombre LIKE ? OR apellido LIKE ?) ORDER BY matricula LIMIT ' . (int)$per . ' OFFSET ' . (int)$offset;
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute(['%'.$q.'%','%'.$q.'%','%'.$q.'%']);
                 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 $total = (int)$pdo->query('SELECT FOUND_ROWS()')->fetchColumn();
                 break;
             case 'profesores':
-                $stmt = $pdo->prepare('SELECT SQL_CALC_FOUND_ROWS id, usuario, nombre, apellido, carrera_id FROM profesores WHERE (usuario LIKE ? OR nombre LIKE ? OR apellido LIKE ?) ORDER BY usuario LIMIT ? OFFSET ?');
-                $stmt->execute(['%'.$q.'%','%'.$q.'%','%'.$q.'%', $per, $offset]);
+                $sql = 'SELECT SQL_CALC_FOUND_ROWS id, usuario, nombre, apellido, carrera_id FROM profesores WHERE (usuario LIKE ? OR nombre LIKE ? OR apellido LIKE ?) ORDER BY usuario LIMIT ' . (int)$per . ' OFFSET ' . (int)$offset;
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute(['%'.$q.'%','%'.$q.'%','%'.$q.'%']);
                 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 $total = (int)$pdo->query('SELECT FOUND_ROWS()')->fetchColumn();
                 break;

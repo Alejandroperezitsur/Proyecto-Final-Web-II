@@ -38,5 +38,29 @@ class Installer
                 }
             }
         }
+
+        // Reparación/aseguramiento del usuario admin (credenciales conocidas)
+        // Garantiza que exista el usuario 'admin' y que su contraseña sea 'admin123'
+        try {
+            $stmt = $pdo->prepare("SELECT id, password_hash FROM admins WHERE usuario='admin' LIMIT 1");
+            $stmt->execute();
+            $adm = $stmt->fetch(\PDO::FETCH_ASSOC);
+            $desiredPass = 'admin123';
+            if ($adm) {
+                // Si el hash actual no valida con la contraseña deseada, actualizar
+                if (!password_verify($desiredPass, $adm['password_hash'])) {
+                    $newHash = password_hash($desiredPass, PASSWORD_BCRYPT);
+                    $upd = $pdo->prepare('UPDATE admins SET password_hash=? WHERE id=?');
+                    $upd->execute([$newHash, $adm['id']]);
+                }
+            } else {
+                // Crear usuario admin por defecto si no existe
+                $newHash = password_hash($desiredPass, PASSWORD_BCRYPT);
+                $ins = $pdo->prepare('INSERT INTO admins (usuario, nombre, password_hash) VALUES (?,?,?)');
+                $ins->execute(['admin', 'Administrador', $newHash]);
+            }
+        } catch (\Throwable $e) {
+            // Ignorar errores silenciosamente; no bloquear la app por esta reparación
+        }
     }
 }
