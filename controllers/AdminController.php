@@ -43,6 +43,10 @@ class AdminController extends Controller
         $stmt->execute();
         $stats['grupos'] = (int)$stmt->fetchColumn();
 
+        $stmt = $pdo->prepare('SELECT COUNT(*) FROM periodos');
+        $stmt->execute();
+        $stats['periodos'] = (int)$stmt->fetchColumn();
+
         return $stats;
     }
 
@@ -76,6 +80,12 @@ class AdminController extends Controller
                 $stmt->execute(['%'.$q.'%']);
                 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 $headers = ['id','nombre'];
+                break;
+            case 'periodos':
+                $stmt = $pdo->prepare('SELECT id, nombre, activo FROM periodos WHERE nombre LIKE ? ORDER BY id DESC');
+                $stmt->execute(['%'.$q.'%']);
+                $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                $headers = ['id','nombre','activo'];
                 break;
             case 'materias':
                 $stmt = $pdo->prepare('SELECT m.id, m.nombre, m.semestre, c.nombre AS carrera FROM materias m JOIN carreras c ON c.id=m.carrera_id WHERE m.nombre LIKE ? ORDER BY c.nombre, m.semestre');
@@ -138,7 +148,9 @@ class AdminController extends Controller
     public function stats(): void
     {
         $this->requireRole('admin');
-        $this->dashboard();
+        $this->render('admin/stats', [
+            'reinscripcion_activa' => self::isReinscripcionActiva(),
+        ]);
     }
 
     public function crud(): void
@@ -155,6 +167,12 @@ class AdminController extends Controller
         switch ($entity) {
             case 'carreras':
                 $stmt = $pdo->prepare('SELECT SQL_CALC_FOUND_ROWS * FROM carreras WHERE nombre LIKE ? ORDER BY nombre LIMIT ? OFFSET ?');
+                $stmt->execute(['%'.$q.'%', $per, $offset]);
+                $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                $total = (int)$pdo->query('SELECT FOUND_ROWS()')->fetchColumn();
+                break;
+            case 'periodos':
+                $stmt = $pdo->prepare('SELECT SQL_CALC_FOUND_ROWS id, nombre, activo FROM periodos WHERE nombre LIKE ? ORDER BY id DESC LIMIT ? OFFSET ?');
                 $stmt->execute(['%'.$q.'%', $per, $offset]);
                 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 $total = (int)$pdo->query('SELECT FOUND_ROWS()')->fetchColumn();
@@ -378,6 +396,18 @@ class AdminController extends Controller
                     $stmt->execute([$nombre]);
                 }
                 break;
+            case 'periodos':
+                $nombre = trim($_POST['nombre'] ?? '');
+                $activo = isset($_POST['activo']) ? 1 : 0;
+                if ($nombre !== '') {
+                    if ($activo === 1) {
+                        // Asegurar único período activo
+                        $pdo->exec('UPDATE periodos SET activo=0');
+                    }
+                    $stmt = $pdo->prepare('INSERT INTO periodos (nombre, activo) VALUES (?,?)');
+                    $stmt->execute([$nombre, $activo]);
+                }
+                break;
             case 'materias':
                 $nombre = trim($_POST['nombre'] ?? '');
                 $semestre = (int)($_POST['semestre'] ?? 1);
@@ -425,7 +455,7 @@ class AdminController extends Controller
                 break;
         }
         $_SESSION['success'] = 'Guardado';
-        $this->redirect('admin/crud&entity=' . $entity);
+        $this->redirect('admin/crud&entity=' . $entity . '&msg=guardado');
     }
 
     public function crudUpdate(): void
@@ -445,6 +475,21 @@ class AdminController extends Controller
                 if ($id>0 && $nombre !== '') {
                     $stmt = $pdo->prepare('UPDATE carreras SET nombre=? WHERE id=?');
                     $stmt->execute([$nombre, $id]);
+                }
+                break;
+            case 'periodos':
+                $nombre = trim($_POST['nombre'] ?? '');
+                $activo = (int)($_POST['activo'] ?? 0);
+                if ($id>0 && $nombre !== '') {
+                    if ($activo === 1) {
+                        // Un solo activo
+                        $pdo->exec('UPDATE periodos SET activo=0');
+                        $stmt = $pdo->prepare('UPDATE periodos SET nombre=?, activo=1 WHERE id=?');
+                        $stmt->execute([$nombre, $id]);
+                    } else {
+                        $stmt = $pdo->prepare('UPDATE periodos SET nombre=?, activo=0 WHERE id=?');
+                        $stmt->execute([$nombre, $id]);
+                    }
                 }
                 break;
             case 'materias':
@@ -491,7 +536,7 @@ class AdminController extends Controller
                 break;
         }
         $_SESSION['success'] = 'Actualizado';
-        $this->redirect('admin/crud&entity=' . $entity);
+        $this->redirect('admin/crud&entity=' . $entity . '&msg=actualizado');
     }
 
     public function crudDelete(): void
@@ -508,6 +553,24 @@ class AdminController extends Controller
         switch ($entity) {
             case 'carreras':
                 $stmt = $pdo->prepare('DELETE FROM carreras WHERE id=?');
+                $stmt->execute([$id]);
+                break;
+            case 'periodos':
+                // No permitir borrar períodos activos o con inscripciones asociadas
+                $chk = $pdo->prepare('SELECT activo FROM periodos WHERE id=?');
+                $chk->execute([$id]);
+                $activo = (int)($chk->fetchColumn() ?? 0);
+                if ($activo === 1) {
+                    $_SESSION['error'] = 'No se puede eliminar el período ACTIVO.';
+                    $this->redirect('admin/crud&entity=periodos');
+                }
+                $cnt = $pdo->prepare('SELECT COUNT(*) FROM inscripciones WHERE periodo_id=?');
+                $cnt->execute([$id]);
+                if ((int)$cnt->fetchColumn() > 0) {
+                    $_SESSION['error'] = 'No se puede eliminar un período con inscripciones asociadas.';
+                    $this->redirect('admin/crud&entity=periodos');
+                }
+                $stmt = $pdo->prepare('DELETE FROM periodos WHERE id=?');
                 $stmt->execute([$id]);
                 break;
             case 'materias':
@@ -528,6 +591,6 @@ class AdminController extends Controller
                 break;
         }
         $_SESSION['success'] = 'Eliminado';
-        $this->redirect('admin/crud&entity=' . $entity);
+        $this->redirect('admin/crud&entity=' . $entity . '&msg=eliminado');
     }
 }

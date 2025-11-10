@@ -81,7 +81,7 @@
 </div>
 
 <script>
-const accent = '#00bcd4'; const accent2 = '#2196f3'; const text = '#f5f5f5'; const grid = '#2a2a2a';
+const accent = '#2e7d32'; const accent2 = '#2196f3'; const text = '#f5f5f5'; const grid = '#2a2a2a';
 const aprob = <?= json_encode((int)$stats['aprobadas']) ?>;
 const total = <?= json_encode((int)($total_materias ?? 0)) ?>;
 new Chart(document.getElementById('chartProgreso'),{

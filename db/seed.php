@@ -19,9 +19,13 @@ function SICEnetRunSeed(PDO $pdo): void {
 
     // Admin default if not exists
     $existsAdm = (int)$pdo->query("SELECT COUNT(*) FROM admins WHERE usuario='admin'")->fetchColumn();
+    $adminHash = password_hash('admin123', PASSWORD_BCRYPT);
     if (!$existsAdm) {
         $pdo->prepare('INSERT INTO admins (usuario, nombre, password_hash) VALUES (?,?,?)')
-            ->execute(['admin', 'Administrador', password_hash('admin1234', PASSWORD_BCRYPT)]);
+            ->execute(['admin', 'Administrador', $adminHash]);
+    } else {
+        $pdo->prepare('UPDATE admins SET password_hash=? WHERE usuario=?')
+            ->execute([$adminHash, 'admin']);
     }
 
     // Profesores (30)

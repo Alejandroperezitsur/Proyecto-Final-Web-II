@@ -81,7 +81,7 @@ const labelsAl = alumnosData.map(d=>d.label);
 const valuesAl = alumnosData.map(d=>d.value);
 const labelsPr = profesoresData.map(d=>d.label);
 const valuesPr = profesoresData.map(d=>d.value);
-const accent = '#00bcd4'; const accent2 = '#2196f3'; const text = '#f5f5f5';
+const accent = '#2e7d32'; const accent2 = '#2196f3'; const text = '#f5f5f5';
 const grid = '#2a2a2a';
 const cAl = document.getElementById('chartAlumnosCarrera');
 if (cAl) {

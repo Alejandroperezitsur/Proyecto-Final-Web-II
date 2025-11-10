@@ -30,6 +30,7 @@
       <?php elseif($role==='admin'): ?>
         <?php $sidebarStats = \Controllers\AdminController::getSidebarStats(); ?>
         <a href="<?= \Core\Url::route('admin/dashboard') ?>" class="<?= str_starts_with($route,'admin/dashboard') || $route==='admin/stats' ? 'active' : '' ?>"><i class="fa fa-gauge"></i><span>Dashboard</span></a>
+        <a href="<?= \Core\Url::route('admin/crud', ['entity'=>'periodos']) ?>" class="<?= ($route==='admin/crud' && $entity==='periodos') ? 'active' : '' ?>"><i class="fa fa-calendar"></i><span>Períodos</span><span class="menu-badge"><?= (int)($sidebarStats['periodos'] ?? 0) ?></span></a>
         <a href="<?= \Core\Url::route('admin/crud', ['entity'=>'alumnos']) ?>" class="<?= ($route==='admin/crud' && $entity==='alumnos') ? 'active' : '' ?>"><i class="fa fa-user-graduate"></i><span>Alumnos</span><span class="menu-badge"><?= (int)($sidebarStats['alumnos'] ?? 0) ?></span></a>
         <a href="<?= \Core\Url::route('admin/crud', ['entity'=>'profesores']) ?>" class="<?= ($route==='admin/crud' && $entity==='profesores') ? 'active' : '' ?>"><i class="fa fa-chalkboard-teacher"></i><span>Profesores</span><span class="menu-badge"><?= (int)($sidebarStats['profesores'] ?? 0) ?></span></a>
         <a href="<?= \Core\Url::route('admin/crud', ['entity'=>'carreras']) ?>" class="<?= ($route==='admin/crud' && $entity==='carreras') ? 'active' : '' ?>"><i class="fa fa-graduation-cap"></i><span>Carreras</span><span class="menu-badge"><?= (int)($sidebarStats['carreras'] ?? 0) ?></span></a>

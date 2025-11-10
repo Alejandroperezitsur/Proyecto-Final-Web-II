@@ -22,6 +22,13 @@
     <input type="hidden" name="csrf_token" value="<?= \Core\Security::csrfToken() ?>" />
     <?php if($entity==='carreras'): ?>
       <div class="row"><input class="input" name="nombre" placeholder="Nombre de carrera" required /></div>
+    <?php elseif($entity==='periodos'): ?>
+      <div class="row">
+        <input class="input" name="nombre" placeholder="Nombre del período (ej. 2025-1)" required />
+      </div>
+      <div class="row">
+        <label><input type="checkbox" name="activo" value="1" /> Activar este período</label>
+      </div>
     <?php elseif($entity==='materias'): ?>
       <div class="row">
         <input class="input" name="nombre" placeholder="Nombre de materia" required />
@@ -73,11 +80,26 @@
     </thead>
     <tbody>
       <?php foreach($rows as $r): ?>
-        <tr>
+        <tr class="<?= ($entity==='periodos' && (int)($r['activo'] ?? 0)===1) ? 'active-period' : '' ?>">
           <?php foreach($r as $k=>$v): ?><td><?= htmlspecialchars((string)$v) ?></td><?php endforeach; ?>
           <td>
+            <?php if($entity==='periodos'): ?>
+              <?php if((int)($r['activo'] ?? 0)===1): ?>
+                <span class="badge badge-activo">Activo</span>
+              <?php else: ?>
+                <span class="badge badge-inactivo">Inactivo</span>
+                <form method="post" action="<?= \Core\Url::route('admin/crud/update') ?>" class="inline">
+                  <input type="hidden" name="entity" value="periodos" />
+                  <input type="hidden" name="id" value="<?= (int)$r['id'] ?>" />
+                  <input type="hidden" name="nombre" value="<?= htmlspecialchars((string)$r['nombre']) ?>" />
+                  <input type="hidden" name="activo" value="1" />
+                  <input type="hidden" name="csrf_token" value="<?= \Core\Security::csrfToken() ?>" />
+                  <button class="btn" type="submit"><i class="fa fa-toggle-on"></i> Activar</button>
+                </form>
+              <?php endif; ?>
+            <?php endif; ?>
             <button class="btn secondary" data-edit='<?= json_encode($r, JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_AMP|JSON_HEX_QUOT) ?>' data-entity="<?= htmlspecialchars($entity) ?>"><i class="fa fa-pen"></i> Editar</button>
-<form method="post" action="<?= \Core\Url::route('admin/crud/delete') ?>" class="js-confirm-delete inline">
+            <form method="post" action="<?= \Core\Url::route('admin/crud/delete') ?>" class="js-confirm-delete inline">
               <input type="hidden" name="entity" value="<?= htmlspecialchars($entity) ?>" />
               <input type="hidden" name="id" value="<?= (int)$r['id'] ?>" />
               <input type="hidden" name="csrf_token" value="<?= \Core\Security::csrfToken() ?>" />
@@ -121,6 +143,7 @@ function confirmDelete(form){
 }
 const fieldSets={
   carreras:[{name:'nombre',label:'Nombre',type:'text',required:true}],
+  periodos:[{name:'nombre',label:'Nombre',type:'text',required:true},{name:'activo',label:'Activo (0/1)',type:'number'}],
   materias:[{name:'nombre',label:'Nombre',type:'text',required:true},{name:'semestre',label:'Semestre',type:'number'},{name:'unidades',label:'Unidades',type:'number'},{name:'carrera_id',label:'ID Carrera',type:'number'}],
   grupos:[{name:'carrera_id',label:'ID Carrera',type:'number'},{name:'materia_id',label:'ID Materia',type:'number'},{name:'profesor_id',label:'ID Profesor',type:'number'},{name:'clave',label:'Clave',type:'text',required:true},{name:'salon',label:'Salón',type:'text'}],
   alumnos:[{name:'matricula',label:'Matrícula',type:'text',required:true},{name:'nombre',label:'Nombre',type:'text',required:true},{name:'apellido',label:'Apellido',type:'text',required:true},{name:'carrera_id',label:'ID Carrera',type:'number',required:true},{name:'semestre_actual',label:'Semestre',type:'number'}],
@@ -141,13 +164,38 @@ document.querySelectorAll('button[data-edit]').forEach(btn=>{
       const input=document.createElement('input');
       input.className='input';
       input.name=f.name; input.type=f.type||'text'; input.required=!!f.required;
-      input.value=data[f.name]??'';
+      if(f.type==='checkbox'){
+        input.value='1';
+        input.checked = !!(data[f.name] && Number(data[f.name])===1);
+      } else {
+        input.value=data[f.name]??'';
+      }
       const label=document.createElement('label');
       label.textContent=f.label;
       div.appendChild(label); div.appendChild(input);
       fields.appendChild(div);
     }
+    // Nota para períodos ya activos
+    if(entity==='periodos' && Number(data['activo']||0)===1){
+      const note=document.createElement('div');
+      note.className='text-muted';
+      note.textContent='Nota: este período ya está ACTIVO.';
+      fields.appendChild(note);
+    }
   });
 });
 function closeModal(){document.getElementById('modal').hidden=true;}
+// Confirmación de eliminación; mensaje específico para períodos
+document.querySelectorAll('form.js-confirm-delete').forEach(f=>{
+  f.addEventListener('submit', (e)=>{
+    const entity = f.querySelector('input[name="entity"]').value;
+    let msg = '¿Eliminar este registro? Esta acción es irreversible.';
+    if(entity==='periodos'){
+      msg = '¿Eliminar este período? Si está ACTIVO o tiene inscripciones, no se eliminará.';
+    }
+    if(!window.confirm(msg)){
+      e.preventDefault();
+    }
+  });
+});
 </script>

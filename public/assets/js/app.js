@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   });
 
   // Charts (Professor dashboard) moved from inline script
-  const accent = '#00bcd4';
+ const accent = '#2e7d32';
   const accent2 = '#2196f3';
   const text = '#f5f5f5';
   const grid = '#2a2a2a';
