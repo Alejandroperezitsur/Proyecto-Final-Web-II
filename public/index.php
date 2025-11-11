@@ -72,7 +72,7 @@ $tokenCSRF = $controlAut->generarTokenCSRF();
                 <div class="login-card">
                     <div class="login-content">
                         <h3 class="login-title text-center mb-3">Bienvenido</h3>
-                        <p class="login-subtitle text-center mb-4">Accede con tu matrícula o correo institucional</p>
+                        <p class="login-subtitle text-center mb-4">Accede con tu matrícula</p>
                         
                         <?php if (!empty($mensajeError)): ?>
                             <div class="alert alert-danger">
@@ -86,13 +86,13 @@ $tokenCSRF = $controlAut->generarTokenCSRF();
                     value="<?= htmlspecialchars($tokenCSRF) ?>">
                             
                             <div class="mb-3">
-                                <label for="identifier" class="form-label">Matrícula o correo</label>
+                                <label for="identifier" class="form-label">Matrícula</label>
                                 <input type="text" class="form-control" id="identifier" 
                                        name="identifier" required 
                                        pattern="^[SICMQEA][0-9]{8}$|^.+@.+$" 
-                                       placeholder="Ej: S12345678 o admin@local">
+                                       placeholder="Ej: S12345678">
                                 <div class="invalid-feedback">
-                                    Ingresa una matrícula válida (prefijo de ingeniería + 8 dígitos) o un correo electrónico.
+                                    Ingresa una matrícula válida (prefijo de ingeniería + 8 dígitos).
                                 </div>
                             </div>
 

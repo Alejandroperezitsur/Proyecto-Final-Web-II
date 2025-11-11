@@ -1,6 +1,6 @@
 <?php
-// Actualiza el email del admin a un dominio con punto para pasar validaciones de cliente.
-// Uso: php scripts/fix_admin_email.php [--email=admin@local.test]
+// Actualiza el email del admin a un dominio institucional.
+// Uso: php scripts/fix_admin_email.php [--email=admin@itsur.edu.mx]
 
 if (PHP_SAPI !== 'cli') {
   fwrite(STDERR, "Este script debe ejecutarse por CLI.\n");
@@ -9,7 +9,7 @@ if (PHP_SAPI !== 'cli') {
 
 require_once __DIR__ . '/../config/db.php';
 
-$newEmail = 'admin@local.test';
+$newEmail = 'admin@itsur.edu.mx';
 foreach ($argv as $arg) {
   if (strpos($arg, '--email=') === 0) { $newEmail = substr($arg, strlen('--email=')); }
 }
