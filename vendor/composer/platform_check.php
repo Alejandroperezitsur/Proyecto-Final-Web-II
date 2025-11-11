@@ -4,12 +4,31 @@
 
 $issues = array();
 
-if (!(PHP_VERSION_ID >= 80300)) {
-    $issues[] = 'Your Composer dependencies require a PHP version ">= 8.3.0". You are running ' . PHP_VERSION . '.';
+if (!(PHP_VERSION_ID >= 80200)) {
+    $issues[] = 'Your Composer dependencies require a PHP version ">= 8.2.0". You are running ' . PHP_VERSION . '.';
 }
 
 if (PHP_INT_SIZE !== 8) {
     $issues[] = 'Your Composer dependencies require a 64-bit build of PHP.';
+}
+
+$missingExtensions = array();
+extension_loaded('ctype') || $missingExtensions[] = 'ctype';
+extension_loaded('dom') || $missingExtensions[] = 'dom';
+extension_loaded('fileinfo') || $missingExtensions[] = 'fileinfo';
+extension_loaded('gd') || $missingExtensions[] = 'gd';
+extension_loaded('iconv') || $missingExtensions[] = 'iconv';
+extension_loaded('libxml') || $missingExtensions[] = 'libxml';
+extension_loaded('mbstring') || $missingExtensions[] = 'mbstring';
+extension_loaded('simplexml') || $missingExtensions[] = 'simplexml';
+extension_loaded('xml') || $missingExtensions[] = 'xml';
+extension_loaded('xmlreader') || $missingExtensions[] = 'xmlreader';
+extension_loaded('xmlwriter') || $missingExtensions[] = 'xmlwriter';
+extension_loaded('zip') || $missingExtensions[] = 'zip';
+extension_loaded('zlib') || $missingExtensions[] = 'zlib';
+
+if ($missingExtensions) {
+    $issues[] = 'Your Composer dependencies require the following PHP extensions to be installed: ' . implode(', ', $missingExtensions) . '.';
 }
 
 if ($issues) {

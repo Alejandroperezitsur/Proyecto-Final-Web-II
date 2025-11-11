@@ -461,6 +461,11 @@ class AdminController extends Controller
                 break;
         }
         $_SESSION['success'] = 'Guardado';
+        if (!empty($_POST['ajax'])) {
+            header('Content-Type: application/json');
+            echo json_encode(['ok'=>true,'msg'=>'guardado']);
+            exit;
+        }
         $this->redirect('admin/crud&entity=' . $entity . '&msg=guardado');
     }
 
@@ -475,12 +480,17 @@ class AdminController extends Controller
         }
         $entity = $_POST['entity'] ?? '';
         $id = (int)(\Core\Security::input('id','POST',FILTER_SANITIZE_NUMBER_INT) ?? 0);
+        $updated = false;
+        $error = '';
         switch ($entity) {
             case 'carreras':
                 $nombre = trim($_POST['nombre'] ?? '');
                 if ($id>0 && $nombre !== '') {
                     $stmt = $pdo->prepare('UPDATE carreras SET nombre=? WHERE id=?');
                     $stmt->execute([$nombre, $id]);
+                    $updated = true;
+                } else {
+                    $error = $id<=0 ? 'ID inválido' : 'Nombre requerido';
                 }
                 break;
             case 'periodos':
@@ -496,6 +506,9 @@ class AdminController extends Controller
                         $stmt = $pdo->prepare('UPDATE periodos SET nombre=?, activo=0 WHERE id=?');
                         $stmt->execute([$nombre, $id]);
                     }
+                    $updated = true;
+                } else {
+                    $error = $id<=0 ? 'ID inválido' : 'Nombre requerido';
                 }
                 break;
             case 'materias':
@@ -506,6 +519,12 @@ class AdminController extends Controller
                 if ($id>0 && $nombre !== '' && $carrera_id > 0) {
                     $stmt = $pdo->prepare('UPDATE materias SET carrera_id=?, nombre=?, semestre=?, unidades=? WHERE id=?');
                     $stmt->execute([$carrera_id, $nombre, $semestre, $unidades, $id]);
+                    $updated = true;
+                } else {
+                    if ($id<=0) { $error = 'ID inválido'; }
+                    elseif ($nombre==='') { $error = 'Nombre requerido'; }
+                    elseif ($carrera_id<=0) { $error = 'Carrera inválida'; }
+                    else { $error = 'Datos inválidos'; }
                 }
                 break;
             case 'grupos':
@@ -517,6 +536,13 @@ class AdminController extends Controller
                 if ($id>0 && $materia_id > 0 && $profesor_id > 0 && $clave !== '') {
                     $stmt = $pdo->prepare('UPDATE grupos SET carrera_id=?, materia_id=?, profesor_id=?, clave=?, salon=? WHERE id=?');
                     $stmt->execute([$carrera_id, $materia_id, $profesor_id, $clave, $salon, $id]);
+                    $updated = true;
+                } else {
+                    if ($id<=0) { $error = 'ID inválido'; }
+                    elseif ($materia_id<=0) { $error = 'Materia inválida'; }
+                    elseif ($profesor_id<=0) { $error = 'Profesor inválido'; }
+                    elseif ($clave==='') { $error = 'Clave requerida'; }
+                    else { $error = 'Datos inválidos'; }
                 }
                 break;
             case 'alumnos':
@@ -525,9 +551,15 @@ class AdminController extends Controller
                 $apellido = trim($_POST['apellido'] ?? '');
                 $carrera_id = (int)($_POST['carrera_id'] ?? 0);
                 $semestre = (int)($_POST['semestre_actual'] ?? 1);
-                if ($id>0 && preg_match('/^\d{9}$/', $matricula)) {
+                if ($id>0 && preg_match('/^\d{9}$/', $matricula) && $carrera_id > 0) {
                     $stmt = $pdo->prepare('UPDATE alumnos SET matricula=?, nombre=?, apellido=?, carrera_id=?, semestre_actual=? WHERE id=?');
                     $stmt->execute([$matricula, $nombre, $apellido, $carrera_id, $semestre, $id]);
+                    $updated = true;
+                } else {
+                    if ($id<=0) { $error = 'ID inválido'; }
+                    elseif (!preg_match('/^\d{9}$/', $matricula)) { $error = 'Matrícula inválida (9 dígitos)'; }
+                    elseif ($carrera_id<=0) { $error = 'Carrera inválida'; }
+                    else { $error = 'Datos inválidos'; }
                 }
                 break;
             case 'profesores':
@@ -538,11 +570,32 @@ class AdminController extends Controller
                 if ($id>0 && $usuario !== '') {
                     $stmt = $pdo->prepare('UPDATE profesores SET usuario=?, nombre=?, apellido=?, carrera_id=? WHERE id=?');
                     $stmt->execute([$usuario, $nombre, $apellido, $carrera_id, $id]);
+                    $updated = true;
+                } else {
+                    if ($id<=0) { $error = 'ID inválido'; }
+                    elseif ($usuario==='') { $error = 'Usuario requerido'; }
+                    else { $error = 'Datos inválidos'; }
                 }
                 break;
         }
-        $_SESSION['success'] = 'Actualizado';
-        $this->redirect('admin/crud&entity=' . $entity . '&msg=actualizado');
+        if (!empty($_POST['ajax'])) {
+            header('Content-Type: application/json');
+            if ($updated) {
+                $_SESSION['success'] = 'Actualizado';
+                echo json_encode(['ok'=>true,'msg'=>'actualizado']);
+            } else {
+                $_SESSION['error'] = 'No actualizado';
+                echo json_encode(['ok'=>false,'msg'=>'no_actualizado','error'=>$error ?: 'Actualización no aplicada']);
+            }
+            exit;
+        }
+        if ($updated) {
+            $_SESSION['success'] = 'Actualizado';
+            $this->redirect('admin/crud&entity=' . $entity . '&msg=actualizado');
+        } else {
+            $_SESSION['error'] = $error ?: 'No actualizado';
+            $this->redirect('admin/crud&entity=' . $entity . '&msg=no_actualizado');
+        }
     }
 
     public function crudDelete(): void
@@ -597,6 +650,46 @@ class AdminController extends Controller
                 break;
         }
         $_SESSION['success'] = 'Eliminado';
+        if (!empty($_POST['ajax'])) {
+            header('Content-Type: application/json');
+            echo json_encode(['ok'=>true,'msg'=>'eliminado']);
+            exit;
+        }
         $this->redirect('admin/crud&entity=' . $entity . '&msg=eliminado');
+    }
+
+    public function resetPassword(): void
+    {
+        $this->requireRole('admin');
+        $pdo = Database::getConnection();
+        $csrf = \Core\Security::input('csrf_token');
+        if (!\Core\Security::verifyCsrf($csrf)) {
+            $_SESSION['error'] = 'CSRF inválido';
+            $this->redirect('admin/dashboard');
+        }
+        $entity = $_POST['entity'] ?? '';
+        $id = (int)(\Core\Security::input('id','POST',FILTER_SANITIZE_NUMBER_INT) ?? 0);
+        if (!in_array($entity, ['alumnos','profesores'], true) || $id <= 0) {
+            $_SESSION['error'] = 'Solicitud inválida';
+            $this->redirect('admin/crud&entity=' . ($entity ?: 'alumnos'));
+        }
+        // Generar contraseña temporal segura (12 caracteres hex)
+        $tempPassword = bin2hex(random_bytes(6));
+        $hash = password_hash($tempPassword, PASSWORD_BCRYPT);
+        if ($entity === 'alumnos') {
+            $stmt = $pdo->prepare('UPDATE alumnos SET password_hash=? WHERE id=?');
+            $stmt->execute([$hash, $id]);
+            $_SESSION['success'] = 'Contraseña temporal de alumno #' . $id . ': ' . $tempPassword;
+        } else {
+            $stmt = $pdo->prepare('UPDATE profesores SET password_hash=? WHERE id=?');
+            $stmt->execute([$hash, $id]);
+            $_SESSION['success'] = 'Contraseña temporal de profesor #' . $id . ': ' . $tempPassword;
+        }
+        if (!empty($_POST['ajax'])) {
+            header('Content-Type: application/json');
+            echo json_encode(['ok'=>true,'msg'=>'password_reseteada','entity'=>$entity,'id'=>$id,'temp_password'=>$tempPassword]);
+            exit;
+        }
+        $this->redirect('admin/crud&entity=' . $entity . '&msg=actualizado');
     }
 }

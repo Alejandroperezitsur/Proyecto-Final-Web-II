@@ -53,6 +53,8 @@ $router->get('admin/crud', 'AdminController@crud');
 $router->post('admin/crud/save', 'AdminController@crudSave');
 $router->post('admin/crud/update', 'AdminController@crudUpdate');
 $router->post('admin/crud/delete', 'AdminController@crudDelete');
+// Reset de contraseñas (solo admin)
+$router->post('admin/password/reset', 'AdminController@resetPassword');
 // Exportaciones Admin (PDF/Excel)
 $router->get('admin/export/pdf', 'AdminController@exportPDF');
 $router->post('admin/export/pdf', 'AdminController@exportPDF');
