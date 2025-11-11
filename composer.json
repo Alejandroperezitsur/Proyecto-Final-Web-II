@@ -1,0 +1,14 @@
+{
+  "name": "itsur/control-escolar",
+  "type": "project",
+  "description": "Sistema de Control Escolar modernizado (PSR-4, router, vistas modernas)",
+  "require": {
+    "php": "^8.0",
+    "dompdf/dompdf": "^3.1"
+  },
+  "autoload": {
+    "psr-4": {
+      "App\\": "src/"
+    }
+  }
+}

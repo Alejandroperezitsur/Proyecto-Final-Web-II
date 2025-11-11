@@ -76,6 +76,28 @@ Siguientes pasos recomendados
 - Traducir las vistas restantes y terminar la localización completa.
 - Preparar plan de merge `i18n-es` → `main` con pruebas básicas y rollback.
 
+## Gestión de usuario Admin (CLI y Web)
+
+- Script CLI recomendado: `scripts/fix_admin_email.php`
+  - Actualiza el email del primer usuario con rol `admin` y elimina cuentas placeholder (`admin@local`, `admin@local.test`).
+  - Opcionalmente crea el admin si no existe.
+  - Uso:
+    - `php scripts/fix_admin_email.php --email=admin@itsur.edu.mx`
+    - `php scripts/fix_admin_email.php --email=admin@itsur.edu.mx --create`
+    - `php scripts/fix_admin_email.php --email=admin@itsur.edu.mx --create --password=admin123`
+    - `php scripts/fix_admin_email.php --email=admin@itsur.edu.mx --dry-run`
+  - Notas:
+    - Requiere `pdo_mysql` habilitado en el `php.ini` del CLI. Verifica con `php -m`.
+    - En XAMPP, usa `C:\xampp\php\php.exe` y habilita `extension=pdo_mysql` en `C:\xampp\php\php.ini`.
+
+- Script CLI alternativo: `scripts/manage_admin.php`
+  - Actualiza o crea admin con email por defecto `admin@itsur.edu.mx` y contraseña `admin123`.
+  - Permite `--email=...` y `--password=...`.
+
+- Endpoint web (solo localhost): `public/setup_admin.php`
+  - Permite crear/actualizar admin vía navegador.
+  - Acepta `?email=...&password=...`. Restringido a `127.0.0.1`/`::1`.
+
 Si quieres, puedo:
 - crear un script PowerShell para automatizar la importación y verificación básica, o
 - implementar los métodos faltantes en los adaptadores para eliminar los fallbacks ahora.
@@ -178,6 +200,76 @@ Sistema web para la gestión escolar desarrollado en PHP, MySQL y JavaScript.
     └── fotos/
 ```
 
+## Flujo del Alumno (login → dashboard → Kardex)
+
+- Inicia sesión con un usuario cuyo `rol = alumno`.
+- Tras autenticación, el sistema redirige al tablero según rol; para alumnos se carga `src/Views/dashboard/student.php`.
+- El panel muestra:
+  - Resumen académico: promedio general, materias cursadas, materias pendientes.
+  - Tabla Kardex con materia, grupo, ciclo, calificación y estado (Aprobado/Reprobado/Pendiente).
+  - Gráfica de rendimiento (Chart.js) con el promedio por ciclo escolar.
+  - Si no hay registros: se muestra el mensaje “No hay registros disponibles”.
+- Los estilos usan Bootstrap y los toasts se integran vía `src/Views/layout.php`.
+
+## Endpoints del Alumno (API)
+
+- Todas las rutas requieren sesión activa y rol `alumno`.
+- El API toma el `alumnoId` desde `$_SESSION['user_id']` para evitar accesos cruzados.
+- Endpoints:
+  - `GET /api/alumno/carga` → materias/grupos inscritos del alumno.
+  - `GET /api/alumno/estadisticas` → resumen con promedio, total de materias, aprobadas y pendientes. Acepta `?ciclo=YYYY-1|YYYY-2`.
+  - `GET /api/alumno/chart` → datos para Chart.js: `{ labels: [...], data: [...] }`.
+- Ejemplos rápidos:
+  - `http://localhost/Proyecto-Final-Web-II/public/api/alumno/carga`
+  - `http://localhost/Proyecto-Final-Web-II/public/api/alumno/estadisticas?ciclo=2024-1`
+  - `http://localhost/Proyecto-Final-Web-II/public/api/alumno/chart`
+
+## Descripción de la gráfica
+
+- La gráfica del panel del alumno usa Chart.js y muestra el promedio final por ciclo.
+- Estructura esperada del JSON: `{ success: true, data: { labels: ["2023-2","2024-1"], data: [78.0, 85.0] } }`.
+- El tipo de gráfica puede ser línea o barras según configuración del frontend; se estiliza con Bootstrap y respeta el CSP configurado.
+
+## Pruebas rápidas (Alumno)
+
+1. Inicia sesión como alumno.
+2. Abre `http://localhost/Proyecto-Final-Web-II/public/dashboard.php` y verifica que ves el panel del alumno.
+3. Comprueba que las tarjetas de resumen muestran valores coherentes.
+4. Revisa la tabla Kardex: presencia de materias, calificaciones y estados.
+5. Observa la gráfica: debe cargar con etiquetas de ciclos y promedios.
+6. Llama los endpoints API listados arriba desde el navegador para validar respuestas JSON.
+7. Verifica que el API no permite cambiar el `alumnoId` vía query (sólo la sesión determina el alumno).
+
+
+## Flujo de Reportes (Admin/Profesor)
+
+- Inicia sesión como `admin` o `profesor`.
+- En el menú, entra a `Reportes` (`/reports`).
+- Usa los filtros de `ciclo`, `grupo` y (si eres admin) `profesor`.
+- Exporta con los botones:
+  - `Exportar CSV` → envía `POST` con `csrf_token` y descarga `calificaciones.csv`.
+  - `Exportar PDF` → envía `POST` con `csrf_token` y abre el PDF en otra pestaña.
+- Se muestra un resumen con promedio general y reprobados, y una gráfica dinámica.
+
+Notas:
+- Para PDF se utiliza `dompdf/dompdf`. Instalación opcional con Composer:
+  ```bash
+  composer require dompdf/dompdf
+  ```
+- Los endpoints de exportación y reportes están protegidos por rol y validan `csrf_token`.
+
+## Pruebas rápidas (Reportes y Estadísticas)
+
+1. Abre `http://localhost/Proyecto-Final-Web-II/public/app.php` y navega a `Reportes`.
+2. Aplica `ciclo = 2024-1` y verifica el resumen y la gráfica.
+3. Exporta CSV y PDF. Valida que el CSV tenga encabezados y datos.
+4. Endpoints de API de estadísticas:
+   - `GET /api/charts/promedios-ciclo` → promedios por ciclo.
+   - `GET /api/charts/desempeño-grupo` (profesor) → promedio por grupo del profesor autenticado.
+   - `GET /api/charts/reprobados` → % de reprobados por materia.
+5. Revisa que las respuestas mantengan `{ ok, data, message }` y que las rutas fallen con `403` si el rol no corresponde.
+
+
 ## Seguridad
 
 ### Configuración para Producción
@@ -212,10 +304,12 @@ Sistema web para la gestión escolar desarrollado en PHP, MySQL y JavaScript.
 - Consultas preparadas PDO para prevenir SQL injection
 - Hash seguro de contraseñas con password_hash()
 - Escape de salida HTML con htmlspecialchars()
-- Protección CSRF en formularios
+- Protección CSRF uniforme con `csrf_token` y validación `hash_equals()`
 - Validación de archivos subidos
 - Regeneración de ID de sesión en login
 - Headers de seguridad básicos
+ - Sesiones endurecidas (`HttpOnly`, `SameSite=Strict`, `Secure` en HTTPS)
+ - Validaciones de servidor en `GroupsService`: cupo (1–100), ciclo `^\d{4}-(1|2)$`, existencia de `materia_id` y `profesor_id` activo, y unicidad por (`materia_id`,`profesor_id`,`nombre`,`ciclo`).
 
 ## API REST
 
@@ -315,3 +409,71 @@ Distribuido bajo la Licencia MIT. Ver `LICENSE` para más información.
 Desarrollado por [Tu Nombre](https://github.com/tuusuario)#   P r o y e c t o - F i n a l - W e b - I I 
  
  
+# Control Escolar ITSUR (Modernizado)
+
+Sistema de gestión académica con arquitectura modernizada, compatible con XAMPP y PHP 8.x. Incluye router con middleware, CSRF, sesiones endurecidas, catálogos dinámicos para selects, toasts contextuales, modales Bootstrap y experiencia mejorada para carga masiva de calificaciones.
+
+## Requisitos
+
+- PHP 8.x (pdo_mysql, mbstring, json)
+- Apache (mod_rewrite habilitado)
+- MySQL/MariaDB
+- XAMPP recomendado en Windows
+
+## Instalación (XAMPP)
+
+1. Copia el proyecto en `C:\xampp\htdocs\PWBII\Control-Escolar-ITSUR`.
+2. Importa la base de datos (`db/control_escolar.sql`).
+3. Configura conexión en `config.php` o variables del proyecto.
+4. Abre `http://localhost/PWBII/Control-Escolar-ITSUR/public/app.php`.
+
+## Estructura del Proyecto
+
+- `public/app.php`: punto de entrada del router.
+- `src/`: controladores, servicios, vistas y utilidades.
+- `src/Views/layout.php`: layout compartido con Bootstrap y toasts.
+- `logs/app.log`: eventos en JSON (login, CRUD, calificaciones).
+- `uploads/`: protegido por `.htaccess` (sin ejecución PHP, sólo imágenes).
+
+## Roles y Accesos
+
+- Admin: CRUD Materias/Grupos/Profesores; exportar CSV/PDF; dashboards.
+- Profesor: CRUD Calificaciones; carga masiva CSV con resumen y descarga de log.
+- Alumno: consulta de información académica y promedios.
+
+## UX/Features Clave
+
+- Modales Bootstrap para confirmar delete en Materias y Grupos.
+- Validaciones visuales en formularios (Bootstrap validation states).
+- Toasts contextuales (`success`, `warning`, `danger`) vía `$_SESSION['flash_type']`.
+- Carga masiva CSV con barra de progreso y resumen (procesadas/actualizadas/omitidas) y descarga de log (`/grades/bulk-log`).
+- Selects dinámicos por catálogos:
+  - `/api/catalogs/subjects` (materias)
+  - `/api/catalogs/professors` (profesores)
+  - `/api/catalogs/students` (alumnos)
+  - `/api/catalogs/groups` (por profesor actual)
+
+## Seguridad y Rendimiento
+
+- CSRF tokens en formularios.
+- Sesiones endurecidas (httponly, secure, samesite Strict).
+- Rate limiting por acción sensible (login, CRUD, bulk upload).
+- Índices recomendados en `migrations/add_indexes.sql`.
+
+## Flujo de Uso Ejemplo
+
+1. Login como Admin → Dashboard → Crear Materia/Grupo/Profesor.
+2. Login como Profesor → Dashboard → Registrar calificación o Carga masiva CSV → Descargar log.
+3. Login como Alumno → Dashboard → Ver carga y promedios.
+
+## Troubleshooting
+
+- 403 al enviar formularios: revisa nombre del parámetro CSRF (`csrf` o `csrf_token`) y sesión.
+- Upload CSV falla: valida formato y contenido (IDs enteros, calificaciones 0–100).
+- Toasts no aparecen: confirma `$_SESSION['flash']` y `flash_type` antes de render.
+
+## Créditos y Contacto
+
+- Proyecto académico ITSUR.
+- Mantenedores: Equipo PWBII.
+- Contacto: soporte@itsur.edu.mx
