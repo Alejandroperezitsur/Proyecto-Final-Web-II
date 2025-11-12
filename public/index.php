@@ -61,9 +61,6 @@ $tokenCSRF = $controlAut->generarTokenCSRF();
                     <p class="institutional-subtitle">Sistema Integral de Control Escolar</p>
                 </div>
             </a>
-            <button id="theme-toggle" class="btn btn-outline-light btn-sm ms-auto" aria-label="Cambiar tema" title="Cambiar tema">
-              <i class="bi bi-brightness-high"></i>
-            </button>
         </div>
     </header>
     <div class="container-fluid login-container">

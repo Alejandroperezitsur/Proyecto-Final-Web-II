@@ -43,29 +43,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Tema claro/oscuro: detectar preferencia y persistir en localStorage
+  // Tema fijo: oscuro por defecto, sin toggle
   const THEME_KEY = 'sicenet-theme';
-  const getSystemPref = () => {
-    try { return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; } catch { return 'dark'; }
-  };
-  const getStoredTheme = () => {
-    try { return localStorage.getItem(THEME_KEY); } catch { return null; }
-  };
   const applyTheme = (theme) => {
     const t = theme === 'light' ? 'light' : 'dark';
     document.documentElement.setAttribute('data-theme', t);
   };
-  const currentTheme = getStoredTheme() || getSystemPref();
-  applyTheme(currentTheme);
-  // Permitir toggle si existe #theme-toggle
-  const btnToggle = document.getElementById('theme-toggle');
-  if (btnToggle) {
-    btnToggle.addEventListener('click', () => {
-      const now = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-      applyTheme(now);
-      try { localStorage.setItem(THEME_KEY, now); } catch {}
-    });
-  }
+  // Forzar tema oscuro y limpiar posibles preferencias previas
+  applyTheme('dark');
+  try { localStorage.removeItem(THEME_KEY); } catch {}
 
   /* LOGICA DEL TOGGLE (comentada)
   // const getSystemPref = () => {
