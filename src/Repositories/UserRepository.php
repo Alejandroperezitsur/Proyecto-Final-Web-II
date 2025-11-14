@@ -27,4 +27,12 @@ class UserRepository
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         return $row ?: null;
     }
+
+    public function findProfessorByMatricula(string $matricula): ?array
+    {
+        $stmt = $this->pdo->prepare("SELECT id, matricula, email, nombre, password, rol, activo FROM usuarios WHERE matricula = :m AND rol = 'profesor' LIMIT 1");
+        $stmt->execute([':m' => $matricula]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row ?: null;
+    }
 }

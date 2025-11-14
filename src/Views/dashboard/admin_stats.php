@@ -1,3 +1,4 @@
+<?php $base = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/'); ?>
 <div class="mt-4">
   <div class="card">
     <div class="card-body">
@@ -18,7 +19,7 @@
 
 <script>
 // Promedios por ciclo (línea)
-fetch('/api/charts/promedios-ciclo')
+fetch('<?php echo $base; ?>/api/charts/promedios-ciclo')
   .then(r=>r.json())
   .then(j=>{
     if (!j.ok) return;
@@ -31,7 +32,7 @@ fetch('/api/charts/promedios-ciclo')
   });
 
 // Reprobados por materia (barra)
-fetch('/api/charts/reprobados')
+fetch('<?php echo $base; ?>/api/charts/reprobados')
   .then(r=>r.json())
   .then(j=>{
     if (!j.ok) return;

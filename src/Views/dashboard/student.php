@@ -1,4 +1,5 @@
 <?php
+$base = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/');
 ob_start();
 ?>
 <h2 class="mb-4">Mi Tablero</h2>
@@ -81,7 +82,7 @@ ob_start();
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 // Cargar estadísticas
-fetch('/api/alumno/estadisticas').then(r=>r.json()).then(resp=>{
+fetch('<?php echo $base; ?>/api/alumno/estadisticas').then(r=>r.json()).then(resp=>{
   const d = resp.data || {};
   const prom = Number(d.promedio ?? 0);
   document.getElementById('stat-promedio').textContent = prom.toFixed(2);
@@ -114,7 +115,7 @@ function renderCarga(){
     </tr>`).join('');
   }
 }
-fetch('/api/alumno/carga').then(r=>r.json()).then(resp=>{
+fetch('<?php echo $base; ?>/api/alumno/carga').then(r=>r.json()).then(resp=>{
   const data = resp.data || [];
   cargaRows = Array.isArray(data) ? data : [];
   if (cargaRows.length === 0) { noRec.classList.remove('d-none'); }
@@ -123,7 +124,7 @@ fetch('/api/alumno/carga').then(r=>r.json()).then(resp=>{
 document.getElementById('carga-filter').addEventListener('input', renderCarga);
 
 // Gráfica Chart.js
-fetch('/api/alumno/chart').then(r=>r.json()).then(resp=>{
+fetch('<?php echo $base; ?>/api/alumno/chart').then(r=>r.json()).then(resp=>{
   const d = resp.data || { labels: [], data: [] };
   const labels = d.labels || [];
   const data = (d.data || []).map(Number);

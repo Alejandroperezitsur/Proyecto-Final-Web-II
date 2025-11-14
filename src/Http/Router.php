@@ -23,11 +23,26 @@ class Router
     public function dispatch(): void
     {
         $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-        $uri = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
+        // Soporte de querystring r=/ruta para entornos sin PATH_INFO o reescrituras
+        $queryRoute = isset($_GET['r']) ? (string)$_GET['r'] : null;
+        // Preferir PATH_INFO si está disponible (ej. /app.php/login → PATH_INFO=/login)
+        $pathInfo = isset($_SERVER['PATH_INFO']) ? (string)$_SERVER['PATH_INFO'] : null;
+        $uri = $queryRoute !== null && $queryRoute !== ''
+            ? $queryRoute
+            : (($pathInfo !== null && $pathInfo !== '')
+                ? $pathInfo
+                : parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH));
+
+        // Normalizar quitando el directorio del script (subcarpetas en XAMPP)
         $scriptDir = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/');
         if ($scriptDir && $scriptDir !== '/') {
             $uri = preg_replace('#^' . preg_quote($scriptDir, '#') . '#', '', $uri);
             if ($uri === '') { $uri = '/'; }
+        }
+        // Si la ruta incluye el nombre del script (ej. /app.php/login), eliminarlo
+        $scriptBase = '/' . basename($_SERVER['SCRIPT_NAME'] ?? '');
+        if ($scriptBase !== '/' && strpos($uri, $scriptBase) === 0) {
+            $uri = substr($uri, strlen($scriptBase)) ?: '/';
         }
 
         $route = $this->routes[$method][$uri] ?? null;

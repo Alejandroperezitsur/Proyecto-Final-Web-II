@@ -1,17 +1,18 @@
 <?php
+$base = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/');
 ob_start();
 ?>
 <h2 class="mb-4">Carga masiva de calificaciones (CSV)</h2>
 <div class="alert alert-info">Sube un archivo CSV con columnas: <code>alumno_id,grupo_id,parcial1,parcial2,final</code>.</div>
-<form method="post" action="/grades/bulk" enctype="multipart/form-data" id="bulkForm" class="needs-validation" novalidate>
+<form method="post" action="<?php echo $base; ?>/grades/bulk" enctype="multipart/form-data" id="bulkForm" class="needs-validation" novalidate>
   <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? ''); ?>">
   <div class="mb-3">
     <input type="file" name="csv" accept="text/csv" class="form-control" required>
     <div class="invalid-feedback">Selecciona un archivo CSV válido.</div>
   </div>
   <button class="btn btn-primary" type="submit"><i class="fa-solid fa-upload me-1"></i> Subir CSV</button>
-  <a class="btn btn-outline-secondary ms-2" href="/dashboard">Cancelar</a>
-  <a class="btn btn-outline-success ms-2" href="/reports/export/csv"><i class="fa-solid fa-file-csv me-1"></i> Descargar CSV ejemplo</a>
+  <a class="btn btn-outline-secondary ms-2" href="<?php echo $base; ?>/dashboard">Cancelar</a>
+  <a class="btn btn-outline-success ms-2" href="<?php echo $base; ?>/reports/export/csv"><i class="fa-solid fa-file-csv me-1"></i> Descargar CSV ejemplo</a>
   <div class="mt-3 small text-muted">Tip: Puedes exportar CSV y ajustarlo para la carga masiva.</div>
 </form>
 
@@ -80,7 +81,7 @@ document.getElementById('bulkForm').addEventListener('submit', async (e) => {
 
   const fd = new FormData(e.target);
   try {
-    const res = await fetch('/grades/bulk', { method: 'POST', body: fd, headers: { 'Accept': 'application/json' } });
+    const res = await fetch('<?php echo $base; ?>/grades/bulk', { method: 'POST', body: fd, headers: { 'Accept': 'application/json' } });
     if (!res.ok) throw new Error('Error en la carga');
     const data = await res.json();
     bar.classList.remove('progress-bar-animated');
@@ -92,7 +93,7 @@ document.getElementById('bulkForm').addEventListener('submit', async (e) => {
     showToast('Carga masiva completada', 'success');
     const btn = document.getElementById('downloadLogBtn');
     btn.disabled = false;
-    btn.onclick = () => { window.location.href = '/grades/bulk-log'; };
+    btn.onclick = () => { window.location.href = '<?php echo $base; ?>/grades/bulk-log'; };
   } catch (err) {
     bar.classList.remove('progress-bar-animated');
     bar.style.width = '100%'; bar.textContent = 'Error';

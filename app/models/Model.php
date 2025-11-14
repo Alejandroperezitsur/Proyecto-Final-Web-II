@@ -81,15 +81,7 @@ abstract class Model {
     }
 
     protected function sanitize($data) {
-        $clean = [];
-        foreach ($data as $key => $value) {
-            if (is_string($value)) {
-                $clean[$key] = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
-            } else {
-                $clean[$key] = $value;
-            }
-        }
-        return $clean;
+        return $data;
     }
 
     public function getDb() {

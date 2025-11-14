@@ -1,17 +1,18 @@
 <?php
 // Expect $subjects
 $csrf = $_SESSION['csrf_token'] ?? '';
+$base = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/');
 ob_start();
 ?>
 <div class="container py-4">
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h3>Materias</h3>
-    <a href="/dashboard" class="btn btn-outline-secondary">Volver</a>
+    <a href="<?php echo $base; ?>/dashboard" class="btn btn-outline-secondary">Volver</a>
   </div>
 
   <div class="card mb-4">
     <div class="card-body">
-      <form method="post" action="/subjects/create" class="row g-2 needs-validation" novalidate id="subjectForm">
+      <form method="post" action="<?php echo $base; ?>/subjects/create" class="row g-2 needs-validation" novalidate id="subjectForm">
         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf) ?>">
         <div class="col-md-4">
           <input class="form-control" name="nombre" placeholder="Nombre" required>
@@ -50,7 +51,7 @@ ob_start();
                   <div class="modal-body">¿Confirmas eliminar "<?= htmlspecialchars($m['nombre']) ?>"?</div>
                   <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <form method="post" action="/subjects/delete">
+                    <form method="post" action="<?php echo $base; ?>/subjects/delete">
                       <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf) ?>">
                       <input type="hidden" name="id" value="<?= (int)$m['id'] ?>">
                       <button type="submit" class="btn btn-danger">Eliminar</button>

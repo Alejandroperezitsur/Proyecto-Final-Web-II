@@ -1,16 +1,17 @@
 <?php
 $csrf = $_SESSION['csrf_token'] ?? '';
+$base = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/');
 ob_start();
 ?>
 <div class="container py-4">
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h3>Grupos</h3>
-    <a href="/dashboard" class="btn btn-outline-secondary">Volver</a>
+    <a href="<?php echo $base; ?>/dashboard" class="btn btn-outline-secondary">Volver</a>
   </div>
 
   <div class="card mb-4">
     <div class="card-body">
-      <form method="post" action="/groups/create" class="row g-2 needs-validation" novalidate id="groupForm">
+      <form method="post" action="<?php echo $base; ?>/groups/create" class="row g-2 needs-validation" novalidate id="groupForm">
         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf) ?>">
         <div class="col-md-3">
           <select class="form-select" name="materia_id" id="materiaSelect" required>
@@ -64,7 +65,7 @@ ob_start();
                   <div class="modal-body">¿Confirmas eliminar el grupo "<?= htmlspecialchars($g['nombre']) ?>"?</div>
                   <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <form method="post" action="/groups/delete">
+                    <form method="post" action="<?php echo $base; ?>/groups/delete">
                       <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf) ?>">
                       <input type="hidden" name="id" value="<?= (int)$g['id'] ?>">
                       <button type="submit" class="btn btn-danger">Eliminar</button>
@@ -100,8 +101,8 @@ async function loadCatalogs() {
   const profSel = document.getElementById('profesorSelect');
   try {
     const [subjRes, profRes] = await Promise.all([
-      fetch('/api/catalogs/subjects'),
-      fetch('/api/catalogs/professors')
+      fetch('<?php echo $base; ?>/api/catalogs/subjects'),
+      fetch('<?php echo $base; ?>/api/catalogs/professors')
     ]);
     if (!subjRes.ok || !profRes.ok) throw new Error('Error cargando catálogos');
     const subjects = await subjRes.json();

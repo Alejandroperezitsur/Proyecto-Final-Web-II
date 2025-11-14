@@ -1,4 +1,8 @@
 <?php
+header('Location: app.php?r=/groups');
+exit;
+?>
+<?php
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../app/capas/negocio/ControlAutenticacion.php';
 require_once __DIR__ . '/../app/capas/negocio/ControlGrupos.php';

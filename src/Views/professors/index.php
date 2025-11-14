@@ -2,16 +2,16 @@
 $csrf = $_SESSION['csrf_token'] ?? '';
 // Expect $professors
 ?>
-<?php ob_start(); ?>
+<?php $base = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/'); ob_start(); ?>
 <div class="container py-4">
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h3>Profesores</h3>
-    <a href="/dashboard" class="btn btn-outline-secondary">Volver</a>
+    <a href="<?php echo $base; ?>/dashboard" class="btn btn-outline-secondary">Volver</a>
   </div>
 
   <div class="card mb-4">
     <div class="card-body">
-      <form method="post" action="/professors/create" class="row g-2 needs-validation" novalidate>
+      <form method="post" action="<?php echo $base; ?>/professors/create" class="row g-2 needs-validation" novalidate>
         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf) ?>">
         <div class="col-md-4">
           <input class="form-control" name="nombre" placeholder="Nombre" required>
@@ -51,7 +51,7 @@ $csrf = $_SESSION['csrf_token'] ?? '';
                   <div class="modal-body">¿Confirmas eliminar a <?= htmlspecialchars($p['nombre']) ?>?</div>
                   <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <form method="post" action="/professors/delete">
+                    <form method="post" action="<?php echo $base; ?>/professors/delete">
                       <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf) ?>">
                       <input type="hidden" name="id" value="<?= (int)$p['id'] ?>">
                       <button type="submit" class="btn btn-danger">Eliminar</button>
@@ -71,7 +71,7 @@ $csrf = $_SESSION['csrf_token'] ?? '';
 <script>
 // Bootstrap client-side validation
 (() => {
-  const form = document.querySelector('form[action="/professors/create"]');
+  const form = document.querySelector('form[action="<?php echo $base; ?>/professors/create"]');
   form.addEventListener('submit', (event) => {
     if (!form.checkValidity()) {
       event.preventDefault();

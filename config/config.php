@@ -10,7 +10,7 @@ return [
     'app' => [
         'name' => 'Control Escolar',
     // URL sugerida para acceder con XAMPP (colocar carpeta del proyecto en htdocs)
-    'url' => 'http://localhost/PWBII/Proyecto-Final-Web-II/public',
+    'url' => 'http://localhost/PWBII/Control-Escolar-ITSUR',
         'timezone' => 'America/Mexico_City',
         'charset' => 'UTF-8',
         'debug' => true // Cambiar a false en producción

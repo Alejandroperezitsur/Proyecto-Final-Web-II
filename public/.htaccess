@@ -1,67 +1,18 @@
-# Asegurarse que se use el set de caracteres UTF-8
-AddDefaultCharset utf-8
-
-# Redirigir todas las solicitudes al index.php excepto para archivos existentes
 RewriteEngine On
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ index.php [QSA,L]
+AcceptPathInfo On
 
-# Protección básica de seguridad
-<IfModule mod_headers.c>
-    # Prevenir clickjacking
-    Header set X-Frame-Options "SAMEORIGIN"
-    
-    # Protección XSS para navegadores modernos
-    Header set X-XSS-Protection "1; mode=block"
-    
-    # Deshabilitar MIME-type sniffing
-    Header set X-Content-Type-Options "nosniff"
-</IfModule>
+# Sirve archivos y directorios existentes directamente
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
 
-# Prevenir acceso a archivos sensibles
-<FilesMatch "^(\.env|\.gitignore|composer\.json|composer\.lock|package\.json|package-lock\.json)$">
-    Require all denied
-</FilesMatch>
+# APIs legacy con PATH_INFO (no pasar por app.php)
+RewriteRule ^api/admin/?$ api/admin/index.php [QSA,L]
+RewriteRule ^api/admin/(.*)$ api/admin/index.php/$1 [QSA,L]
+RewriteRule ^api/alumnos/?$ api/alumnos/index.php [QSA,L]
+RewriteRule ^api/alumnos/(.*)$ api/alumnos/index.php/$1 [QSA,L]
+RewriteRule ^api/profesores/?$ api/profesores/index.php [QSA,L]
+RewriteRule ^api/profesores/(.*)$ api/profesores/index.php/$1 [QSA,L]
 
-# Comprimir respuestas
-<IfModule mod_deflate.c>
-    AddOutputFilterByType DEFLATE text/plain
-    AddOutputFilterByType DEFLATE text/html
-    AddOutputFilterByType DEFLATE text/xml
-    AddOutputFilterByType DEFLATE text/css
-    AddOutputFilterByType DEFLATE application/xml
-    AddOutputFilterByType DEFLATE application/xhtml+xml
-    AddOutputFilterByType DEFLATE application/rss+xml
-    AddOutputFilterByType DEFLATE application/javascript
-    AddOutputFilterByType DEFLATE application/x-javascript
-</IfModule>
-
-# Cache control para recursos estáticos
-<IfModule mod_expires.c>
-    ExpiresActive On
-    ExpiresByType image/jpg "access plus 1 year"
-    ExpiresByType image/jpeg "access plus 1 year"
-    ExpiresByType image/gif "access plus 1 year"
-    ExpiresByType image/png "access plus 1 year"
-    ExpiresByType text/css "access plus 1 month"
-    ExpiresByType application/javascript "access plus 1 month"
-</IfModule>
-
-# Cabeceras de seguridad
-<IfModule mod_headers.c>
-    Header always set X-Content-Type-Options "nosniff"
-    Header always set X-Frame-Options "SAMEORIGIN"
-    Header always set Referrer-Policy "strict-origin-when-cross-origin"
-    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
-    # CSP compatible con CDNs de Bootstrap y scripts inline mínimos en páginas existentes
-    Header set Content-Security-Policy "default-src 'self' https:; img-src 'self' https: data:; style-src 'self' https: 'unsafe-inline'; script-src 'self' https: 'unsafe-inline'; font-src 'self' https: data:; connect-src 'self' https:"
-</IfModule>
-
-# Deshabilitar listado de directorios
-Options -Indexes
-
-# Mostrar errores personalizados en index.php
-ErrorDocument 404 /index.php?code=404
-ErrorDocument 403 /index.php?code=403
-ErrorDocument 500 /index.php?code=500
+# Reescribe todo lo demás a app.php
+RewriteRule ^.*$ app.php [QSA,L]

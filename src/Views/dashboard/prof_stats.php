@@ -1,3 +1,4 @@
+<?php $base = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/'); ?>
 <div class="mt-4">
   <div class="card">
     <div class="card-body">
@@ -9,7 +10,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-fetch('/api/charts/desempeño-grupo')
+fetch('<?php echo $base; ?>/api/charts/desempeño-grupo')
   .then(r=>r.json())
   .then(j=>{
     if (!j.ok) return;

@@ -17,13 +17,13 @@ if (session_status() === PHP_SESSION_NONE) {
             'domain' => '',
             'secure' => $secure,
             'httponly' => true,
-            'samesite' => 'Lax',
+            'samesite' => 'Strict',
         ]);
-        ini_set('session.cookie_samesite', 'Lax');
+        ini_set('session.cookie_samesite', 'Strict');
     } else {
         // Fallback para versiones antiguas
         ini_set('session.cookie_secure', (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? '1' : '0');
-        ini_set('session.cookie_samesite', 'Lax');
+        ini_set('session.cookie_samesite', 'Strict');
     }
 
     session_start();

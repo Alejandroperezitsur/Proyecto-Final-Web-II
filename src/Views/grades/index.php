@@ -1,16 +1,17 @@
 <?php
 $csrf = $_SESSION['csrf_token'] ?? '';
+$base = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/');
 ob_start();
 ?>
 <div class="container py-4">
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h3>Registrar Calificaciones</h3>
-    <a href="/dashboard" class="btn btn-outline-secondary">Volver</a>
+    <a href="<?php echo $base; ?>/dashboard" class="btn btn-outline-secondary">Volver</a>
   </div>
 
   <div class="card">
     <div class="card-body">
-      <form id="grade-form" method="post" action="/grades/create" novalidate>
+      <form id="grade-form" method="post" action="<?php echo $base; ?>/grades/create" novalidate>
         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf) ?>">
         <div class="row g-3">
           <div class="col-md-4">
@@ -39,7 +40,7 @@ ob_start();
 
         <div class="mt-4 d-flex gap-2">
           <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#confirmModal"><i class="fa-solid fa-floppy-disk me-1"></i> Guardar</button>
-          <a href="/grades/bulk" class="btn btn-outline-info"><i class="fa-solid fa-file-csv me-1"></i> Carga Masiva</a>
+          <a href="<?php echo $base; ?>/grades/bulk" class="btn btn-outline-info"><i class="fa-solid fa-file-csv me-1"></i> Carga Masiva</a>
         </div>
       </form>
     </div>
@@ -70,11 +71,11 @@ ob_start();
   const grupoSel = document.getElementById('grupo_id');
   const alumnoSel = document.getElementById('alumno_id');
   // Poblar grupos del profesor actual
-  const gRes = await fetch('/api/catalogs/groups');
+  const gRes = await fetch('<?php echo $base; ?>/api/catalogs/groups');
   const grupos = await gRes.json();
   grupoSel.innerHTML = grupos.map(g => `<option value="${g.id}">${g.ciclo} · ${g.materia} · ${g.nombre}</option>`).join('');
   // Poblar alumnos activos
-  const aRes = await fetch('/api/catalogs/students');
+  const aRes = await fetch('<?php echo $base; ?>/api/catalogs/students');
   const alumnos = await aRes.json();
   alumnoSel.innerHTML = alumnos.map(a => `<option value="${a.id}">${a.matricula} · ${a.nombre}</option>`).join('');
 })();

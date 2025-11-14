@@ -1,13 +1,7 @@
 <?php
-require_once __DIR__ . '/../app/controllers/AuthController.php';
-require_once __DIR__ . '/../app/models/Grupo.php';
-require_once __DIR__ . '/../app/models/Calificacion.php';
-require_once __DIR__ . '/../app/models/Materia.php';
-
-$auth = new AuthController();
-$auth->requireRole(['alumno']);
-$user = $auth->getCurrentUser();
-$role = 'alumno';
+header('Location: app.php?r=/dashboard');
+exit;
+?>
 
 // Cargar configuración y ventanas por carrera
 $config = require __DIR__ . '/../config/config.php';

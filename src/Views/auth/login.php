@@ -1,4 +1,5 @@
 <?php
+$base = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/');
 ob_start();
 ?>
 <div class="row justify-content-center">
@@ -6,7 +7,7 @@ ob_start();
     <div class="card shadow-sm">
       <div class="card-body">
         <h1 class="h4 mb-3">Acceso al Sistema</h1>
-        <form method="post" action="/login" novalidate>
+        <form method="post" action="<?php echo $base; ?>/login" novalidate>
           <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrf); ?>">
           <div class="mb-3">
             <label class="form-label">Email (admin/profesor) o Matrícula (alumno)</label>

@@ -1,0 +1,16 @@
+{"ts":"2025-11-14T01:21:16+01:00","user_id":90,"role":"admin","path":"\/Control-Escolar-ITSUR\/public\/login","msg":"login_success","ctx":{"user_id":90,"role":"admin"}}
+{"ts":"2025-11-14T01:21:16+01:00","user_id":90,"role":"admin","path":"\/Control-Escolar-ITSUR\/public\/api\/charts\/reprobados","msg":"chart_query","ctx":{"type":"reprobados_materia"}}
+{"ts":"2025-11-14T01:21:16+01:00","user_id":90,"role":"admin","path":"\/Control-Escolar-ITSUR\/public\/api\/charts\/promedios-ciclo","msg":"chart_query","ctx":{"type":"promedios_ciclo"}}
+{"ts":"2025-11-14T01:21:55+01:00","user_id":90,"role":"admin","path":"\/Control-Escolar-ITSUR\/public\/reports\/summary","msg":"report_summary","ctx":{"filters":{"ciclo":null,"profesor_id":null},"promedio":79.53,"reprobados":516}}
+{"ts":"2025-11-14T01:22:09+01:00","user_id":90,"role":"admin","path":"\/Control-Escolar-ITSUR\/public\/reports\/summary","msg":"report_summary","ctx":{"filters":{"ciclo":null,"profesor_id":null},"promedio":79.53,"reprobados":516}}
+{"ts":"2025-11-14T01:22:33+01:00","user_id":90,"role":"admin","path":"\/Control-Escolar-ITSUR\/public\/reports\/summary","msg":"report_summary","ctx":{"filters":{"ciclo":null,"profesor_id":null},"promedio":79.53,"reprobados":516}}
+{"ts":"2025-11-14T01:22:59+01:00","user_id":90,"role":"admin","path":"\/Control-Escolar-ITSUR\/public\/reports\/summary","msg":"report_summary","ctx":{"filters":{"ciclo":null,"profesor_id":null},"promedio":79.53,"reprobados":516}}
+{"ts":"2025-11-14T01:25:46+01:00","user_id":null,"role":null,"path":"\/Control-Escolar-ITSUR\/public\/logout","msg":"logout","ctx":[]}
+{"ts":"2025-11-14T01:29:08+01:00","user_id":126,"role":"alumno","path":"\/Control-Escolar-ITSUR\/public\/login","msg":"login_success","ctx":{"user_id":126,"role":"alumno"}}
+{"ts":"2025-11-14T01:30:12+01:00","user_id":null,"role":null,"path":"\/Control-Escolar-ITSUR\/public\/logout","msg":"logout","ctx":[]}
+{"ts":"2025-11-14T01:30:25+01:00","user_id":null,"role":null,"path":"\/Control-Escolar-ITSUR\/public\/login","msg":"login_failed","ctx":{"identity":"C91771817"}}
+{"ts":"2025-11-14T01:30:40+01:00","user_id":null,"role":null,"path":"\/Control-Escolar-ITSUR\/public\/login","msg":"login_failed","ctx":{"identity":"I53281283"}}
+{"ts":"2025-11-14T01:30:55+01:00","user_id":null,"role":null,"path":"\/Control-Escolar-ITSUR\/public\/login","msg":"login_failed","ctx":{"identity":"S14161955"}}
+{"ts":"2025-11-14T01:31:03+01:00","user_id":null,"role":null,"path":"\/Control-Escolar-ITSUR\/public\/login","msg":"login_failed","ctx":{"identity":""}}
+{"ts":"2025-11-14T01:33:01+01:00","user_id":70,"role":"profesor","path":"\/Control-Escolar-ITSUR\/public\/login","msg":"login_success","ctx":{"user_id":70,"role":"profesor"}}
+{"ts":"2025-11-14T01:33:57+01:00","user_id":70,"role":"profesor","path":"\/Control-Escolar-ITSUR\/public\/reports\/summary","msg":"report_summary","ctx":{"filters":{"ciclo":null,"profesor_id":null},"promedio":0,"reprobados":0}}

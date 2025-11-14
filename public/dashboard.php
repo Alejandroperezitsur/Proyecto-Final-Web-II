@@ -1,23 +1,6 @@
 <?php
-require_once __DIR__ . '/../config/config.php';
-require_once __DIR__ . '/../app/controllers/AuthController.php';
-require_once __DIR__ . '/../app/capas/negocio/ControlGrupos.php';
-require_once __DIR__ . '/../app/capas/negocio/ControlCalificaciones.php';
-
-use App\Capas\Negocio\ControlGrupos;
-use App\Capas\Negocio\ControlCalificaciones;
-
-$controlGrupos = new ControlGrupos();
-$controlCal = new ControlCalificaciones();
-
-$controlAut = new \AuthController();
-$controlAut->requireAuth();
-
-$usuarioActual = $controlAut->getCurrentUser();
-$role = $_SESSION['user_role'] ?? '';
-$esAdmin = ($role === 'admin');
-$esProfesor = ($role === 'profesor');
-$esAlumno = ($role === 'alumno');
+header('Location: app.php?r=/dashboard');
+exit;
 // KPIs globales (solo admin)
 $estadisticas = $controlCal->obtenerAgregadosGlobales();
 $promediosPorCiclo = $controlCal->obtenerPromediosPorCiclo();

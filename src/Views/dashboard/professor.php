@@ -1,4 +1,5 @@
 <?php
+$base = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/');
 ob_start();
 ?>
 <h2 class="mb-4">Dashboard Profesor</h2>
@@ -45,11 +46,11 @@ ob_start();
 </div>
 
 <div class="mt-4">
-  <a class="btn btn-outline-primary" href="/grades/bulk"><i class="fa-solid fa-file-import me-1"></i> Carga masiva de calificaciones (CSV)</a>
+  <a class="btn btn-outline-primary" href="<?php echo $base; ?>/grades/bulk"><i class="fa-solid fa-file-import me-1"></i> Carga masiva de calificaciones (CSV)</a>
 </div>
 
 <script>
-fetch('/api/kpis/profesor').then(r=>r.json()).then(d=>{
+fetch('<?php echo $base; ?>/api/kpis/profesor').then(r=>r.json()).then(d=>{
   document.getElementById('kpi-grupos').textContent = d.grupos_activos ?? '—';
   document.getElementById('kpi-alumnos').textContent = d.alumnos ?? '—';
   // Pendientes: si deseas calcularlo, puedes derivarlo de grupos/estadísticas reales.
@@ -74,7 +75,7 @@ fetch('/api/kpis/profesor').then(r=>r.json()).then(d=>{
 </div>
 
 <script>
-fetch('/api/kpis/profesor').then(r=>r.json()).then(d=>{
+fetch('<?php echo $base; ?>/api/kpis/profesor').then(r=>r.json()).then(d=>{
   const rows = d.grupos || [];
   const tbody = document.getElementById('grp-tbody');
   const render = () => {
@@ -85,7 +86,7 @@ fetch('/api/kpis/profesor').then(r=>r.json()).then(d=>{
         <td>${x.ciclo ?? ''}</td>
         <td>${x.materia ?? ''}</td>
         <td>${x.nombre ?? ''}</td>
-        <td class="text-end"><a class="btn btn-outline-success btn-sm" href="/grades"><i class="fa-solid fa-pen"></i> Calificar</a></td>
+        <td class="text-end"><a class="btn btn-outline-success btn-sm" href="<?php echo $base; ?>/grades"><i class="fa-solid fa-pen"></i> Calificar</a></td>
       </tr>`).join('');
   };
   render();

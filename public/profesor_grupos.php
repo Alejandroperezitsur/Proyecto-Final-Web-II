@@ -1,11 +1,6 @@
 <?php
-require_once __DIR__ . '/../app/controllers/AuthController.php';
-
-$auth = new AuthController();
-$auth->requireAuth();
-$auth->requireRole(['profesor','admin']);
-$user = $auth->getCurrentUser();
-$csrf = $auth->generateCSRFToken();
+header('Location: app.php?r=/dashboard');
+exit;
 ?>
 <!doctype html>
 <html lang="es">

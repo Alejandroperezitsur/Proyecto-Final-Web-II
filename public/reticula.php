@@ -1,12 +1,7 @@
 <?php
-require_once __DIR__ . '/../app/controllers/AuthController.php';
-require_once __DIR__ . '/../app/models/Materia.php';
-require_once __DIR__ . '/../app/models/Usuario.php';
-
-$auth = new AuthController();
-$auth->requireAuth();
-$user = $auth->getCurrentUser();
-$role = $_SESSION['user_role'] ?? '';
+header('Location: app.php?r=/dashboard');
+exit;
+?>
 
 // Determinar carrera por prefijo de matrícula del alumno
 $carreras = [

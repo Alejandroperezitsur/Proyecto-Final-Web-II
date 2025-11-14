@@ -53,6 +53,25 @@ class Database {
                     PDO::ATTR_EMULATE_PREPARES => false
                 ]
             );
+
+            try {
+                $chk = $this->conn->prepare("SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = :db AND TABLE_NAME = 'usuarios' AND COLUMN_NAME = 'nombre'");
+                $chk->execute([':db' => $dbname]);
+                $exists = (int)$chk->fetchColumn();
+                if ($exists === 0) {
+                    $this->conn->exec("ALTER TABLE usuarios ADD COLUMN nombre VARCHAR(100) DEFAULT NULL AFTER email");
+                }
+            } catch (Throwable $e) {}
+
+            // alumnos.activo
+            try {
+                $chk = $this->conn->prepare("SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = :db AND TABLE_NAME = 'alumnos' AND COLUMN_NAME = 'activo'");
+                $chk->execute([':db' => $dbname]);
+                $exists = (int)$chk->fetchColumn();
+                if ($exists === 0) {
+                    $this->conn->exec("ALTER TABLE alumnos ADD COLUMN activo TINYINT(1) NOT NULL DEFAULT 1 AFTER password");
+                }
+            } catch (Throwable $e) {}
         } catch(PDOException $e) {
             die("Error de conexión: " . $e->getMessage());
         }

@@ -1,13 +1,7 @@
 <?php
-require_once __DIR__ . '/../app/controllers/AuthController.php';
-require_once __DIR__ . '/../app/models/Alumno.php';
-require_once __DIR__ . '/../app/models/SavedView.php';
-
-$auth = new AuthController();
-$auth->requireAuth();
-$user = $auth->getCurrentUser();
-$csrf = $auth->generateCSRFToken();
-// Guardado de vistas en servidor
+header('Location: app.php?r=/dashboard');
+exit;
+?>
 $message = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_server_view'])) {
   $token = $_POST['csrf_token'] ?? '';

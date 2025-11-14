@@ -8,7 +8,8 @@ class AuthMiddleware
         return function () {
             if (!isset($_SESSION['user_id'], $_SESSION['role'])) {
                 http_response_code(302);
-                header('Location: /login');
+                $base = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/');
+                header('Location: ' . $base . '/app.php?r=/login');
                 return false;
             }
             return true;
@@ -20,7 +21,8 @@ class AuthMiddleware
         return function () use ($role) {
             if (!isset($_SESSION['user_id'], $_SESSION['role'])) {
                 http_response_code(302);
-                header('Location: /login');
+                $base = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/');
+                header('Location: ' . $base . '/app.php?r=/login');
                 return false;
             }
             if ($_SESSION['role'] !== $role) {
@@ -40,7 +42,8 @@ class AuthMiddleware
         return function () use ($roles) {
             if (!isset($_SESSION['user_id'], $_SESSION['role'])) {
                 http_response_code(302);
-                header('Location: /login');
+                $base = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/');
+                header('Location: ' . $base . '/app.php?r=/login');
                 return false;
             }
             $current = (string)($_SESSION['role'] ?? '');

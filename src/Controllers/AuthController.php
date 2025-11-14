@@ -66,7 +66,8 @@ class AuthController
         $_SESSION['login_attempts'] = 0;
         unset($_SESSION['captcha_question'], $_SESSION['captcha_answer']);
         Logger::info('login_success', ['user_id' => $user['id'], 'role' => $user['role']]);
-        header('Location: /dashboard');
+        $base = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/');
+        header('Location: ' . $base . '/app.php?r=/dashboard');
         return '';
     }
 
@@ -79,7 +80,8 @@ class AuthController
         }
         session_destroy();
         Logger::info('logout');
-        header('Location: /login');
+        $base = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/');
+        header('Location: ' . $base . '/app.php?r=/login');
         return '';
     }
 }

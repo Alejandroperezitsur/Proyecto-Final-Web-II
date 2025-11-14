@@ -1,13 +1,13 @@
 /* Tema moderno y sidebar */
 :root {
-  --bg: #0f172a;
-  --surface: #111827;
-  --surface-2: #0b1220;
-  --text: #e5e7eb;
-  --muted: #9ca3af;
-  --primary: #22c55e;
-  --primary-600: #16a34a;
-  --primary-700: #15803d;
+  --bg: #0a1b14;
+  --surface: #0f241b;
+  --surface-2: #0b1d16;
+  --text: #e6f4ea;
+  --muted: #b5cbbf;
+  --primary: #14532d; /* verde oscuro principal */
+  --primary-600: #0e4026;
+  --primary-700: #0b3320;
   --accent: #60a5fa;
   --danger: #ef4444;
   --warning: #f59e0b;
@@ -21,9 +21,9 @@
   --surface-2: #f4f7fb;
   --text: #0b1220; /* texto más oscuro para mejor contraste */
   --muted: #1f2937; /* evitar grises demasiado bajos en blanco */
-  --primary: #2563eb;
-  --primary-600: #1d4ed8;
-  --primary-700: #1e40af;
+  --primary: #166534; /* verde más oscuro también en claro */
+  --primary-600: #14532d;
+  --primary-700: #0f3f22;
   --accent: #10b981;
   --danger: #b91c1c;
   --warning: #b45309;
@@ -138,7 +138,7 @@ body {
 }
 
 /* Navbar */
-.navbar { background: linear-gradient(90deg, var(--surface) 0%, #0f1a2b 100%) !important; box-shadow: var(--shadow); }
+.navbar { background: linear-gradient(90deg, var(--surface) 0%, #0a1b14 100%) !important; box-shadow: var(--shadow); }
 .navbar-brand { font-weight: 700; letter-spacing: .3px; color: var(--text) !important; }
 .nav-link { color: var(--muted) !important; transition: color .2s ease; padding: .5rem .75rem; font-size: 1rem; }
 .nav-link:hover { color: var(--text) !important; }

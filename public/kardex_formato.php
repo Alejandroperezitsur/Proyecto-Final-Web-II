@@ -1,13 +1,7 @@
 <?php
-require_once __DIR__ . '/../app/controllers/AuthController.php';
-require_once __DIR__ . '/../app/models/Alumno.php';
-
-$auth = new AuthController();
-$auth->requireAuth();
-$user = $auth->getCurrentUser();
-$role = $_SESSION['user_role'] ?? '';
-$isAdmin = ($role === 'admin');
-$isAlumno = ($role === 'alumno');
+header('Location: app.php?r=/dashboard');
+exit;
+?>
 $isProfesor = ($role === 'profesor');
 if (!$isAdmin && !$isAlumno && !$isProfesor) {
   http_response_code(403);

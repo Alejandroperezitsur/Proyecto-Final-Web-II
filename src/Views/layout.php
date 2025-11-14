@@ -1,6 +1,7 @@
 <?php
 $role = $_SESSION['role'] ?? 'guest';
 $name = $_SESSION['name'] ?? '';
+$base = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/');
 ?>
 <!doctype html>
 <html lang="es">
@@ -10,34 +11,35 @@ $name = $_SESSION['name'] ?? '';
   <title>Control Escolar</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link href="<?php echo $base; ?>/assets/css/styles.css" rel="stylesheet">
 </head>
-<body class="bg-light">
+<body data-theme="dark">
   <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     <div class="container-fluid">
-      <a class="navbar-brand" href="/dashboard"><i class="fa-solid fa-graduation-cap me-2"></i>ITSUR</a>
+      <a class="navbar-brand" href="<?php echo $base; ?>/dashboard"><i class="fa-solid fa-graduation-cap me-2"></i>ITSUR</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="nav">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <?php if ($role === 'admin'): ?>
-            <li class="nav-item"><a class="nav-link" href="/dashboard">Dashboard</a></li>
-            <li class="nav-item"><a class="nav-link" href="/reports">Reportes</a></li>
-            <li class="nav-item"><a class="nav-link" href="/alumnos">Alumnos</a></li>
+            <li class="nav-item"><a class="nav-link" href="<?php echo $base; ?>/dashboard">Dashboard</a></li>
+            <li class="nav-item"><a class="nav-link" href="<?php echo $base; ?>/reports">Reportes</a></li>
+            <li class="nav-item"><a class="nav-link" href="<?php echo $base; ?>/alumnos">Alumnos</a></li>
           <?php elseif ($role === 'profesor'): ?>
-            <li class="nav-item"><a class="nav-link" href="/dashboard">Dashboard</a></li>
-            <li class="nav-item"><a class="nav-link" href="/reports">Reportes</a></li>
-            <li class="nav-item"><a class="nav-link" href="/grades/bulk">Carga masiva</a></li>
+            <li class="nav-item"><a class="nav-link" href="<?php echo $base; ?>/dashboard">Dashboard</a></li>
+            <li class="nav-item"><a class="nav-link" href="<?php echo $base; ?>/reports">Reportes</a></li>
+            <li class="nav-item"><a class="nav-link" href="<?php echo $base; ?>/grades/bulk">Carga masiva</a></li>
           <?php elseif ($role === 'alumno'): ?>
-            <li class="nav-item"><a class="nav-link" href="/dashboard">Mi tablero</a></li>
+            <li class="nav-item"><a class="nav-link" href="<?php echo $base; ?>/dashboard">Mi tablero</a></li>
           <?php endif; ?>
         </ul>
         <div class="d-flex">
           <?php if ($role !== 'guest'): ?>
             <span class="navbar-text me-3"><i class="fa-regular fa-user me-1"></i><?php echo htmlspecialchars($name ?: $role); ?></span>
-            <a href="/logout" class="btn btn-outline-light">Salir</a>
+            <a href="<?php echo $base; ?>/logout" class="btn btn-outline-light">Salir</a>
           <?php else: ?>
-            <a href="/login" class="btn btn-outline-light">Acceder</a>
+            <a href="<?php echo $base; ?>/login" class="btn btn-outline-light">Acceder</a>
           <?php endif; ?>
         </div>
       </div>

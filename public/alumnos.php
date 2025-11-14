@@ -1,4 +1,8 @@
 <?php
+header('Location: app.php?r=/alumnos');
+exit;
+?>
+<?php
 require_once __DIR__ . '/../app/controllers/AuthController.php';
 require_once __DIR__ . '/../app/capas/negocio/ControlAlumnos.php';
 

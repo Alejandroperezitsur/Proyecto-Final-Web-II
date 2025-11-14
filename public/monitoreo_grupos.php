@@ -1,14 +1,7 @@
 <?php
-require_once __DIR__ . '/../app/controllers/AuthController.php';
-
-$auth = new AuthController();
-$auth->requireAuth();
-$user = $auth->getCurrentUser();
-if ($user['rol'] !== 'admin') {
-  http_response_code(403);
-  echo 'Acceso denegado';
-  exit;
-}
+header('Location: app.php?r=/dashboard');
+exit;
+?>
 ?>
 <!doctype html>
 <html lang="es">

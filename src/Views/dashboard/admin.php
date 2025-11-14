@@ -1,4 +1,5 @@
 <?php
+$base = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/');
 ob_start();
 ?>
 <h2 class="mb-4">Dashboard Administrador</h2>
@@ -58,8 +59,8 @@ ob_start();
 </div>
 
 <div class="mt-4">
-  <a class="btn btn-outline-secondary me-2" href="/reports/export/csv"><i class="fa-solid fa-file-csv me-1"></i> Exportar CSV</a>
-  <a class="btn btn-outline-primary" href="/dashboard"><i class="fa-solid fa-arrows-rotate me-1"></i> Refrescar</a>
+  <a class="btn btn-outline-secondary me-2" href="<?php echo $base; ?>/reports/export/csv"><i class="fa-solid fa-file-csv me-1"></i> Exportar CSV</a>
+  <a class="btn btn-outline-primary" href="<?php echo $base; ?>/dashboard"><i class="fa-solid fa-arrows-rotate me-1"></i> Refrescar</a>
 </div>
 
 <div class="row g-3 mt-3">
@@ -106,7 +107,7 @@ ob_start();
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 // Cargar KPIs reales
-fetch('/api/kpis/admin')
+fetch('<?php echo $base; ?>/api/kpis/admin')
   .then(r=>r.json())
   .then(d=>{
     document.getElementById('kpi-alumnos').textContent = d.alumnos ?? '—';
@@ -118,7 +119,7 @@ fetch('/api/kpis/admin')
   });
 
 // Chart.js con datos reales
-fetch('/api/charts/promedios-materias')
+fetch('<?php echo $base; ?>/api/charts/promedios-materias')
   .then(r=>r.json())
   .then(rows=>{
     const labels = rows.map(x=>x.materia);

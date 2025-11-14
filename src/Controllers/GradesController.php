@@ -33,6 +33,8 @@ class GradesController
             http_response_code(403);
             return 'CSRF inválido';
         }
+        $role = $_SESSION['role'] ?? '';
+        $profId = (int)($_SESSION['user_id'] ?? 0);
         if (!isset($_FILES['csv']) || $_FILES['csv']['error'] !== UPLOAD_ERR_OK) {
             http_response_code(400);
             return 'Archivo CSV inválido';
@@ -54,6 +56,18 @@ class GradesController
             $fin = ($fin !== '' ? filter_var($fin, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0, 'max_range' => 100]]) : null);
 
             if (!$alumnoId || !$grupoId) { $skipped++; $processed++; continue; }
+
+            // Validar alumno activo
+            $chkAlumno = $this->pdo->prepare('SELECT 1 FROM alumnos WHERE id = :id AND activo = 1');
+            $chkAlumno->execute([':id' => $alumnoId]);
+            if (!$chkAlumno->fetchColumn()) { $skipped++; $processed++; continue; }
+
+            // Validar grupo existente y pertenencia del profesor (si aplica)
+            $chkGrupo = $this->pdo->prepare('SELECT profesor_id FROM grupos WHERE id = :id');
+            $chkGrupo->execute([':id' => $grupoId]);
+            $grupoRow = $chkGrupo->fetch(PDO::FETCH_ASSOC);
+            if (!$grupoRow) { $skipped++; $processed++; continue; }
+            if ($role === 'profesor' && (int)$grupoRow['profesor_id'] !== $profId) { $skipped++; $processed++; continue; }
 
             $stmt->execute([
                 ':alumno' => $alumnoId,

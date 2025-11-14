@@ -1,13 +1,7 @@
 <?php
-require_once __DIR__ . '/../app/controllers/AuthController.php';
-require_once __DIR__ . '/../app/models/Alumno.php';
-require_once __DIR__ . '/../app/models/Usuario.php';
-
-$auth = new AuthController();
-$auth->requireAuth();
-$user = $auth->getCurrentUser();
-$isAdmin = ($_SESSION['user_role'] ?? '') === 'admin';
-$isProfesor = ($_SESSION['user_role'] ?? '') === 'profesor';
+header('Location: app.php?r=/dashboard');
+exit;
+?>
 $isAlumno = ($_SESSION['user_role'] ?? '') === 'alumno';
 ?>
 <!doctype html>

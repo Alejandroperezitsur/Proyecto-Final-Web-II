@@ -1,0 +1,12 @@
+RewriteEngine On
+
+# Si piden la raíz del proyecto, enviar a public/ (preserva querystring)
+RewriteRule ^$ public/ [QSA,L]
+
+# Si es archivo o carpeta existente, servirlo directamente
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Para todo lo demás, redirigir al mismo path dentro de public/
+RewriteRule ^(.*)$ public/$1 [QSA,L]

@@ -1,3 +1,4 @@
+
 -- Índices recomendados para rendimiento
 ALTER TABLE usuarios ADD INDEX idx_usuarios_email (email);
 ALTER TABLE usuarios ADD INDEX idx_usuarios_rol_activo (rol, activo);

@@ -1,17 +1,18 @@
 <?php
 $role = $_SESSION['role'] ?? '';
 $csrf = $_SESSION['csrf_token'] ?? '';
+$base = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/');
 ob_start();
 ?>
 <div class="container py-4">
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h3>Reportes Avanzados</h3>
-    <a href="/dashboard" class="btn btn-outline-secondary">Volver</a>
+    <a href="<?php echo $base; ?>/dashboard" class="btn btn-outline-secondary">Volver</a>
   </div>
 
   <div class="card mb-4">
     <div class="card-body">
-      <form method="get" action="/reports" class="row g-2" id="filtersForm">
+      <form method="get" action="<?php echo $base; ?>/reports" class="row g-2" id="filtersForm">
         <div class="col-md-3">
           <label class="form-label">Ciclo</label>
           <input class="form-control" name="ciclo" placeholder="2024-1" pattern="^\\d{4}-(1|2)$" value="<?= htmlspecialchars($_GET['ciclo'] ?? '') ?>">
@@ -34,7 +35,7 @@ ob_start();
   </div>
 
   <div class="d-flex justify-content-end mb-3 gap-2">
-    <form method="post" action="/reports/export/csv">
+    <form method="post" action="<?php echo $base; ?>/reports/export/csv">
       <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf) ?>">
       <input type="hidden" name="ciclo" value="<?= htmlspecialchars($_GET['ciclo'] ?? '') ?>">
       <input type="hidden" name="grupo_id" value="<?= htmlspecialchars($_GET['grupo_id'] ?? '') ?>">
@@ -43,7 +44,7 @@ ob_start();
       <?php endif; ?>
       <button class="btn btn-outline-primary"><i class="fa-solid fa-file-csv me-1"></i> Exportar CSV</button>
     </form>
-    <form method="post" action="/reports/export/pdf" target="_blank">
+    <form method="post" action="<?php echo $base; ?>/reports/export/pdf" target="_blank">
       <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf) ?>">
       <input type="hidden" name="ciclo" value="<?= htmlspecialchars($_GET['ciclo'] ?? '') ?>">
       <input type="hidden" name="grupo_id" value="<?= htmlspecialchars($_GET['grupo_id'] ?? '') ?>">
@@ -78,7 +79,7 @@ ob_start();
 <script>
 const params = new URLSearchParams(window.location.search);
 const ciclo = params.get('ciclo') || '';
-const resumenUrl = '/reports/summary' + (ciclo ? ('?ciclo=' + encodeURIComponent(ciclo)) : '');
+const resumenUrl = '<?php echo $base; ?>/reports/summary' + (ciclo ? ('?ciclo=' + encodeURIComponent(ciclo)) : '');
 fetch(resumenUrl).then(r => r.json()).then(j => {
   const box = document.getElementById('summaryBox');
   if (!j.ok) { box.textContent = j.message || 'Error'; return; }
@@ -90,9 +91,9 @@ fetch(resumenUrl).then(r => r.json()).then(j => {
 });
 
 // Selección de endpoint de gráfica
-let chartUrl = '/api/charts/promedios-ciclo';
+let chartUrl = '<?php echo $base; ?>/api/charts/promedios-ciclo';
 <?php if ($role === 'profesor'): ?>
-chartUrl = '/api/charts/desempeño-grupo';
+chartUrl = '<?php echo $base; ?>/api/charts/desempeño-grupo';
 <?php endif; ?>
 
 fetch(chartUrl).then(r => r.json()).then(j => {
