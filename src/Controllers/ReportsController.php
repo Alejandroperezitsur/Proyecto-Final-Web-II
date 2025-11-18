@@ -12,6 +12,24 @@ class ReportsController
         $this->pdo = $pdo;
     }
 
+    private function ascii(?string $s): string
+    {
+        if ($s === null) { return ''; }
+        $t = @iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $s);
+        if ($t !== false) { $s = $t; }
+        $s = strtr($s, [
+            'Á'=>'A','À'=>'A','Â'=>'A','Ä'=>'A','Ã'=>'A','á'=>'a','à'=>'a','â'=>'a','ä'=>'a','ã'=>'a',
+            'É'=>'E','È'=>'E','Ê'=>'E','Ë'=>'E','é'=>'e','è'=>'e','ê'=>'e','ë'=>'e',
+            'Í'=>'I','Ì'=>'I','Î'=>'I','Ï'=>'I','í'=>'i','ì'=>'i','î'=>'i','ï'=>'i',
+            'Ó'=>'O','Ò'=>'O','Ô'=>'O','Ö'=>'O','Õ'=>'O','ó'=>'o','ò'=>'o','ô'=>'o','ö'=>'o','õ'=>'o',
+            'Ú'=>'U','Ù'=>'U','Û'=>'U','Ü'=>'U','ú'=>'u','ù'=>'u','û'=>'u','ü'=>'u',
+            'Ñ'=>'N','ñ'=>'n','Ç'=>'C','ç'=>'c'
+        ]);
+        $s = str_replace(["'", "`"], '', $s);
+        $s = preg_replace('/[^\x20-\x7E]/', '', (string)$s);
+        return (string)$s;
+    }
+
     public function index(): void
     {
         $role = $_SESSION['role'] ?? '';
@@ -70,11 +88,14 @@ class ReportsController
             echo 'No autorizado';
             return '';
         }
-        $token = $_POST['csrf_token'] ?? ($_GET['csrf_token'] ?? '');
-        if (!$this->validateCsrf($token)) {
-            http_response_code(400);
-            echo 'CSRF inválido';
-            return '';
+        $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+        if ($method !== 'GET') {
+            $token = $_POST['csrf_token'] ?? ($_GET['csrf_token'] ?? '');
+            if (!$this->validateCsrf($token)) {
+                http_response_code(400);
+                echo 'CSRF inválido';
+                return '';
+            }
         }
 
         $filters = [
@@ -102,7 +123,10 @@ class ReportsController
         $stmt->execute($params);
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             fputcsv($out, [
-                $row['alumno'], $row['grupo'], $row['materia'], $row['ciclo'],
+                $this->ascii($row['alumno'] ?? ''),
+                $this->ascii($row['grupo'] ?? ''),
+                $this->ascii($row['materia'] ?? ''),
+                $this->ascii($row['ciclo'] ?? ''),
                 $row['parcial1'], $row['parcial2'], $row['final'], $row['promedio']
             ]);
         }
@@ -117,10 +141,13 @@ class ReportsController
             http_response_code(403);
             exit('No autorizado');
         }
-        $token = $_POST['csrf_token'] ?? ($_GET['csrf_token'] ?? '');
-        if (!$this->validateCsrf($token)) {
-            http_response_code(400);
-            exit('CSRF inválido');
+        $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+        if ($method !== 'GET') {
+            $token = $_POST['csrf_token'] ?? ($_GET['csrf_token'] ?? '');
+            if (!$this->validateCsrf($token)) {
+                http_response_code(400);
+                exit('CSRF inválido');
+            }
         }
 
         $filters = [

@@ -149,6 +149,8 @@ if ($q !== '') {
 }
 $totalPages = max(1, (int)ceil($total / $limit));
 $csrf = $auth->generateCSRFToken();
+// Base dinámico para assets y enlaces
+$base = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/');
 ?>
 <!doctype html>
 <html lang="es">
@@ -158,11 +160,11 @@ $csrf = $auth->generateCSRFToken();
   <title>SICEnet · ITSUR — Alumnos</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-  <link href="assets/css/styles.css" rel="stylesheet">
-  <link href="assets/css/desktop-fixes.css" rel="stylesheet">
+  <link href="<?php echo $base; ?>/assets/css/styles.css" rel="stylesheet">
+  <link href="<?php echo $base; ?>/assets/css/desktop-fixes.css" rel="stylesheet">
   <meta name="csrf-token" content="<?= htmlspecialchars($csrf) ?>">
 </head>
-<body>
+<body data-theme="dark">
 <?php require __DIR__ . '/partials/header.php'; ?>
 
 <div class="app-shell">

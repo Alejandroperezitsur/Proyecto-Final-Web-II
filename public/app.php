@@ -69,6 +69,9 @@ $router->get('/dashboard', fn() => $dashboard->index(), [AuthMiddleware::require
 $router->get('/reports', fn() => $reports->index(), [AuthMiddleware::requireAnyRole(['admin','profesor'])]);
 $router->post('/reports/export/csv', fn() => $reports->exportCsv(), [AuthMiddleware::requireAnyRole(['admin','profesor'])]);
 $router->post('/reports/export/pdf', fn() => $reports->exportPdf(), [AuthMiddleware::requireAnyRole(['admin','profesor'])]);
+// Soporte GET para exportaciones (requiere CSRF vía query)
+$router->get('/reports/export/csv', fn() => $reports->exportCsv(), [AuthMiddleware::requireAnyRole(['admin','profesor'])]);
+$router->get('/reports/export/pdf', fn() => $reports->exportPdf(), [AuthMiddleware::requireAnyRole(['admin','profesor'])]);
 $router->get('/reports/summary', fn() => $reports->summary(), [AuthMiddleware::requireAnyRole(['admin','profesor'])]);
 $router->get('/api/kpis/admin', fn() => $kpi->admin(), [AuthMiddleware::requireRole('admin')]);
 $router->get('/api/charts/promedios-materias', fn() => $charts->averagesBySubject(), [AuthMiddleware::requireRole('admin')]);
