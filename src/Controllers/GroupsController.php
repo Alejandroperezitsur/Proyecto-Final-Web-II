@@ -20,6 +20,34 @@ class GroupsController
         include __DIR__ . '/../Views/groups/index.php';
     }
 
+    public function seedDemo(): string
+    {
+        $cycles = ['2024A','2024B'];
+        $profs = $this->pdo->query("SELECT id, matricula FROM usuarios WHERE rol = 'profesor' AND activo = 1")->fetchAll(PDO::FETCH_ASSOC);
+        $mats = $this->pdo->query("SELECT id, clave FROM materias")->fetchAll(PDO::FETCH_ASSOC);
+        if (!$profs || !$mats) { header('Content-Type: application/json'); return json_encode(['ok'=>false,'message'=>'Faltan profesores o materias']); }
+        $sel = $this->pdo->prepare('SELECT id FROM grupos WHERE materia_id = :m AND profesor_id = :p AND nombre = :n AND ciclo <=> :c');
+        $ins = $this->pdo->prepare('INSERT INTO grupos (materia_id, profesor_id, nombre, ciclo) VALUES (:m,:p,:n,:c)');
+        $created = 0;
+        foreach ($profs as $prof) {
+            $count = 7;
+            $indices = array_rand($mats, min($count, count($mats)));
+            $indices = is_array($indices) ? $indices : [$indices];
+            $k = 1;
+            foreach ($indices as $idx) {
+                $m = $mats[$idx];
+                $c = $cycles[($k - 1) % count($cycles)];
+                $name = $m['clave'] . '-G' . str_pad((string)$k, 2, '0', STR_PAD_LEFT);
+                $sel->execute([':m' => (int)$m['id'], ':p' => (int)$prof['id'], ':n' => $name, ':c' => $c]);
+                $gid = $sel->fetchColumn();
+                if (!$gid) { $ins->execute([':m' => (int)$m['id'], ':p' => (int)$prof['id'], ':n' => $name, ':c' => $c]); $created++; }
+                $k++; if ($k > $count) { break; }
+            }
+        }
+        header('Content-Type: application/json');
+        return json_encode(['ok'=>true,'created'=>$created]);
+    }
+
     private function listAll(): array
     {
         $sql = "SELECT g.id, g.nombre, g.ciclo, g.cupo, m.nombre AS materia, u.nombre AS profesor
