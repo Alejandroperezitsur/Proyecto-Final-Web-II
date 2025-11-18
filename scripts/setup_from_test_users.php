@@ -119,29 +119,34 @@ function ensureMaterias(PDO $pdo): array {
   return $result;
 }
 
-function crearGrupos(PDO $pdo, array $materias, array $profesores, array $ciclos): array {
+function crearGruposPorProfesor(PDO $pdo, array $materias, array $profesores, array $ciclos, int $porProfesor = 7): array {
   if (count($profesores) < 1) { throw new RuntimeException('No hay profesores activos para crear grupos'); }
-  $sel = $pdo->prepare("SELECT id FROM grupos WHERE materia_id = :m AND nombre = :nom AND ciclo <=> :c");
+  $sel = $pdo->prepare("SELECT id FROM grupos WHERE materia_id = :m AND profesor_id = :p AND nombre = :nom AND ciclo <=> :c");
   $ins = $pdo->prepare("INSERT INTO grupos (materia_id, profesor_id, nombre, ciclo) VALUES (:m, :p, :nom, :c)");
   $created = [];
-  foreach ($materias as $m) {
-    $grupoCount = 1; // uno por materia para garantizar distribución
-    for ($i = 1; $i <= $grupoCount; $i++) {
-      $prof = $profesores[random_int(0, count($profesores) - 1)];
-      // Obtener id profesor por matrícula
-      $stmtProf = $pdo->prepare("SELECT id FROM usuarios WHERE matricula = :mat AND rol = 'profesor' AND activo = 1");
-      $stmtProf->execute([':mat' => $prof['matricula']]);
-      $profId = (int)($stmtProf->fetchColumn() ?: 0);
-      if ($profId <= 0) { continue; }
-      $ciclo = $ciclos[random_int(0, count($ciclos) - 1)];
-      $nombre = $m['clave'] . '-' . $i;
-      $sel->execute([':m' => (int)$m['id'], ':nom' => $nombre, ':c' => $ciclo]);
+  foreach ($profesores as $prof) {
+    // Obtener id profesor por matrícula
+    $stmtProf = $pdo->prepare("SELECT id FROM usuarios WHERE matricula = :mat AND rol = 'profesor' AND activo = 1");
+    $stmtProf->execute([':mat' => $prof['matricula']]);
+    $profId = (int)($stmtProf->fetchColumn() ?: 0);
+    if ($profId <= 0) { continue; }
+    // Seleccionar materias distintas para asignar clases
+    $indices = array_rand($materias, min($porProfesor, count($materias)));
+    $indices = is_array($indices) ? $indices : [$indices];
+    $k = 1;
+    foreach ($indices as $idx) {
+      $m = $materias[$idx];
+      $ciclo = $ciclos[($k - 1) % count($ciclos)];
+      $nombre = $m['clave'] . '-G' . str_pad((string)$k, 2, '0', STR_PAD_LEFT);
+      $sel->execute([':m' => (int)$m['id'], ':p' => $profId, ':nom' => $nombre, ':c' => $ciclo]);
       $gid = $sel->fetchColumn();
       if (!$gid) {
         $ins->execute([':m' => (int)$m['id'], ':p' => $profId, ':nom' => $nombre, ':c' => $ciclo]);
         $gid = (int)$pdo->lastInsertId();
       }
       $created[] = ['id' => (int)$gid, 'materia_id' => (int)$m['id'], 'nombre' => $nombre, 'ciclo' => $ciclo, 'profesor_id' => $profId];
+      $k++;
+      if ($k > $porProfesor) { break; }
     }
   }
   return $created;
@@ -203,7 +208,7 @@ function main(): void {
     [$alumnos, $profesores] = parseTestUsers(__DIR__ . '/../public/test_users.html');
     $resUsers = ensureUsers($pdo, $alumnos, $profesores);
     $materias = ensureMaterias($pdo);
-    $grupos = crearGrupos($pdo, $materias, $profesores, ['2024A','2024B']);
+    $grupos = crearGruposPorProfesor($pdo, $materias, $profesores, ['2024A','2024B'], 7);
     $inscritos = enrollAll($pdo);
     $pdo->commit();
     $sum = summary($pdo);
