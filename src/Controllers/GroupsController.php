@@ -20,6 +20,17 @@ class GroupsController
         include __DIR__ . '/../Views/groups/index.php';
     }
 
+    public function mine(): string
+    {
+        $pid = (int)($_SESSION['user_id'] ?? 0);
+        $stmt = $this->pdo->prepare("SELECT g.ciclo, m.nombre AS materia, g.nombre FROM grupos g JOIN materias m ON m.id = g.materia_id WHERE g.profesor_id = :p ORDER BY g.ciclo DESC, m.nombre, g.nombre");
+        $stmt->execute([':p' => $pid]);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        ob_start();
+        include __DIR__ . '/../Views/professor/groups.php';
+        return ob_get_clean();
+    }
+
     public function seedDemo(): string
     {
         $cycles = ['2024A','2024B'];

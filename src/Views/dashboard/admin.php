@@ -5,7 +5,7 @@ ob_start();
 <h2 class="mb-4">Dashboard Administrador</h2>
 <div class="row g-3">
   <div class="col-md-3">
-    <div class="card text-bg-primary">
+    <div class="card text-bg-primary position-relative">
       <div class="card-body">
         <div class="d-flex align-items-center">
           <i class="fa-solid fa-users fa-2x me-3"></i>
@@ -14,11 +14,12 @@ ob_start();
             <div class="h5 mb-0" id="kpi-alumnos">—</div>
           </div>
         </div>
+        <a href="<?php echo $base; ?>/alumnos" class="stretched-link"></a>
       </div>
     </div>
   </div>
   <div class="col-md-3">
-    <div class="card text-bg-success">
+    <div class="card text-bg-success position-relative">
       <div class="card-body">
         <div class="d-flex align-items-center">
           <i class="fa-solid fa-book fa-2x me-3"></i>
@@ -27,11 +28,26 @@ ob_start();
             <div class="h5 mb-0" id="kpi-materias">—</div>
           </div>
         </div>
+        <a href="<?php echo $base; ?>/subjects" class="stretched-link"></a>
       </div>
     </div>
   </div>
   <div class="col-md-3">
-    <div class="card text-bg-warning">
+    <div class="card text-bg-info position-relative">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <i class="fa-solid fa-user-tie fa-2x me-3"></i>
+          <div>
+            <div class="small">Profesores</div>
+            <div class="h5 mb-0" id="kpi-profesores">—</div>
+          </div>
+        </div>
+        <a href="<?php echo $base; ?>/professors" class="stretched-link"></a>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-bg-warning position-relative">
       <div class="card-body">
         <div class="d-flex align-items-center">
           <i class="fa-solid fa-people-group fa-2x me-3"></i>
@@ -40,11 +56,12 @@ ob_start();
             <div class="h5 mb-0" id="kpi-grupos">—</div>
           </div>
         </div>
+        <a href="<?php echo $base; ?>/groups" class="stretched-link"></a>
       </div>
     </div>
   </div>
   <div class="col-md-3">
-    <div class="card text-bg-info">
+    <div class="card text-bg-info position-relative">
       <div class="card-body">
         <div class="d-flex align-items-center">
           <i class="fa-solid fa-chart-line fa-2x me-3"></i>
@@ -53,6 +70,7 @@ ob_start();
             <div class="h5 mb-0" id="kpi-promedio">—</div>
           </div>
         </div>
+        <a href="<?php echo $base; ?>/reports" class="stretched-link"></a>
       </div>
     </div>
   </div>
@@ -65,7 +83,7 @@ ob_start();
 
 <div class="row g-3 mt-3">
   <div class="col-md-3">
-    <div class="card text-bg-secondary">
+    <div class="card text-bg-secondary position-relative">
       <div class="card-body">
         <div class="d-flex align-items-center">
           <i class="fa-solid fa-chalkboard-teacher fa-2x me-3"></i>
@@ -74,11 +92,12 @@ ob_start();
             <div class="h5 mb-0" id="kpi-profesores">—</div>
           </div>
         </div>
+        <a href="<?php echo $base; ?>/professors" class="stretched-link"></a>
       </div>
     </div>
   </div>
   <div class="col-md-3">
-    <div class="card text-bg-danger">
+    <div class="card text-bg-danger position-relative">
       <div class="card-body">
         <div class="d-flex align-items-center">
           <i class="fa-solid fa-hourglass-half fa-2x me-3"></i>
@@ -87,6 +106,7 @@ ob_start();
             <div class="h5 mb-0" id="kpi-pendientes">—</div>
           </div>
         </div>
+        <a href="<?php echo $base; ?>/admin/pendientes" class="stretched-link"></a>
       </div>
     </div>
   </div>

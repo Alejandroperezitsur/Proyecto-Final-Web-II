@@ -24,18 +24,18 @@ ob_start();
             <select name="alumno_id" id="alumno_id" class="form-select" required></select>
             <div class="form-text">Selecciona el alumno activo.</div>
           </div>
-          <div class="col-md-4">
-            <label class="form-label">Parcial 1</label>
-            <input type="number" min="0" max="100" name="parcial1" class="form-control" placeholder="0-100">
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">Parcial 2</label>
-            <input type="number" min="0" max="100" name="parcial2" class="form-control" placeholder="0-100">
-          </div>
-          <div class="col-md-4">
-            <label class="form-label">Final</label>
-            <input type="number" min="0" max="100" name="final" class="form-control" placeholder="0-100">
-          </div>
+        <div class="col-md-4">
+          <label class="form-label">Parcial 1</label>
+          <input type="number" min="0" max="100" name="parcial1" class="form-control" placeholder="0-100">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Parcial 2</label>
+          <input type="number" min="0" max="100" name="parcial2" class="form-control" placeholder="0-100">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Final</label>
+          <input type="number" min="0" max="100" name="final" class="form-control" placeholder="0-100">
+        </div>
         </div>
 
         <div class="mt-4 d-flex gap-2">
@@ -98,6 +98,19 @@ document.getElementById('confirmSubmit').addEventListener('click', function() {
   }
   form.submit();
 });
+
+// Umbral visual (>=70 verde, <70 rojo)
+(() => {
+  const inputs = ['parcial1','parcial2','final'].map(n => document.querySelector(`[name="${n}"]`));
+  const paint = (el) => {
+    const v = el.value === '' ? null : Number(el.value);
+    el.classList.remove('is-valid','is-invalid','text-success','text-danger');
+    if (v === null || isNaN(v)) return;
+    if (v >= 70) { el.classList.add('is-valid','text-success'); }
+    else { el.classList.add('is-invalid','text-danger'); }
+  };
+  inputs.forEach(el => el && el.addEventListener('input', () => paint(el)));
+})();
 </script>
 
 <?php

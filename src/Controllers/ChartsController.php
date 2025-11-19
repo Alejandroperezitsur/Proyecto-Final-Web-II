@@ -50,7 +50,9 @@ class ChartsController
     // /api/charts/promedios-ciclo
     public function averagesByCycle(): string
     {
-        $filters = [];
+        $gid = isset($_GET['grupo_id']) ? (int)$_GET['grupo_id'] : null;
+        $ciclo = isset($_GET['ciclo']) ? trim((string)$_GET['ciclo']) : null;
+        $filters = ['gid' => $gid, 'ciclo' => $ciclo];
         $key = $this->cacheKey('promedios_ciclo', $filters);
         $cached = $this->getCache($key);
         if ($cached) {
@@ -60,10 +62,14 @@ class ChartsController
         $sql = "SELECT g.ciclo, ROUND(AVG(c.final),2) AS promedio
                 FROM calificaciones c
                 JOIN grupos g ON g.id = c.grupo_id
-                WHERE c.final IS NOT NULL
-                GROUP BY g.ciclo
-                ORDER BY g.ciclo";
-        $stmt = $this->pdo->query($sql);
+                WHERE c.final IS NOT NULL";
+        $params = [];
+        if ($gid) { $sql .= ' AND g.id = :gid'; $params[':gid'] = $gid; }
+        if ($ciclo) { $sql .= ' AND g.ciclo = :ciclo'; $params[':ciclo'] = $ciclo; }
+        $sql .= ' GROUP BY g.ciclo ORDER BY g.ciclo';
+        $stmt = $this->pdo->prepare($sql);
+        foreach ($params as $k=>$v) { $stmt->bindValue($k, $v); }
+        $stmt->execute();
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
         $data = [
             'labels' => array_map(fn($r) => $r['ciclo'], $rows),
@@ -85,7 +91,9 @@ class ChartsController
             http_response_code(403);
             return json_encode(['ok' => false, 'message' => 'No autorizado']);
         }
-        $key = $this->cacheKey('desempeno_grupo', ['pid' => $pid]);
+        $gid = isset($_GET['grupo_id']) ? (int)$_GET['grupo_id'] : null;
+        $ciclo = isset($_GET['ciclo']) ? trim((string)$_GET['ciclo']) : null;
+        $key = $this->cacheKey('desempeno_grupo', ['pid' => $pid, 'gid' => $gid, 'ciclo' => $ciclo]);
         $cached = $this->getCache($key);
         if ($cached) {
             header('Content-Type: application/json');
@@ -94,11 +102,14 @@ class ChartsController
         $sql = "SELECT g.nombre AS grupo, ROUND(AVG(c.final),2) AS promedio
                 FROM calificaciones c
                 JOIN grupos g ON g.id = c.grupo_id
-                WHERE c.final IS NOT NULL AND g.profesor_id = :pid
-                GROUP BY g.id, g.nombre
-                ORDER BY g.nombre";
+                WHERE c.final IS NOT NULL AND g.profesor_id = :pid";
+        $params = [':pid' => $pid];
+        if ($gid) { $sql .= ' AND g.id = :gid'; $params[':gid'] = $gid; }
+        if ($ciclo) { $sql .= ' AND g.ciclo = :ciclo'; $params[':ciclo'] = $ciclo; }
+        $sql .= ' GROUP BY g.id, g.nombre ORDER BY g.nombre';
         $stmt = $this->pdo->prepare($sql);
-        $stmt->execute([':pid' => $pid]);
+        foreach ($params as $k=>$v) { $stmt->bindValue($k, $v); }
+        $stmt->execute();
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
         $data = [
             'labels' => array_map(fn($r) => $r['grupo'], $rows),
@@ -113,7 +124,11 @@ class ChartsController
     // /api/charts/reprobados
     public function failRateBySubject(): string
     {
-        $filters = [];
+        $role = $_SESSION['role'] ?? '';
+        $pid = (int)($_SESSION['user_id'] ?? 0);
+        $ciclo = isset($_GET['ciclo']) ? trim((string)$_GET['ciclo']) : null;
+        $gid = isset($_GET['grupo_id']) ? (int)$_GET['grupo_id'] : null;
+        $filters = ['ciclo' => $ciclo, 'gid' => $gid, 'pid' => ($role==='profesor'?$pid:null)];
         $key = $this->cacheKey('reprobados_materia', $filters);
         $cached = $this->getCache($key);
         if ($cached) {
@@ -125,9 +140,15 @@ class ChartsController
                 FROM calificaciones c
                 JOIN grupos g ON g.id = c.grupo_id
                 JOIN materias m ON m.id = g.materia_id
-                GROUP BY m.id, m.nombre
-                ORDER BY m.nombre";
-        $stmt = $this->pdo->query($sql);
+                WHERE 1=1";
+        $params = [];
+        if ($role === 'profesor' && $pid > 0) { $sql .= ' AND g.profesor_id = :pid'; $params[':pid'] = $pid; }
+        if ($ciclo) { $sql .= ' AND g.ciclo = :ciclo'; $params[':ciclo'] = $ciclo; }
+        if ($gid) { $sql .= ' AND g.id = :gid'; $params[':gid'] = $gid; }
+        $sql .= ' GROUP BY m.id, m.nombre ORDER BY m.nombre';
+        $stmt = $this->pdo->prepare($sql);
+        foreach ($params as $k=>$v) { $stmt->bindValue($k, $v); }
+        $stmt->execute();
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
         $data = [
             'labels' => array_map(fn($r) => $r['materia'], $rows),

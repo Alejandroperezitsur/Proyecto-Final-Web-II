@@ -4,9 +4,28 @@ ob_start();
 ?>
 <h2 class="mb-4">Mi Tablero</h2>
 
+<div class="row g-3 mb-3">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <i class="fa-regular fa-id-card fa-2x me-3 text-primary"></i>
+          <div>
+            <div class="small">Información Personal</div>
+            <div id="perfil-nombre" class="fw-semibold">—</div>
+            <div id="perfil-email" class="text-muted small">—</div>
+            <div id="perfil-matricula" class="text-muted small">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6"></div>
+  </div>
+
 <div class="row g-3">
   <div class="col-md-4">
-    <div class="card">
+    <div class="card position-relative">
       <div class="card-body">
         <div class="d-flex align-items-center">
           <i class="fa-solid fa-chart-line fa-2x me-3 text-primary"></i>
@@ -18,11 +37,12 @@ ob_start();
         <div class="progress mt-3" style="height: 20px;">
           <div id="promedio-bar" class="progress-bar" role="progressbar" style="width: 0%">0%</div>
         </div>
+        <a href="<?php echo $base; ?>/alumno/calificaciones" class="stretched-link"></a>
       </div>
     </div>
   </div>
   <div class="col-md-4">
-    <div class="card">
+    <div class="card position-relative">
       <div class="card-body">
         <div class="d-flex align-items-center">
           <i class="fa-solid fa-book-open fa-2x me-3 text-success"></i>
@@ -31,11 +51,12 @@ ob_start();
             <div class="h4 mb-0" id="stat-total">—</div>
           </div>
         </div>
+        <a href="<?php echo $base; ?>/alumno/carga" class="stretched-link"></a>
       </div>
     </div>
   </div>
   <div class="col-md-4">
-    <div class="card">
+    <div class="card position-relative">
       <div class="card-body">
         <div class="d-flex align-items-center">
           <i class="fa-solid fa-hourglass-half fa-2x me-3 text-warning"></i>
@@ -44,6 +65,7 @@ ob_start();
             <div class="h4 mb-0" id="stat-pendientes">—</div>
           </div>
         </div>
+        <a href="<?php echo $base; ?>/alumno/pendientes" class="stretched-link"></a>
       </div>
     </div>
   </div>
@@ -81,6 +103,13 @@ ob_start();
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+fetch('<?php echo $base; ?>/api/alumno/perfil').then(r=>r.json()).then(resp=>{
+  const d = resp.data || {};
+  const nombre = [d.nombre||'', d.apellido||''].filter(Boolean).join(' ');
+  document.getElementById('perfil-nombre').textContent = nombre || '—';
+  document.getElementById('perfil-email').textContent = d.email || '—';
+  document.getElementById('perfil-matricula').textContent = 'Matrícula: ' + (d.matricula || '—');
+});
 // Cargar estadísticas
 fetch('<?php echo $base; ?>/api/alumno/estadisticas').then(r=>r.json()).then(resp=>{
   const d = resp.data || {};

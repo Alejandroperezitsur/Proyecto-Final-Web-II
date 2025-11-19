@@ -56,6 +56,7 @@ ob_start();
           <td><?= htmlspecialchars($g['cupo']) ?></td>
           <td class="text-end">
             <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#delGroup<?= (int)$g['id'] ?>"><i class="fa-regular fa-trash-can"></i></button>
+            <a class="btn btn-sm btn-outline-primary" href="<?php echo $base; ?>/grades/group?grupo_id=<?= (int)$g['id'] ?>"><i class="fa-solid fa-table"></i></a>
             <div class="modal fade" id="delGroup<?= (int)$g['id'] ?>" tabindex="-1" aria-hidden="true">
               <div class="modal-dialog">
                 <div class="modal-content">

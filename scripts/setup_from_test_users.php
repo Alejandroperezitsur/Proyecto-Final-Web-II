@@ -119,18 +119,16 @@ function ensureMaterias(PDO $pdo): array {
   return $result;
 }
 
-function crearGruposPorProfesor(PDO $pdo, array $materias, array $profesores, array $ciclos, int $porProfesor = 7): array {
-  if (count($profesores) < 1) { throw new RuntimeException('No hay profesores activos para crear grupos'); }
+function crearGruposPorProfesor(PDO $pdo, array $materias, array $ciclos, int $porProfesor = 7, int $maxPorProfesor = 8): array {
+  $profesores = $pdo->query("SELECT id FROM usuarios WHERE rol = 'profesor' AND activo = 1")->fetchAll(PDO::FETCH_ASSOC);
+  if (!$profesores) { throw new RuntimeException('No hay profesores activos para crear grupos'); }
   $sel = $pdo->prepare("SELECT id FROM grupos WHERE materia_id = :m AND profesor_id = :p AND nombre = :nom AND ciclo <=> :c");
   $ins = $pdo->prepare("INSERT INTO grupos (materia_id, profesor_id, nombre, ciclo) VALUES (:m, :p, :nom, :c)");
   $created = [];
   foreach ($profesores as $prof) {
-    // Obtener id profesor por matrícula
-    $stmtProf = $pdo->prepare("SELECT id FROM usuarios WHERE matricula = :mat AND rol = 'profesor' AND activo = 1");
-    $stmtProf->execute([':mat' => $prof['matricula']]);
-    $profId = (int)($stmtProf->fetchColumn() ?: 0);
-    if ($profId <= 0) { continue; }
-    // Seleccionar materias distintas para asignar clases
+    $profId = (int)$prof['id'];
+    $cur = (int)$pdo->query("SELECT COUNT(*) FROM grupos WHERE profesor_id = $profId")->fetchColumn();
+    if ($cur >= $maxPorProfesor) { continue; }
     $indices = array_rand($materias, min($porProfesor, count($materias)));
     $indices = is_array($indices) ? $indices : [$indices];
     $k = 1;
@@ -146,7 +144,8 @@ function crearGruposPorProfesor(PDO $pdo, array $materias, array $profesores, ar
       }
       $created[] = ['id' => (int)$gid, 'materia_id' => (int)$m['id'], 'nombre' => $nombre, 'ciclo' => $ciclo, 'profesor_id' => $profId];
       $k++;
-      if ($k > $porProfesor) { break; }
+      $cur++;
+      if ($k > $porProfesor || $cur >= $maxPorProfesor) { break; }
     }
   }
   return $created;
@@ -208,7 +207,21 @@ function main(): void {
     [$alumnos, $profesores] = parseTestUsers(__DIR__ . '/../public/test_users.html');
     $resUsers = ensureUsers($pdo, $alumnos, $profesores);
     $materias = ensureMaterias($pdo);
-    $grupos = crearGruposPorProfesor($pdo, $materias, $profesores, ['2024A','2024B'], 7);
+    $grupos = crearGruposPorProfesor($pdo, $materias, ['2024A','2024B'], 7, 8);
+    foreach ($pdo->query("SELECT id FROM usuarios WHERE rol = 'profesor' AND activo = 1") as $row) {
+      $pid = (int)$row['id'];
+      $q = $pdo->prepare("SELECT g.id FROM grupos g LEFT JOIN calificaciones c ON c.grupo_id = g.id WHERE g.profesor_id = :p GROUP BY g.id ORDER BY COUNT(c.id) DESC");
+      $q->execute([':p' => $pid]);
+      $ids = array_map(fn($r)=> (int)$r['id'], $q->fetchAll(PDO::FETCH_ASSOC));
+      if (count($ids) > 8) {
+        $surplus = array_slice($ids, 8);
+        if ($surplus) {
+          $in = implode(',', array_map('intval', $surplus));
+          $pdo->exec("DELETE FROM calificaciones WHERE grupo_id IN ($in)");
+          $pdo->exec("DELETE FROM grupos WHERE id IN ($in)");
+        }
+      }
+    }
     $inscritos = enrollAll($pdo);
     $pdo->commit();
     $sum = summary($pdo);

@@ -67,4 +67,13 @@ class StudentController
         }
         return $this->json(['success' => true, 'data' => $res]);
     }
+
+    public function perfil(): string
+    {
+        $id = (int)($_SESSION['user_id'] ?? 0);
+        $stmt = $this->pdo->prepare('SELECT id, matricula, nombre, apellido, email FROM alumnos WHERE id = :id');
+        $stmt->execute([':id' => $id]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+        return $this->json(['success' => true, 'data' => $row]);
+    }
 }

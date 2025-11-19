@@ -3,9 +3,27 @@ $base = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/');
 ob_start();
 ?>
 <h2 class="mb-4">Dashboard Profesor</h2>
+<div class="row g-3 mb-3">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <i class="fa-regular fa-id-card fa-2x me-3 text-primary"></i>
+          <div>
+            <div class="small">Información Personal</div>
+            <div id="perfil-nombre" class="fw-semibold">—</div>
+            <div id="perfil-email" class="text-muted small">—</div>
+            <div id="perfil-matricula" class="text-muted small">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6"></div>
+</div>
 <div class="row g-3">
   <div class="col-md-4">
-    <div class="card">
+    <div class="card position-relative">
       <div class="card-body">
         <div class="d-flex align-items-center">
           <i class="fa-solid fa-people-group fa-2x me-3 text-primary"></i>
@@ -14,11 +32,12 @@ ob_start();
             <div class="h5 mb-0" id="kpi-grupos">—</div>
           </div>
         </div>
+        <a href="<?php echo $base; ?>/profesor/grupos" class="stretched-link"></a>
       </div>
     </div>
   </div>
   <div class="col-md-4">
-    <div class="card">
+    <div class="card position-relative">
       <div class="card-body">
         <div class="d-flex align-items-center">
           <i class="fa-solid fa-user-graduate fa-2x me-3 text-success"></i>
@@ -27,11 +46,12 @@ ob_start();
             <div class="h5 mb-0" id="kpi-alumnos">—</div>
           </div>
         </div>
+        <a href="<?php echo $base; ?>/profesor/alumnos" class="stretched-link"></a>
       </div>
     </div>
   </div>
   <div class="col-md-4">
-    <div class="card">
+    <div class="card position-relative">
       <div class="card-body">
         <div class="d-flex align-items-center">
           <i class="fa-solid fa-clipboard-check fa-2x me-3 text-warning"></i>
@@ -40,6 +60,7 @@ ob_start();
             <div class="h5 mb-0" id="kpi-pendientes">—</div>
           </div>
         </div>
+        <a href="<?php echo $base; ?>/profesor/pendientes" class="stretched-link"></a>
       </div>
     </div>
   </div>
@@ -50,10 +71,16 @@ ob_start();
 </div>
 
 <script>
+fetch('<?php echo $base; ?>/api/profesor/perfil').then(r=>r.json()).then(resp=>{
+  const d = resp.data || {};
+  const fallback = <?php echo json_encode((string)($_SESSION['name'] ?? '')); ?>;
+  document.getElementById('perfil-nombre').textContent = (d.nombre && d.nombre.trim()) ? d.nombre : (fallback || '—');
+  document.getElementById('perfil-email').textContent = d.email || '—';
+  document.getElementById('perfil-matricula').textContent = 'Matrícula: ' + (d.matricula || '—');
+});
 fetch('<?php echo $base; ?>/api/kpis/profesor').then(r=>r.json()).then(d=>{
   document.getElementById('kpi-grupos').textContent = d.grupos_activos ?? '—';
   document.getElementById('kpi-alumnos').textContent = d.alumnos ?? '—';
-  // Pendientes: si deseas calcularlo, puedes derivarlo de grupos/estadísticas reales.
   document.getElementById('kpi-pendientes').textContent = d.pendientes ?? '—';
 });
 </script>
@@ -86,7 +113,10 @@ fetch('<?php echo $base; ?>/api/kpis/profesor').then(r=>r.json()).then(d=>{
         <td>${x.ciclo ?? ''}</td>
         <td>${x.materia ?? ''}</td>
         <td>${x.nombre ?? ''}</td>
-        <td class="text-end"><a class="btn btn-outline-success btn-sm" href="<?php echo $base; ?>/grades"><i class="fa-solid fa-pen"></i> Calificar</a></td>
+        <td class="text-end">
+          <a class="btn btn-outline-success btn-sm" href="<?php echo $base; ?>/grades"><i class="fa-solid fa-pen"></i> Calificar</a>
+          <a class="btn btn-outline-primary btn-sm ms-1" href="<?php echo $base; ?>/grades/group?grupo_id=${x.id}"><i class="fa-solid fa-table"></i> Ver calificaciones</a>
+        </td>
       </tr>`).join('');
   };
   render();

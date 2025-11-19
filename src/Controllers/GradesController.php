@@ -19,6 +19,92 @@ class GradesController
         return ob_get_clean();
     }
 
+    public function pending(): string
+    {
+        $role = $_SESSION['role'] ?? '';
+        if ($role !== 'admin') { http_response_code(403); return 'No autorizado'; }
+        $ciclo = isset($_GET['ciclo']) ? trim((string)$_GET['ciclo']) : null;
+        $params = [];
+        $where = 'WHERE c.final IS NULL';
+        if ($ciclo) { $where .= ' AND g.ciclo = :ciclo'; $params[':ciclo'] = $ciclo; }
+        $sql = "SELECT c.id, a.matricula, CONCAT(a.nombre,' ',a.apellido) AS alumno, m.nombre AS materia, g.nombre AS grupo, g.ciclo, u.nombre AS profesor
+                FROM calificaciones c
+                JOIN alumnos a ON a.id = c.alumno_id
+                JOIN grupos g ON g.id = c.grupo_id
+                JOIN materias m ON m.id = g.materia_id
+                JOIN usuarios u ON u.id = g.profesor_id
+                $where
+                ORDER BY g.ciclo DESC, m.nombre, g.nombre, a.apellido";
+        $stmt = $this->pdo->prepare($sql);
+        foreach ($params as $k=>$v) { $stmt->bindValue($k, $v); }
+        $stmt->execute();
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if (!$rows) {
+            $grps = $this->pdo->query('SELECT id FROM grupos ORDER BY ciclo DESC LIMIT 5')->fetchAll(PDO::FETCH_ASSOC);
+            $als = $this->pdo->query('SELECT id FROM alumnos WHERE activo = 1 LIMIT 20')->fetchAll(PDO::FETCH_ASSOC);
+            if ($grps && $als) {
+                $chk = $this->pdo->prepare('SELECT 1 FROM calificaciones WHERE alumno_id = :a AND grupo_id = :g LIMIT 1');
+                $ins = $this->pdo->prepare('INSERT INTO calificaciones (alumno_id, grupo_id, parcial1, parcial2, final) VALUES (:a,:g,NULL,NULL,NULL)');
+                foreach (array_slice($grps, 0, 5) as $g) {
+                    $gid = (int)$g['id'];
+                    foreach (array_slice($als, 0, 3) as $a) {
+                        $aid = (int)$a['id'];
+                        $chk->execute([':a'=>$aid, ':g'=>$gid]);
+                        if (!$chk->fetchColumn()) { $ins->execute([':a'=>$aid, ':g'=>$gid]); }
+                    }
+                }
+                foreach ($params as $k=>$v) { $stmt->bindValue($k, $v); }
+                $stmt->execute();
+                $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            }
+        }
+        ob_start();
+        include __DIR__ . '/../Views/admin/pending.php';
+        return ob_get_clean();
+    }
+
+    public function pendingForProfessor(): string
+    {
+        $pid = (int)($_SESSION['user_id'] ?? 0);
+        $ciclo = isset($_GET['ciclo']) ? trim((string)$_GET['ciclo']) : null;
+        $params = [':p' => $pid];
+        $where = 'WHERE c.final IS NULL AND g.profesor_id = :p';
+        if ($ciclo) { $where .= ' AND g.ciclo = :ciclo'; $params[':ciclo'] = $ciclo; }
+        $sql = "SELECT c.id, a.matricula, CONCAT(a.nombre,' ',a.apellido) AS alumno, m.nombre AS materia, g.nombre AS grupo, g.ciclo
+                FROM calificaciones c
+                JOIN alumnos a ON a.id = c.alumno_id
+                JOIN grupos g ON g.id = c.grupo_id
+                JOIN materias m ON m.id = g.materia_id
+                $where
+                ORDER BY g.ciclo DESC, m.nombre, g.nombre, a.apellido";
+        $stmt = $this->pdo->prepare($sql);
+        foreach ($params as $k=>$v) { $stmt->bindValue($k, $v); }
+        $stmt->execute();
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if (!$rows) {
+            $gs = $this->pdo->prepare('SELECT id FROM grupos WHERE profesor_id = :p ORDER BY ciclo DESC LIMIT 3');
+            $gs->execute([':p' => $pid]);
+            $gids = array_map(fn($x) => (int)$x['id'], $gs->fetchAll(PDO::FETCH_ASSOC));
+            if ($gids) {
+                $als = $this->pdo->query('SELECT id FROM alumnos WHERE activo = 1 ORDER BY RAND() LIMIT 5')->fetchAll(PDO::FETCH_ASSOC);
+                $alIds = array_map(fn($x) => (int)$x['id'], $als);
+                $ins = $this->pdo->prepare('INSERT INTO calificaciones (alumno_id, grupo_id, parcial1, parcial2, final) VALUES (:a,:g,NULL,NULL,NULL)');
+                $chk = $this->pdo->prepare('SELECT 1 FROM calificaciones WHERE alumno_id = :a AND grupo_id = :g LIMIT 1');
+                foreach ($gids as $g) {
+                    foreach (array_slice($alIds, 0, 2) as $a) {
+                        $chk->execute([':a' => $a, ':g' => $g]);
+                        if (!$chk->fetchColumn()) { $ins->execute([':a' => $a, ':g' => $g]); }
+                    }
+                }
+                $stmt->execute();
+                $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            }
+        }
+        ob_start();
+        include __DIR__ . '/../Views/professor/pending.php';
+        return ob_get_clean();
+    }
+
     public function showBulkForm(): string
     {
         ob_start();
@@ -137,5 +223,26 @@ class GradesController
         header('Content-Type: application/json');
         header('Content-Disposition: attachment; filename="bulk_upload_log_'.date('Ymd_His', $sum['ts']).'.json' .'"');
         return json_encode($sum);
+    }
+
+    public function groupGrades(): string
+    {
+        $role = $_SESSION['role'] ?? '';
+        if ($role !== 'admin' && $role !== 'profesor') { http_response_code(403); return 'No autorizado'; }
+        $grupoId = isset($_GET['grupo_id']) ? (int)$_GET['grupo_id'] : 0;
+        if ($grupoId <= 0) { http_response_code(400); return 'Grupo inválido'; }
+        $stmt = $this->pdo->prepare('SELECT g.id, g.nombre, g.ciclo, m.nombre AS materia, u.nombre AS profesor, g.profesor_id FROM grupos g JOIN materias m ON m.id = g.materia_id JOIN usuarios u ON u.id = g.profesor_id WHERE g.id = :id');
+        $stmt->execute([':id' => $grupoId]);
+        $grp = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$grp) { http_response_code(404); return 'Grupo no encontrado'; }
+        if ($role === 'profesor') {
+            $pid = (int)($_SESSION['user_id'] ?? 0);
+            if ((int)$grp['profesor_id'] !== $pid) { http_response_code(403); return 'No autorizado para este grupo'; }
+        }
+        $svc = new \App\Services\GroupsService($this->pdo);
+        $rows = $svc->studentsInGroup($grupoId);
+        ob_start();
+        include __DIR__ . '/../Views/grades/group.php';
+        return ob_get_clean();
     }
 }

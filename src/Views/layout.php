@@ -26,6 +26,7 @@ $base = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/');
             <li class="nav-item"><a class="nav-link" href="<?php echo $base; ?>/dashboard">Dashboard</a></li>
             <li class="nav-item"><a class="nav-link" href="<?php echo $base; ?>/reports">Reportes</a></li>
             <li class="nav-item"><a class="nav-link" href="<?php echo $base; ?>/alumnos">Alumnos</a></li>
+            <li class="nav-item"><a class="nav-link" href="<?php echo $base; ?>/admin/settings">Ajustes</a></li>
           <?php elseif ($role === 'profesor'): ?>
             <li class="nav-item"><a class="nav-link" href="<?php echo $base; ?>/dashboard">Dashboard</a></li>
             <li class="nav-item"><a class="nav-link" href="<?php echo $base; ?>/reports">Reportes</a></li>
