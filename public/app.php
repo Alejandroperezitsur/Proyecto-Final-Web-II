@@ -38,6 +38,7 @@ use App\Controllers\ChartsController;
 use App\Controllers\CatalogsController;
 use App\Controllers\ProfessorsController;
 use App\Controllers\AdminSettingsController;
+use App\Controllers\CareersController;
 
 Kernel::boot();
 $pdo = \Database::getInstance()->getConnection();
@@ -59,6 +60,7 @@ $charts = new ChartsController($pdo);
 $catalogs = new CatalogsController($pdo);
 $professorsCtl = new ProfessorsController($pdo);
 $adminSettings = new AdminSettingsController();
+$careers = new CareersController($pdo);
 
 // Rutas públicas
 $router->get('/login', fn() => $auth->showLogin());
@@ -94,6 +96,11 @@ $router->post('/admin/settings/save', fn() => $adminSettings->save(), [AuthMiddl
 $router->get('/professors', fn() => $professorsCtl->index(), [AuthMiddleware::requireRole('admin')]);
 $router->post('/professors/create', fn() => $professorsCtl->create(), [AuthMiddleware::requireRole('admin'), RateLimitMiddleware::limit('prof_create', 20, 600)]);
 $router->post('/professors/delete', fn() => $professorsCtl->delete(), [AuthMiddleware::requireRole('admin'), RateLimitMiddleware::limit('prof_delete', 20, 600)]);
+
+// Carreras - Curriculum view
+$router->get('/careers', fn() => $careers->index(), [AuthMiddleware::requireRole('admin')]);
+$router->get('/api/careers/count', fn() => $careers->getCareersCount(), [AuthMiddleware::requireRole('admin')]);
+$router->get('/api/careers/curriculum', fn() => $careers->getCurriculum(), [AuthMiddleware::requireRole('admin')]);
 
 // Catálogos (para selects dinámicos)
 $router->get('/api/catalogs/subjects', fn() => $catalogs->subjects(), [AuthMiddleware::requireAnyRole(['admin','profesor'])]);

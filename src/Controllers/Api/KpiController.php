@@ -33,7 +33,158 @@ class KpiController
             $totalProfesores = (int)$this->pdo->query("SELECT COUNT(*) FROM usuarios WHERE rol = 'profesor' AND activo = 1")->fetchColumn();
         }
         $totalMaterias = $this->subjects->count();
-        $totalCarreras = (int)$this->pdo->query('SELECT COUNT(*) FROM carreras')->fetchColumn();
+        
+        // Check if carreras table exists and has all required columns
+        try {
+            $totalCarreras = (int)$this->pdo->query('SELECT COUNT(*) FROM carreras')->fetchColumn();
+            
+            // Check if required columns exist
+            $columnsCheck = $this->pdo->query("SHOW COLUMNS FROM carreras LIKE 'descripcion'")->fetch();
+            
+            if (!$columnsCheck) {
+                // Table exists but missing columns, add them
+                try {
+                    $this->pdo->exec("ALTER TABLE carreras ADD COLUMN IF NOT EXISTS descripcion TEXT AFTER nombre");
+                } catch (\PDOException $e) {}
+                
+                try {
+                    $this->pdo->exec("ALTER TABLE carreras ADD COLUMN IF NOT EXISTS duracion_semestres INT DEFAULT 9 AFTER descripcion");
+                } catch (\PDOException $e) {}
+                
+                try {
+                    $this->pdo->exec("ALTER TABLE carreras ADD COLUMN IF NOT EXISTS creditos_totales INT DEFAULT 240 AFTER duracion_semestres");
+                } catch (\PDOException $e) {}
+                
+                try {
+                    $this->pdo->exec("ALTER TABLE carreras ADD COLUMN IF NOT EXISTS activo TINYINT(1) DEFAULT 1 AFTER creditos_totales");
+                } catch (\PDOException $e) {}
+                
+                // Update existing records with descriptions
+                $this->pdo->exec("UPDATE carreras SET 
+                    descripcion = CASE 
+                        WHEN clave = 'ISC' OR clave = 'IC' THEN 'Profesionista capaz de diseñar, desarrollar e implementar sistemas computacionales aplicando las metodologías y tecnologías más recientes.'
+                        WHEN clave = 'II' THEN 'Profesionista capaz de diseñar, implementar y mejorar sistemas de producción de bienes y servicios.'
+                        WHEN clave = 'IGE' THEN 'Profesionista capaz de diseñar, crear y dirigir organizaciones competitivas con visión estratégica.'
+                        WHEN clave = 'IE' THEN 'Profesionista capaz de diseñar, desarrollar e innovar sistemas electrónicos para la solución de problemas en el sector productivo.'
+                        WHEN clave = 'IM' THEN 'Profesionista capaz de diseñar, construir y mantener sistemas mecatrónicos innovadores.'
+                        WHEN clave = 'IER' THEN 'Profesionista capaz de diseñar, implementar y evaluar proyectos de energía sustentable.'
+                        WHEN clave = 'CP' THEN 'Profesionista capaz de diseñar, implementar y evaluar sistemas de información financiera.'
+                        ELSE 'Descripción no disponible'
+                    END,
+                    duracion_semestres = COALESCE(duracion_semestres, 9),
+                    creditos_totales = COALESCE(creditos_totales, 240),
+                    activo = COALESCE(activo, 1)
+                WHERE descripcion IS NULL OR descripcion = ''");
+            }
+            
+        } catch (\PDOException $e) {
+            // Table doesn't exist, create it with all columns
+            $this->pdo->exec("CREATE TABLE IF NOT EXISTS carreras (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                nombre VARCHAR(255) NOT NULL,
+                clave VARCHAR(50) NOT NULL UNIQUE,
+                descripcion TEXT,
+                duracion_semestres INT DEFAULT 9,
+                creditos_totales INT DEFAULT 240,
+                activo TINYINT(1) DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                INDEX idx_activo (activo),
+                INDEX idx_clave (clave)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+            
+            // Insert all 7 careers
+            $this->pdo->exec("INSERT INTO carreras (nombre, clave, descripcion, duracion_semestres, creditos_totales) VALUES
+                ('Ingeniería en Sistemas Computacionales', 'ISC', 'Profesionista capaz de diseñar, desarrollar e implementar sistemas computacionales aplicando las metodologías y tecnologías más recientes.', 9, 240),
+                ('Ingeniería Industrial', 'II', 'Profesionista capaz de diseñar, implementar y mejorar sistemas de producción de bienes y servicios.', 9, 240),
+                ('Ingeniería en Gestión Empresarial', 'IGE', 'Profesionista capaz de diseñar, crear y dirigir organizaciones competitivas con visión estratégica.', 9, 240),
+                ('Ingeniería Electrónica', 'IE', 'Profesionista capaz de diseñar, desarrollar e innovar sistemas electrónicos para la solución de problemas en el sector productivo.', 9, 240),
+                ('Ingeniería Mecatrónica', 'IM', 'Profesionista capaz de diseñar, construir y mantener sistemas mecatrónicos innovadores.', 9, 240),
+                ('Ingeniería en Energías Renovables', 'IER', 'Profesionista capaz de diseñar, implementar y evaluar proyectos de energía sustentable.', 9, 240),
+                ('Contador Público', 'CP', 'Profesionista capaz de diseñar, implementar y evaluar sistemas de información financiera.', 9, 240)
+                ON DUPLICATE KEY UPDATE nombre=VALUES(nombre)");
+            
+            $totalCarreras = (int)$this->pdo->query('SELECT COUNT(*) FROM carreras')->fetchColumn();
+        }
+        
+        // Auto-setup curriculum structure (materias_carrera table)
+        try {
+            $checkCurriculumTable = $this->pdo->query("SHOW TABLES LIKE 'materias_carrera'")->fetch();
+            if (!$checkCurriculumTable) {
+                // Create materias_carrera table
+                $this->pdo->exec("CREATE TABLE IF NOT EXISTS materias_carrera (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    materia_id INT UNSIGNED NOT NULL,
+                    carrera_id INT NOT NULL,
+                    semestre TINYINT NOT NULL,
+                    tipo ENUM('basica', 'especialidad', 'residencia') DEFAULT 'basica',
+                    creditos INT DEFAULT 5,
+                    FOREIGN KEY (materia_id) REFERENCES materias(id) ON DELETE CASCADE,
+                    FOREIGN KEY (carrera_id) REFERENCES carreras(id) ON DELETE CASCADE,
+                    INDEX idx_carrera_semestre (carrera_id, semestre),
+                    INDEX idx_materia (materia_id),
+                    UNIQUE KEY uk_materia_carrera_semestre (materia_id, carrera_id, semestre)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+            }
+        } catch (\PDOException $e) {
+            // Table might already exist or foreign keys might fail, silently continue
+        }
+        
+        // Auto-seed curriculum data if empty
+        try {
+            $count = $this->pdo->query("SELECT COUNT(*) FROM materias_carrera")->fetchColumn();
+            if ($count == 0) {
+                // Path to migrations
+                $migrationsPath = __DIR__ . '/../../../migrations/';
+                
+                // 1. Seed subjects
+                if (file_exists($migrationsPath . 'seed_subjects_data.sql')) {
+                    $sql = file_get_contents($migrationsPath . 'seed_subjects_data.sql');
+                    $this->pdo->exec($sql);
+                }
+                
+                // 2. Seed curriculum part 1
+                if (file_exists($migrationsPath . 'seed_curriculum_part1.sql')) {
+                    $sql = file_get_contents($migrationsPath . 'seed_curriculum_part1.sql');
+                    $this->pdo->exec($sql);
+                }
+                
+                // 3. Seed curriculum part 2
+                if (file_exists($migrationsPath . 'seed_curriculum_part2.sql')) {
+                    $sql = file_get_contents($migrationsPath . 'seed_curriculum_part2.sql');
+                    $this->pdo->exec($sql);
+                }
+            }
+        } catch (\Exception $e) {
+            // Ignore seeding errors
+        }
+
+        // Fix: Ensure ISC and CP have curriculum data (requested specifically)
+        try {
+            $iscCount = $this->pdo->query("SELECT COUNT(*) FROM materias_carrera mc JOIN carreras c ON mc.carrera_id = c.id WHERE c.clave = 'ISC'")->fetchColumn();
+            
+            // If ISC curriculum is incomplete (less than 40 items, a full curriculum is usually ~50), force reload
+            if ($iscCount < 40) {
+                $migrationsPath = __DIR__ . '/../../../migrations/';
+                if (file_exists($migrationsPath . 'force_full_isc_curriculum.sql')) {
+                    $sql = file_get_contents($migrationsPath . 'force_full_isc_curriculum.sql');
+                    $this->pdo->exec($sql);
+                }
+            }
+            
+            // Check CP separately
+            $cpCount = $this->pdo->query("SELECT COUNT(*) FROM materias_carrera mc JOIN carreras c ON mc.carrera_id = c.id WHERE c.clave = 'CP'")->fetchColumn();
+             if ($cpCount == 0) {
+                $migrationsPath = __DIR__ . '/../../../migrations/';
+                if (file_exists($migrationsPath . 'seed_isc_cp_fix.sql')) {
+                    $sql = file_get_contents($migrationsPath . 'seed_isc_cp_fix.sql');
+                    $this->pdo->exec($sql);
+                }
+            }
+        } catch (\Exception $e) {
+            // Ignore errors
+        }
+        
         $activosGrupos = $this->groups->count();
 
         if ($totalMaterias === 0) {
