@@ -7,6 +7,41 @@ require_once __DIR__ . '/../config/db.php';
 
 function pdo(): PDO { return Database::getInstance()->getConnection(); }
 
+function ensureSchemaCarreras(PDO $pdo): void {
+  $pdo->exec("CREATE TABLE IF NOT EXISTS carreras (id INT AUTO_INCREMENT PRIMARY KEY, nombre VARCHAR(120) NOT NULL, clave VARCHAR(20) NOT NULL UNIQUE) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+  $hasCarClave = $pdo->query("SHOW COLUMNS FROM carreras LIKE 'clave'")->fetchColumn();
+  if (!$hasCarClave) { $pdo->exec("ALTER TABLE carreras ADD COLUMN clave VARCHAR(20) NOT NULL UNIQUE"); }
+  $hasClaveMat = $pdo->query("SHOW COLUMNS FROM materias LIKE 'clave'")->fetchColumn();
+  if (!$hasClaveMat) { $pdo->exec("ALTER TABLE materias ADD COLUMN clave VARCHAR(40) NULL"); }
+  $hasCarMat = $pdo->query("SHOW COLUMNS FROM materias LIKE 'carrera_id'")->fetchColumn();
+  if (!$hasCarMat) { $pdo->exec("ALTER TABLE materias ADD COLUMN carrera_id INT NULL"); }
+  $hasCarGrp = $pdo->query("SHOW COLUMNS FROM grupos LIKE 'carrera_id'")->fetchColumn();
+  if (!$hasCarGrp) { $pdo->exec("ALTER TABLE grupos ADD COLUMN carrera_id INT NULL"); }
+}
+
+function ensureCarreras(PDO $pdo): array {
+  ensureSchemaCarreras($pdo);
+  $list = [
+    ['nombre' => 'Ingeniería en Sistemas Computacionales', 'clave' => 'ICS'],
+    ['nombre' => 'Ingeniería Industrial', 'clave' => 'IIN'],
+    ['nombre' => 'Ingeniería Química', 'clave' => 'IQ'],
+    ['nombre' => 'Ingeniería Mecánica', 'clave' => 'IM'],
+    ['nombre' => 'Ingeniería Eléctrica', 'clave' => 'IE'],
+    ['nombre' => 'Ingeniería Civil', 'clave' => 'IC'],
+    ['nombre' => 'Ingeniería en Gestión Empresarial', 'clave' => 'IGE'],
+  ];
+  $sel = $pdo->prepare("SELECT id FROM carreras WHERE clave = :c");
+  $ins = $pdo->prepare("INSERT INTO carreras (nombre, clave) VALUES (:n,:c)");
+  $res = [];
+  foreach ($list as $c) {
+    $sel->execute([':c' => $c['clave']]);
+    $id = $sel->fetchColumn();
+    if (!$id) { $ins->execute([':n' => $c['nombre'], ':c' => $c['clave']]); $id = (int)$pdo->lastInsertId(); }
+    $res[$c['clave']] = (int)$id;
+  }
+  return $res;
+}
+
 function parseTestUsers(string $htmlPath): array {
   $html = file_get_contents($htmlPath);
   if ($html === false) { throw new RuntimeException("No se pudo leer $htmlPath"); }
@@ -73,7 +108,7 @@ function ensureUsers(PDO $pdo, array $alumnos, array $profesores): array {
   return compact('addedA','addedP','skippedA','skippedP');
 }
 
-function ensureMaterias(PDO $pdo): array {
+function ensureMaterias(PDO $pdo, array $carreras): array {
   $materias = [
     ['nombre' => 'Programación I', 'clave' => 'INF101'],
     ['nombre' => 'Programación II', 'clave' => 'INF102'],
@@ -107,28 +142,64 @@ function ensureMaterias(PDO $pdo): array {
     ['nombre' => 'Ética Profesional', 'clave' => 'GEN101'],
     ['nombre' => 'Metodología de la Investigación', 'clave' => 'GEN102'],
   ];
-  $sel = $pdo->prepare("SELECT id FROM materias WHERE clave = :c");
-  $ins = $pdo->prepare("INSERT INTO materias (nombre, clave) VALUES (:n, :c)");
+  $hasClave = (bool)$pdo->query("SHOW COLUMNS FROM materias LIKE 'clave'")->fetchColumn();
+  $sel = $pdo->prepare($hasClave ? "SELECT id FROM materias WHERE clave = :c" : "SELECT id FROM materias WHERE nombre = :n");
+  $ins = $pdo->prepare($hasClave ? "INSERT INTO materias (nombre, clave, carrera_id) VALUES (:n, :c, :car)" : "INSERT INTO materias (nombre, carrera_id) VALUES (:n, :car)");
   $result = [];
   foreach ($materias as $m) {
-    $sel->execute([':c' => $m['clave']]);
+    if ($hasClave) { $sel->execute([':c' => $m['clave']]); }
+    else { $sel->execute([':n' => $m['nombre']]); }
     $id = $sel->fetchColumn();
-    if (!$id) { $ins->execute([':n' => $m['nombre'], ':c' => $m['clave']]); $id = (int)$pdo->lastInsertId(); }
-    $result[] = ['id' => (int)$id, 'nombre' => $m['nombre'], 'clave' => $m['clave']];
+    $car = null;
+    if (str_starts_with($m['clave'], 'INF')) { $car = $carreras['ICS'] ?? null; }
+    elseif (str_starts_with($m['clave'], 'IND')) { $car = $carreras['IIN'] ?? null; }
+    elseif (str_starts_with($m['clave'], 'QUI')) { $car = $carreras['IQ'] ?? null; }
+    elseif (str_starts_with($m['clave'], 'ADM')) { $car = $carreras['IGE'] ?? null; }
+    elseif (str_starts_with($m['clave'], 'MAT') || str_starts_with($m['clave'], 'GEN')) { $car = $carreras['ICS'] ?? null; }
+    if (!$id) {
+      $params = [ ':n' => $m['nombre'], ':car' => $car ];
+      if ($hasClave) { $params[':c'] = $m['clave']; }
+      $ins->execute($params);
+      $id = (int)$pdo->lastInsertId();
+    }
+    else { $pdo->prepare('UPDATE materias SET carrera_id = :car WHERE id = :id')->execute([':car' => $car, ':id' => (int)$id]); }
+    $result[] = ['id' => (int)$id, 'nombre' => $m['nombre'], 'clave' => $m['clave'], 'carrera_id' => $car];
+  }
+  // Extra materias para IM, IE, IC
+  $extra = [
+    ['n' => 'Mecánica de Materiales', 'c' => 'MEC101', 'car' => $carreras['IM'] ?? null],
+    ['n' => 'Diseño de Máquinas', 'c' => 'MEC201', 'car' => $carreras['IM'] ?? null],
+    ['n' => 'Circuitos Eléctricos I', 'c' => 'ELE101', 'car' => $carreras['IE'] ?? null],
+    ['n' => 'Electrónica I', 'c' => 'ELE201', 'car' => $carreras['IE'] ?? null],
+    ['n' => 'Análisis Estructural', 'c' => 'CIV101', 'car' => $carreras['IC'] ?? null],
+    ['n' => 'Diseño de Concreto', 'c' => 'CIV201', 'car' => $carreras['IC'] ?? null],
+  ];
+  foreach ($extra as $e) {
+    if ($hasClave) { $sel->execute([':c' => $e['c']]); } else { $sel->execute([':n' => $e['n']]); }
+    $id = $sel->fetchColumn();
+    if (!$id) {
+      $params = [ ':n' => $e['n'], ':car' => $e['car'] ];
+      if ($hasClave) { $params[':c'] = $e['c']; }
+      $ins->execute($params);
+      $id = (int)$pdo->lastInsertId();
+    }
+    $result[] = ['id' => (int)$id, 'nombre' => $e['n'], 'clave' => $e['c'], 'carrera_id' => $e['car']];
   }
   return $result;
 }
 
-function crearGruposPorProfesor(PDO $pdo, array $materias, array $ciclos, int $porProfesor = 7, int $maxPorProfesor = 8): array {
+function crearGruposPorProfesor(PDO $pdo, array $materias, array $ciclos, int $porProfesor = 7, int $maxPorProfesor = 8, int $maxTotal = 50): array {
   $profesores = $pdo->query("SELECT id FROM usuarios WHERE rol = 'profesor' AND activo = 1")->fetchAll(PDO::FETCH_ASSOC);
   if (!$profesores) { throw new RuntimeException('No hay profesores activos para crear grupos'); }
   $sel = $pdo->prepare("SELECT id FROM grupos WHERE materia_id = :m AND profesor_id = :p AND nombre = :nom AND ciclo <=> :c");
   $ins = $pdo->prepare("INSERT INTO grupos (materia_id, profesor_id, nombre, ciclo) VALUES (:m, :p, :nom, :c)");
   $created = [];
+  $total = (int)$pdo->query('SELECT COUNT(*) FROM grupos')->fetchColumn();
   foreach ($profesores as $prof) {
     $profId = (int)$prof['id'];
     $cur = (int)$pdo->query("SELECT COUNT(*) FROM grupos WHERE profesor_id = $profId")->fetchColumn();
     if ($cur >= $maxPorProfesor) { continue; }
+    if ($total >= $maxTotal) { break; }
     $indices = array_rand($materias, min($porProfesor, count($materias)));
     $indices = is_array($indices) ? $indices : [$indices];
     $k = 1;
@@ -141,14 +212,28 @@ function crearGruposPorProfesor(PDO $pdo, array $materias, array $ciclos, int $p
       if (!$gid) {
         $ins->execute([':m' => (int)$m['id'], ':p' => $profId, ':nom' => $nombre, ':c' => $ciclo]);
         $gid = (int)$pdo->lastInsertId();
+        $pdo->prepare('UPDATE grupos g JOIN materias m ON m.id = g.materia_id SET g.carrera_id = m.carrera_id WHERE g.id = :id')->execute([':id' => (int)$gid]);
+        $total++;
       }
       $created[] = ['id' => (int)$gid, 'materia_id' => (int)$m['id'], 'nombre' => $nombre, 'ciclo' => $ciclo, 'profesor_id' => $profId];
       $k++;
       $cur++;
-      if ($k > $porProfesor || $cur >= $maxPorProfesor) { break; }
+      if ($k > $porProfesor || $cur >= $maxPorProfesor || $total >= $maxTotal) { break; }
     }
   }
   return $created;
+}
+
+function pruneGrupos(PDO $pdo, int $maxTotal = 50): void {
+  $ids = array_map(fn($r)=> (int)$r['id'], $pdo->query("SELECT id FROM grupos ORDER BY id DESC")->fetchAll(PDO::FETCH_ASSOC));
+  if (count($ids) > $maxTotal) {
+    $surplus = array_slice($ids, $maxTotal);
+    if ($surplus) {
+      $in = implode(',', array_map('intval', $surplus));
+      $pdo->exec("DELETE FROM calificaciones WHERE grupo_id IN ($in)");
+      $pdo->exec("DELETE FROM grupos WHERE id IN ($in)");
+    }
+  }
 }
 
 function getGrupos(PDO $pdo): array { return $pdo->query("SELECT id FROM grupos")->fetchAll(); }
@@ -165,9 +250,9 @@ function crearCalificacion(PDO $pdo, int $alumnoId, int $grupoId): void {
   $stmt->execute([':a' => $alumnoId, ':g' => $grupoId, ':p1' => $p1, ':p2' => $p2, ':f' => $fin]);
 }
 
-function enrollAll(PDO $pdo, int $minGroups = 5, int $maxGroups = 8): int {
-  $alumnos = $pdo->query("SELECT id FROM alumnos")->fetchAll();
-  $grupos = $pdo->query("SELECT id FROM grupos")->fetchAll();
+function enrollAll(PDO $pdo, int $minGroups = 4, int $maxGroups = 6): int {
+  $alumnos = $pdo->query("SELECT id FROM alumnos WHERE activo = 1")->fetchAll();
+  $grupos = $pdo->query("SELECT g.id, COALESCE(g.cupo,30) AS cupo, (SELECT COUNT(*) FROM calificaciones c WHERE c.grupo_id = g.id) AS inscritos FROM grupos g")->fetchAll(PDO::FETCH_ASSOC);
   if (!$alumnos || !$grupos) { return 0; }
   $inscritos = 0;
   foreach ($alumnos as $al) {
@@ -175,9 +260,11 @@ function enrollAll(PDO $pdo, int $minGroups = 5, int $maxGroups = 8): int {
     $indices = array_rand($grupos, min($k, count($grupos)));
     $indices = is_array($indices) ? $indices : [$indices];
     foreach ($indices as $idx) {
-      $gid = (int)$grupos[$idx]['id'];
+      $ginfo = $grupos[$idx];
+      $gid = (int)$ginfo['id'];
+      if ((int)$ginfo['inscritos'] >= (int)$ginfo['cupo']) { continue; }
       $aid = (int)$al['id'];
-      if (!calificacionExiste($pdo, $aid, $gid)) { crearCalificacion($pdo, $aid, $gid); $inscritos++; }
+      if (!calificacionExiste($pdo, $aid, $gid)) { crearCalificacion($pdo, $aid, $gid); $inscritos++; $ginfo['inscritos']++; }
     }
   }
   return $inscritos;
@@ -202,12 +289,14 @@ function summary(PDO $pdo): array {
 
 function main(): void {
   $pdo = pdo();
-  $pdo->beginTransaction();
   try {
     [$alumnos, $profesores] = parseTestUsers(__DIR__ . '/../public/test_users.html');
+    $cars = ensureCarreras($pdo);
+    $pdo->beginTransaction();
     $resUsers = ensureUsers($pdo, $alumnos, $profesores);
-    $materias = ensureMaterias($pdo);
-    $grupos = crearGruposPorProfesor($pdo, $materias, ['2024A','2024B'], 7, 8);
+    $materias = ensureMaterias($pdo, $cars);
+    $grupos = crearGruposPorProfesor($pdo, $materias, ['2024A','2024B'], 7, 8, 50);
+    pruneGrupos($pdo, 50);
     foreach ($pdo->query("SELECT id FROM usuarios WHERE rol = 'profesor' AND activo = 1") as $row) {
       $pid = (int)$row['id'];
       $q = $pdo->prepare("SELECT g.id FROM grupos g LEFT JOIN calificaciones c ON c.grupo_id = g.id WHERE g.profesor_id = :p GROUP BY g.id ORDER BY COUNT(c.id) DESC");
@@ -232,7 +321,7 @@ function main(): void {
     echo "Resumen: alumnos={$sum['alumnos']}, profesores={$sum['profesores']}, materias={$sum['materias']}, grupos={$sum['grupos']}, calificaciones={$sum['calificaciones']}\n";
     echo "Coherencia: alumnos con calificación={$sum['alumnos_con_calificacion']} de {$sum['alumnos']}; profesores con grupo={$sum['profesores_con_grupo']} de {$sum['profesores']}\n";
   } catch (Throwable $e) {
-    $pdo->rollBack();
+    if ($pdo->inTransaction()) { $pdo->rollBack(); }
     fwrite(STDERR, "Error: " . $e->getMessage() . "\n");
     exit(1);
   }

@@ -33,6 +33,7 @@ class KpiController
             $totalProfesores = (int)$this->pdo->query("SELECT COUNT(*) FROM usuarios WHERE rol = 'profesor' AND activo = 1")->fetchColumn();
         }
         $totalMaterias = $this->subjects->count();
+        $totalCarreras = (int)$this->pdo->query('SELECT COUNT(*) FROM carreras')->fetchColumn();
         $activosGrupos = $this->groups->count();
 
         if ($totalMaterias === 0) {
@@ -100,6 +101,7 @@ class KpiController
             'alumnos' => $totalAlumnos,
             'profesores' => $totalProfesores,
             'materias' => $totalMaterias,
+            'carreras' => $totalCarreras,
             'promedio' => $promedioGeneral,
             'grupos' => $activosGrupos,
             'pendientes_evaluacion' => $pendientes,

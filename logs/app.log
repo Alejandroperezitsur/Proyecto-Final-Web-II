@@ -114,3 +114,13 @@
 {"ts":"2025-11-20T00:27:22+01:00","user_id":69,"role":"profesor","path":"\/Control-Escolar-ITSUR\/public\/login","msg":"login_success","ctx":{"user_id":69,"role":"profesor"}}
 {"ts":"2025-11-20T00:42:40+01:00","user_id":69,"role":"profesor","path":"\/Control-Escolar-ITSUR\/public\/login","msg":"login_success","ctx":{"user_id":69,"role":"profesor"}}
 {"ts":"2025-11-20T00:46:41+01:00","user_id":69,"role":"profesor","path":"\/Control-Escolar-ITSUR\/public\/grades\/bulk","msg":"grades_bulk_update","ctx":{"updated":0,"skipped":35,"processed":35}}
+{"ts":"2025-11-20T21:05:51+01:00","user_id":90,"role":"admin","path":"\/Control-Escolar-ITSUR\/public\/login","msg":"login_success","ctx":{"user_id":90,"role":"admin"}}
+{"ts":"2025-11-20T21:05:51+01:00","user_id":90,"role":"admin","path":"\/Control-Escolar-ITSUR\/public\/api\/charts\/promedios-ciclo","msg":"chart_query","ctx":{"type":"promedios_ciclo"}}
+{"ts":"2025-11-20T21:05:51+01:00","user_id":90,"role":"admin","path":"\/Control-Escolar-ITSUR\/public\/api\/charts\/reprobados","msg":"chart_query","ctx":{"type":"reprobados_materia"}}
+{"ts":"2025-11-20T21:20:14+01:00","user_id":90,"role":"admin","path":"\/Control-Escolar-ITSUR\/public\/login","msg":"login_success","ctx":{"user_id":90,"role":"admin"}}
+{"ts":"2025-11-20T21:20:14+01:00","user_id":90,"role":"admin","path":"\/Control-Escolar-ITSUR\/public\/api\/charts\/promedios-ciclo","msg":"chart_query","ctx":{"type":"promedios_ciclo"}}
+{"ts":"2025-11-20T21:20:14+01:00","user_id":90,"role":"admin","path":"\/Control-Escolar-ITSUR\/public\/api\/charts\/reprobados","msg":"chart_query","ctx":{"type":"reprobados_materia"}}
+{"ts":"2025-11-20T22:23:56+01:00","user_id":90,"role":"admin","path":"\/Control-Escolar-ITSUR\/public\/login","msg":"login_success","ctx":{"user_id":90,"role":"admin"}}
+{"ts":"2025-11-20T22:23:56+01:00","user_id":90,"role":"admin","path":"\/Control-Escolar-ITSUR\/public\/api\/charts\/promedios-ciclo","msg":"chart_query","ctx":{"type":"promedios_ciclo"}}
+{"ts":"2025-11-20T22:23:56+01:00","user_id":90,"role":"admin","path":"\/Control-Escolar-ITSUR\/public\/api\/charts\/reprobados","msg":"chart_query","ctx":{"type":"reprobados_materia"}}
+{"ts":"2025-11-20T22:24:46+01:00","user_id":90,"role":"admin","path":"\/Control-Escolar-ITSUR\/public\/login","msg":"login_success","ctx":{"user_id":90,"role":"admin"}}

@@ -28,9 +28,23 @@ ob_start();
             <div class="h5 mb-0" id="kpi-materias">—</div>
           </div>
         </div>
+      <a href="<?php echo $base; ?>/subjects" class="stretched-link"></a>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-bg-secondary position-relative">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <i class="fa-solid fa-graduation-cap fa-2x me-3"></i>
+          <div>
+            <div class="small">Carreras</div>
+            <div class="h5 mb-0" id="kpi-carreras">—</div>
+          </div>
+        </div>
         <a href="<?php echo $base; ?>/subjects" class="stretched-link"></a>
       </div>
     </div>
+  </div>
   </div>
   <div class="col-md-3">
     <div class="card text-bg-info position-relative">
@@ -132,6 +146,7 @@ fetch('<?php echo $base; ?>/api/kpis/admin')
   .then(d=>{
     document.getElementById('kpi-alumnos').textContent = d.alumnos ?? '—';
     document.getElementById('kpi-materias').textContent = d.materias ?? '—';
+    document.getElementById('kpi-carreras').textContent = d.carreras ?? '—';
     document.getElementById('kpi-grupos').textContent = d.grupos ?? '—';
     document.getElementById('kpi-promedio').textContent = d.promedio ?? '—';
     document.getElementById('kpi-profesores').textContent = d.profesores ?? '—';
