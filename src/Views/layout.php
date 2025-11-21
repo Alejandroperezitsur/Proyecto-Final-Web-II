@@ -35,7 +35,8 @@ $base = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/');
             <li class="nav-item"><a class="nav-link" href="<?php echo $base; ?>/dashboard">Mi tablero</a></li>
           <?php endif; ?>
         </ul>
-        <div class="d-flex">
+        <div class="d-flex align-items-center">
+          <button id="theme-toggle" class="btn btn-outline-secondary me-2" type="button" aria-label="Cambiar tema">🌙</button>
           <?php if ($role !== 'guest'): ?>
             <span class="navbar-text me-3"><i class="fa-regular fa-user me-1"></i><?php echo htmlspecialchars($name ?: $role); ?></span>
             <a href="<?php echo $base; ?>/logout" class="btn btn-outline-light">Salir</a>
@@ -63,5 +64,6 @@ $base = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/');
   </div>
   <?php unset($_SESSION['flash'], $_SESSION['flash_type']); endif; ?>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="<?php echo $base; ?>/assets/js/main.js"></script>
 </body>
 </html>

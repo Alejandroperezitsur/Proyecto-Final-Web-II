@@ -74,7 +74,10 @@ $modules = $config['modules'] ?? [
         <?php if (!empty($modules['dashboard'])): ?><li class="nav-item"><a class="nav-link" href="<?php echo $base; ?>/app.php?r=/dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a></li><?php endif; ?>
       </ul>
       <?php endif; ?>
-      <ul class="navbar-nav">
+      <ul class="navbar-nav align-items-center">
+        <li class="nav-item me-2">
+          <button id="theme-toggle" class="btn btn-outline-secondary" type="button" aria-label="Cambiar tema">🌙</button>
+        </li>
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="userMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             <i class="bi bi-person-circle"></i>
@@ -91,3 +94,4 @@ $modules = $config['modules'] ?? [
     </div>
   </div>
 </nav>
+<script src="<?php echo $base; ?>/assets/js/main.js"></script>

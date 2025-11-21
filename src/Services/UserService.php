@@ -24,25 +24,24 @@ class UserService
                 'name' => $user['nombre'] ?? '',
             ];
         }
-        if (preg_match('/^[SICMQEA][0-9]{8}$/', $identity)) {
-            $al = $this->repo->findStudentByMatricula($identity);
-            if ($al && $al['activo'] && password_verify($password, $al['password'])) {
-                return [
-                    'id' => (int)$al['id'],
-                    'role' => 'alumno',
-                    'name' => $al['nombre'] ?? '',
-                ];
-            }
-            $prof = $this->repo->findProfessorByMatricula($identity);
-            if ($prof && $prof['activo'] && password_verify($password, $prof['password'])) {
-                return [
-                    'id' => (int)$prof['id'],
-                    'role' => 'profesor',
-                    'name' => $prof['nombre'] ?? '',
-                ];
-            }
-            return null;
+        // Fallback: assume it's a matricula if not an email
+        $al = $this->repo->findStudentByMatricula($identity);
+        if ($al && $al['activo'] && password_verify($password, $al['password'])) {
+            return [
+                'id' => (int)$al['id'],
+                'role' => 'alumno',
+                'name' => $al['nombre'] ?? '',
+            ];
         }
+        $prof = $this->repo->findProfessorByMatricula($identity);
+        if ($prof && $prof['activo'] && password_verify($password, $prof['password'])) {
+            return [
+                'id' => (int)$prof['id'],
+                'role' => 'profesor',
+                'name' => $prof['nombre'] ?? '',
+            ];
+        }
+        return null;
         return null;
     }
 }

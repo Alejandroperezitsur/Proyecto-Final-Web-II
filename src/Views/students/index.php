@@ -5,7 +5,7 @@ ob_start();
 <div class="container py-4">
   <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h2 class="mb-1">Alumnos</h2>
+        <h2 class="mb-1">Alumnos <span class="badge bg-primary rounded-pill fs-6 align-middle ms-2">Total: <?= $total ?? 0 ?></span></h2>
         <p class="text-muted small mb-0">Gestión de estudiantes registrados</p>
     </div>
     <div class="d-flex gap-2">
@@ -30,18 +30,37 @@ ob_start();
       <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
           <thead class="bg-light">
+            <?php
+            $currentSort = $_GET['sort'] ?? 'apellido';
+            $currentOrder = strtoupper($_GET['order'] ?? 'ASC');
+            $baseParams = $_GET;
+            unset($baseParams['sort'], $baseParams['order']);
+            
+            function sortLink($col, $label, $currentSort, $currentOrder, $baseParams) {
+                $newOrder = ($currentSort === $col && $currentOrder === 'ASC') ? 'DESC' : 'ASC';
+                $icon = '';
+                if ($currentSort === $col) {
+                    $icon = ($currentOrder === 'ASC') ? '<i class="fa-solid fa-sort-up ms-1"></i>' : '<i class="fa-solid fa-sort-down ms-1"></i>';
+                } else {
+                    $icon = '<i class="fa-solid fa-sort text-muted ms-1" style="opacity:0.3"></i>';
+                }
+                $params = array_merge($baseParams, ['sort' => $col, 'order' => $newOrder]);
+                $url = '?' . http_build_query($params);
+                return "<a href=\"$url\" class=\"text-decoration-none text-dark fw-bold\">$label $icon</a>";
+            }
+            ?>
             <tr>
-              <th class="ps-4">Matrícula</th>
-              <th>Nombre Completo</th>
-              <th>Email</th>
-              <th>Fecha Nac.</th>
-              <th>Estado</th>
+              <th class="ps-4"><?= sortLink('matricula', 'Matrícula', $currentSort, $currentOrder, $baseParams) ?></th>
+              <th><?= sortLink('nombre', 'Nombre Completo', $currentSort, $currentOrder, $baseParams) ?></th>
+              <th><?= sortLink('email', 'Email', $currentSort, $currentOrder, $baseParams) ?></th>
+
+              <th><?= sortLink('activo', 'Estado', $currentSort, $currentOrder, $baseParams) ?></th>
               <th class="text-end pe-4">Acciones</th>
             </tr>
           </thead>
           <tbody>
             <?php if (empty($students)): ?>
-                <tr><td colspan="6" class="text-center py-5 text-muted">No se encontraron alumnos.</td></tr>
+                <tr><td colspan="5" class="text-center py-5 text-muted">No se encontraron alumnos.</td></tr>
             <?php else: foreach ($students as $s): ?>
               <tr>
                 <td class="ps-4 fw-medium"><?= htmlspecialchars($s['matricula']) ?></td>
@@ -56,7 +75,7 @@ ob_start();
                     </div>
                 </td>
                 <td class="text-dark small"><?= htmlspecialchars($s['email'] ?? '—') ?></td>
-                <td class="text-muted small"><?= htmlspecialchars($s['fecha_nac'] ?? '—') ?></td>
+
                 <td>
                     <?php
                         $statusLabel = $s['activo'] ? 'Activo' : 'Inactivo';
@@ -135,10 +154,7 @@ ob_start();
             <input type="email" class="form-control" id="email" name="email">
           </div>
 
-          <div class="mb-3">
-            <label for="fecha_nac" class="form-label">Fecha de Nacimiento</label>
-            <input type="date" class="form-control" id="fecha_nac" name="fecha_nac">
-          </div>
+
 
           <div class="mb-3">
             <label for="password" class="form-label">Contraseña</label>
@@ -162,17 +178,46 @@ ob_start();
 
 <script>
 const BASE_URL = '<?php echo $base; ?>';
-const modal = new bootstrap.Modal(document.getElementById('studentModal'));
+let modalInstance = null;
+
+function getModal() {
+    if (typeof bootstrap === 'undefined') {
+        console.error('Bootstrap not loaded');
+        alert('Error: Componentes de interfaz no cargados. Recargue la página.');
+        return null;
+    }
+    if (!modalInstance) {
+        const el = document.getElementById('studentModal');
+        if (!el) { console.error('Modal element missing'); return null; }
+        modalInstance = new bootstrap.Modal(el);
+    }
+    return modalInstance;
+}
 
 function openCreateModal() {
-    document.getElementById('studentForm').reset();
-    document.getElementById('studentId').value = '';
-    document.getElementById('modalTitle').textContent = 'Nuevo Alumno';
-    document.getElementById('password').placeholder = 'Contraseña';
-    document.getElementById('password').required = true;
-    document.getElementById('passwordHelp').style.display = 'none';
-    document.getElementById('activo').checked = true;
-    modal.show();
+    try {
+        document.getElementById('studentForm').reset();
+        document.getElementById('studentId').value = '';
+        document.getElementById('modalTitle').textContent = 'Nuevo Alumno';
+        
+        const pwd = document.getElementById('password');
+        if(pwd) {
+            pwd.placeholder = 'Contraseña';
+            pwd.required = true;
+        }
+        
+        const help = document.getElementById('passwordHelp');
+        if(help) help.style.display = 'none';
+        
+        const act = document.getElementById('activo');
+        if(act) act.checked = true;
+        
+        const m = getModal();
+        if(m) m.show();
+    } catch (e) {
+        console.error(e);
+        alert('Error: ' + e.message);
+    }
 }
 
 function openEditModal(id) {
@@ -186,25 +231,38 @@ function openEditModal(id) {
             document.getElementById('nombre').value = data.nombre;
             document.getElementById('apellido').value = data.apellido;
             document.getElementById('email').value = data.email || '';
-            document.getElementById('fecha_nac').value = data.fecha_nac || '';
-            document.getElementById('activo').checked = data.activo == 1;
+
+            const act = document.getElementById('activo');
+            if(act) act.checked = data.activo == 1;
             
             document.getElementById('modalTitle').textContent = 'Editar Alumno';
-            document.getElementById('password').placeholder = 'Dejar en blanco para mantener actual';
-            document.getElementById('password').required = false;
-            document.getElementById('passwordHelp').style.display = 'block';
             
-            modal.show();
+            const pwd = document.getElementById('password');
+            if(pwd) {
+                pwd.placeholder = 'Dejar en blanco para mantener actual';
+                pwd.required = false;
+            }
+            
+            const help = document.getElementById('passwordHelp');
+            if(help) help.style.display = 'block';
+            
+            const m = getModal();
+            if(m) m.show();
         })
-        .catch(e => console.error(e));
+        .catch(e => {
+            console.error(e);
+            alert('Error de conexión al obtener datos');
+        });
 }
 
 function saveStudent(e) {
     e.preventDefault();
+    console.log('Saving student...');
     const form = e.target;
     const formData = new FormData(form);
     const id = formData.get('id');
     const url = id ? `${BASE_URL}/alumnos/update` : `${BASE_URL}/alumnos/store`;
+    console.log('URL:', url);
     
     const btn = document.getElementById('saveBtn');
     const originalText = btn.textContent;
@@ -217,13 +275,17 @@ function saveStudent(e) {
     })
     .then(r => r.json())
     .then(data => {
+        console.log('Response:', data);
         if(data.success) {
             location.reload();
         } else {
             alert(data.error || 'Error desconocido');
         }
     })
-    .catch(err => alert('Error de red'))
+    .catch(err => {
+        console.error(err);
+        alert('Error de red');
+    })
     .finally(() => {
         btn.disabled = false;
         btn.textContent = originalText;

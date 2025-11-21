@@ -49,7 +49,19 @@ class StudentsController
         $totalPages = ceil($total / $limit);
 
         // Fetch students
-        $sql = "SELECT id, matricula, nombre, apellido, email, activo, fecha_nac FROM alumnos $where ORDER BY apellido, nombre LIMIT :limit OFFSET :offset";
+        // Sorting
+        $sort = $_GET['sort'] ?? 'apellido';
+        $order = strtoupper($_GET['order'] ?? 'ASC');
+        $allowedSorts = ['matricula', 'nombre', 'apellido', 'email', 'activo'];
+        if (!in_array($sort, $allowedSorts)) { $sort = 'apellido'; }
+        if (!in_array($order, ['ASC', 'DESC'])) { $order = 'ASC'; }
+        
+        // Secondary sort for name consistency
+        $orderBy = "$sort $order";
+        if ($sort === 'apellido') { $orderBy .= ", nombre ASC"; }
+        
+        // Fetch students
+        $sql = "SELECT id, matricula, nombre, apellido, email, activo FROM alumnos $where ORDER BY $orderBy LIMIT :limit OFFSET :offset";
         $stmt = $this->pdo->prepare($sql);
         foreach ($params as $k => $v) { $stmt->bindValue($k, $v); }
         $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
@@ -81,8 +93,8 @@ class StudentsController
 
         $password = !empty($data['password']) ? password_hash($data['password'], PASSWORD_DEFAULT) : null;
         
-        $sql = "INSERT INTO alumnos (matricula, nombre, apellido, email, password, fecha_nac, activo) 
-                VALUES (:matricula, :nombre, :apellido, :email, :password, :fecha_nac, :activo)";
+        $sql = "INSERT INTO alumnos (matricula, nombre, apellido, email, password, activo) 
+                VALUES (:matricula, :nombre, :apellido, :email, :password, :activo)";
         
         $stmt = $this->pdo->prepare($sql);
         $res = $stmt->execute([
@@ -91,7 +103,6 @@ class StudentsController
             ':apellido' => $data['apellido'],
             ':email' => $data['email'] ?? null,
             ':password' => $password,
-            ':fecha_nac' => !empty($data['fecha_nac']) ? $data['fecha_nac'] : null,
             ':activo' => isset($data['activo']) ? 1 : 0
         ]);
 
@@ -131,12 +142,7 @@ class StudentsController
             ':id' => $id
         ];
 
-        if (!empty($data['fecha_nac'])) {
-            $fields .= ", fecha_nac = :fecha_nac";
-            $params[':fecha_nac'] = $data['fecha_nac'];
-        } else {
-            $fields .= ", fecha_nac = NULL";
-        }
+
 
         if (!empty($data['password'])) {
             $fields .= ", password = :password";
@@ -179,7 +185,7 @@ class StudentsController
             return;
         }
 
-        $stmt = $this->pdo->prepare("SELECT id, matricula, nombre, apellido, email, fecha_nac, activo FROM alumnos WHERE id = :id");
+        $stmt = $this->pdo->prepare("SELECT id, matricula, nombre, apellido, email, activo FROM alumnos WHERE id = :id");
         $stmt->execute([':id' => $id]);
         $student = $stmt->fetch(PDO::FETCH_ASSOC);
 

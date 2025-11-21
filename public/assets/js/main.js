@@ -43,28 +43,35 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Tema fijo: oscuro por defecto, sin toggle
+  // Tema con toggle y persistencia
   const THEME_KEY = 'sicenet-theme';
+  const getSystemPref = () => {
+    try { return (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light'; } catch { return 'dark'; }
+  };
+  const getStoredTheme = () => {
+    try { return localStorage.getItem(THEME_KEY); } catch { return null; }
+  };
   const applyTheme = (theme) => {
     const t = theme === 'light' ? 'light' : 'dark';
     document.documentElement.setAttribute('data-theme', t);
+    try { document.body && document.body.setAttribute('data-theme', t); } catch {}
+    const btn = document.getElementById('theme-toggle') || document.getElementById('themeToggle');
+    if (btn) {
+      btn.textContent = (t === 'light') ? '☀️' : '🌙';
+      btn.setAttribute('aria-label', (t === 'light') ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro');
+    }
   };
-  // Forzar tema oscuro y limpiar posibles preferencias previas
-  applyTheme('dark');
-  try { localStorage.removeItem(THEME_KEY); } catch {}
-
-  /* LOGICA DEL TOGGLE (comentada)
-  // const getSystemPref = () => {
-  //   try { return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; } catch { return 'dark'; }
-  // };
-  // const getCurrentTheme = () => localStorage.getItem('sicenet-theme') || getSystemPref() || 'dark';
-  // let currentTheme = getCurrentTheme();
-  // applyTheme(currentTheme);
-  // const nav = document.querySelector('nav.navbar .container-fluid');
-  // const existingToggle = document.getElementById('themeToggle') || document.getElementById('theme-toggle');
-  // const updateIconEl = (el, theme) => { ... }
-  // if (existingToggle) { ... } else if (nav) { ... }
-  */
+  const initial = getStoredTheme() || getSystemPref() || 'dark';
+  applyTheme(initial);
+  const toggleBtn = document.getElementById('theme-toggle') || document.getElementById('themeToggle');
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme') || 'dark';
+      const next = current === 'light' ? 'dark' : 'light';
+      applyTheme(next);
+      try { localStorage.setItem(THEME_KEY, next); } catch {}
+    }, { passive: true });
+  }
 
   // Autoactivar ordenamiento en tablas con clase .table-sort
   document.querySelectorAll('table.table-sort').forEach(tbl => enableTableSort(tbl));
