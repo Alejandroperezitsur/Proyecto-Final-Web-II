@@ -23,11 +23,16 @@ class GradesController
     {
         $role = $_SESSION['role'] ?? '';
         if ($role !== 'admin') { http_response_code(403); return 'No autorizado'; }
+        
+        // Fetch cycles for the filter dropdown
+        $cycles = $this->pdo->query("SELECT DISTINCT ciclo FROM grupos ORDER BY ciclo DESC")->fetchAll(PDO::FETCH_COLUMN);
+        
         $ciclo = isset($_GET['ciclo']) ? trim((string)$_GET['ciclo']) : null;
         $params = [];
         $where = 'WHERE c.final IS NULL';
         if ($ciclo) { $where .= ' AND g.ciclo = :ciclo'; $params[':ciclo'] = $ciclo; }
-        $sql = "SELECT c.id, a.matricula, CONCAT(a.nombre,' ',a.apellido) AS alumno, m.nombre AS materia, g.nombre AS grupo, g.ciclo, u.nombre AS profesor
+        
+        $sql = "SELECT c.id, c.alumno_id, c.grupo_id, a.matricula, CONCAT(a.nombre,' ',a.apellido) AS alumno, m.nombre AS materia, g.nombre AS grupo, g.ciclo, u.nombre AS profesor
                 FROM calificaciones c
                 JOIN alumnos a ON a.id = c.alumno_id
                 JOIN grupos g ON g.id = c.grupo_id
@@ -39,25 +44,7 @@ class GradesController
         foreach ($params as $k=>$v) { $stmt->bindValue($k, $v); }
         $stmt->execute();
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        if (!$rows) {
-            $grps = $this->pdo->query('SELECT id FROM grupos ORDER BY ciclo DESC LIMIT 5')->fetchAll(PDO::FETCH_ASSOC);
-            $als = $this->pdo->query('SELECT id FROM alumnos WHERE activo = 1 LIMIT 20')->fetchAll(PDO::FETCH_ASSOC);
-            if ($grps && $als) {
-                $chk = $this->pdo->prepare('SELECT 1 FROM calificaciones WHERE alumno_id = :a AND grupo_id = :g LIMIT 1');
-                $ins = $this->pdo->prepare('INSERT INTO calificaciones (alumno_id, grupo_id, parcial1, parcial2, final) VALUES (:a,:g,NULL,NULL,NULL)');
-                foreach (array_slice($grps, 0, 5) as $g) {
-                    $gid = (int)$g['id'];
-                    foreach (array_slice($als, 0, 3) as $a) {
-                        $aid = (int)$a['id'];
-                        $chk->execute([':a'=>$aid, ':g'=>$gid]);
-                        if (!$chk->fetchColumn()) { $ins->execute([':a'=>$aid, ':g'=>$gid]); }
-                    }
-                }
-                foreach ($params as $k=>$v) { $stmt->bindValue($k, $v); }
-                $stmt->execute();
-                $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            }
-        }
+
         ob_start();
         include __DIR__ . '/../Views/admin/pending.php';
         return ob_get_clean();
@@ -212,7 +199,9 @@ class GradesController
         \App\Utils\Logger::info('grade_upsert', ['alumno_id' => $alumnoId, 'grupo_id' => $grupoId]);
         $_SESSION['flash'] = 'Calificación registrada correctamente';
         $_SESSION['flash_type'] = 'success';
-        header('Location: /grades');
+        
+        $redirect = $_POST['redirect_to'] ?? '/grades';
+        header('Location: ' . $redirect);
         return '';
     }
 

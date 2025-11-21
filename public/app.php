@@ -139,6 +139,10 @@ $router->get('/api/alumno/materias', fn() => (new App\Controllers\StudentsContro
 
 // Migración de alumnos.php → nueva ruta
 $router->get('/alumnos', fn() => $students->index(), [AuthMiddleware::requireRole('admin')]);
+$router->post('/alumnos/store', fn() => $students->store(), [AuthMiddleware::requireRole('admin')]);
+    $router->post('/alumnos/update', fn() => $students->update(), [AuthMiddleware::requireRole('admin')]);
+    $router->post('/alumnos/delete', fn() => $students->delete(), [AuthMiddleware::requireRole('admin')]);
+    $router->get('/alumnos/get', fn() => $students->get(), [AuthMiddleware::requireRole('admin')]);
 
 // CRUD Subjects/Groups
 $router->get('/subjects', fn() => (new App\Controllers\SubjectsController($pdo))->index(), [AuthMiddleware::requireRole('admin')]);
